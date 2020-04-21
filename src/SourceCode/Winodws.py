@@ -29,6 +29,7 @@ class MainWindow(QMainWindow):
         self.width = self.screenRect.width()
 
     def __InitView(self):
+
         self.resize(self.width / 1.5, self.height / 1.8)
         self.painterBoard.resize(self.width / 2, self.height / 2)
         self.setWindowTitle('离散数学可视化')  # 给窗口命名
