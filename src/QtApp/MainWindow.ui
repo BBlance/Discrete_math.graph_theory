@@ -241,6 +241,9 @@
    </attribute>
   </widget>
   <action name="actionNew">
+   <property name="icon">
+    <iconset theme=":/icons/images/app.ico"/>
+   </property>
    <property name="text">
     <string>New File</string>
    </property>

@@ -26,7 +26,7 @@ FORMS += \
     MainWindow.ui
 
 TRANSLATIONS += \
-    Graducation_zh_CN.ts
+    QtApp_zh_CN.ts
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
