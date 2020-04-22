@@ -49,7 +49,7 @@ class MainWindow(QMainWindow):
         self.propertyDock = QWidget()
 
         self.setWindowTitle('离散数学可视化认知系统')
-        self.setWindowIcon(QIcon('/images/GraphTheory.png'))
+        self.setWindowIcon(QIcon('QtApp/images/GraphTheory.png'))
 
         self.statusBar = self.statusBar()
 
@@ -69,14 +69,14 @@ class MainWindow(QMainWindow):
     #  初始化文件菜单列表
     def __initFileMenu(self):
         #  菜单功能
-        self.createFileAction = QAction(QIcon('images/CreateFile.png'), '新建', self)
-        self.openFileAction = QAction(QIcon('/images/OpenFile.png'), '&打开', self)
+        self.createFileAction = QAction(QIcon('QtApp/images/CreateFile.png'), '新建', self)
+        self.openFileAction = QAction(QIcon('QtApp/images/OpenFile.png'), '&打开', self)
 
         self.openRecentFileAction = QMenu('&最近打开的', self)
 
         self.closeFileAction = QAction('&关闭', self)
         self.closeAllFileAction = QAction('&关闭所有', self)
-        self.saveFileAction = QAction(QIcon('/images/SaveFile.png'), '&保存', self)
+        self.saveFileAction = QAction(QIcon('QtApp/images/SaveFile.png'), '&保存', self)
         self.saveAllFileAction = QAction('&保存全部', self)
         self.saveAsFileAction = QAction('&另存为', self)
         self.importDataAction = QAction('&导入数据', self)
