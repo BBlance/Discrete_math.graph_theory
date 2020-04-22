@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QPoint
-from OperatorFile import OperatorData
+from src.OperatorFile import OperatorData
 from pythonds.graphs import PriorityQueue
 
 

@@ -1,14 +1,13 @@
 import sys
 import os
 
-from PyQt5.QtWidgets import QLayout, QMainWindow, QWidget, QApplication, QHBoxLayout, QToolBar, QVBoxLayout, QAction, \
-    qApp, QPushButton, QMenu, QListView, QComboBox, QLabel, QColorDialog, QDockWidget, QWizard, QWizardPage, \
+from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAction, \
+    QPushButton, QMenu, QLabel, QColorDialog, QDockWidget, QWizard, QWizardPage, \
     QMessageBox, QFileDialog, QActionGroup
-from PyQt5.QtGui import QIcon, QColor, QPixmap, QCloseEvent
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.Qt import QCloseEvent
-from PainterBoard import Demo
-from OperatorFile import OperatorData
+from PyQt5.QtGui import QIcon, QColor
+from PyQt5.QtCore import Qt
+from src.PainterBoard import Demo
+from src.OperatorFile import OperatorData
 
 
 class MainWindow(QMainWindow):

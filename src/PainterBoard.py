@@ -1,9 +1,7 @@
 import sys
-from PyQt5.QtCore import Qt
 from PyQt5.Qt import *
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow
-from OperatorFile import OperatorData
-from Graph import Graph
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from src.Graph import Graph
 
 
 class Demo(QMainWindow):
