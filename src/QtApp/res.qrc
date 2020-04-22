@@ -36,5 +36,7 @@
         <file>images/UNGROUP.BMP</file>
         <file>images/zoomin.png</file>
         <file>images/zoomout.png</file>
+        <file>images/Point.png</file>
+        <file>images/SaveFile.png</file>
     </qresource>
 </RCC>
