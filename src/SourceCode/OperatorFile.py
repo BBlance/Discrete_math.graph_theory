@@ -1,10 +1,6 @@
 import json
 import os
 import csv
-import re
-
-from PyQt5.QtCore import QPoint
-
 
 class OperatorData(object):
 
@@ -118,8 +114,5 @@ class OperatorData(object):
                 for key, value in row.items():
                     load_dict[key] = value
         return load_dict
-
-if __name__ == '__main__':
-    g = OperatorData()
 
 
