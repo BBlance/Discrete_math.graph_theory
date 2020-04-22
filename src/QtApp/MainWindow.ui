@@ -27,6 +27,16 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="cursor">
+        <cursorShape>CrossCursor</cursorShape>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QUndoView" name="undoView"/>
+     </item>
     </layout>
    </widget>
   </widget>

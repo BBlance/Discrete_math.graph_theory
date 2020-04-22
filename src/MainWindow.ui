@@ -27,6 +27,16 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="cursor">
+        <cursorShape>CrossCursor</cursorShape>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QUndoView" name="undoView"/>
+     </item>
     </layout>
    </widget>
   </widget>
@@ -88,6 +98,27 @@
     <property name="title">
      <string>Settings</string>
     </property>
+    <widget class="QMenu" name="menuDraw_Tools">
+     <property name="title">
+      <string>Draw Tools</string>
+     </property>
+     <widget class="QMenu" name="menuLine">
+      <property name="title">
+       <string>Line</string>
+      </property>
+      <addaction name="actionArc"/>
+      <addaction name="actionStraight_Line"/>
+     </widget>
+     <addaction name="actionPoint"/>
+     <addaction name="menuLine"/>
+     <addaction name="actionEllipse"/>
+     <addaction name="actionRectangle"/>
+    </widget>
+    <addaction name="menuDraw_Tools"/>
+    <addaction name="separator"/>
+    <addaction name="actionPen_Thickness"/>
+    <addaction name="actionPen_Color"/>
+    <addaction name="actionBackground_Color"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -242,7 +273,8 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset theme=":/icons/images/app.ico"/>
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/128.bmp</normaloff>:/icons/images/128.bmp</iconset>
    </property>
    <property name="text">
     <string>New File</string>
@@ -255,6 +287,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/132.bmp</normaloff>:/icons/images/132.bmp</iconset>
+   </property>
    <property name="text">
     <string>Open File</string>
    </property>
@@ -266,6 +302,10 @@
    </property>
   </action>
   <action name="actionSave">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/SaveFile.png</normaloff>:/icons/images/SaveFile.png</iconset>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -323,6 +363,10 @@
    </property>
   </action>
   <action name="actionClose">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/108.bmp</normaloff>:/icons/images/108.bmp</iconset>
+   </property>
    <property name="text">
     <string>Close</string>
    </property>
@@ -331,6 +375,10 @@
    </property>
   </action>
   <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/DELETE.BMP</normaloff>:/icons/images/DELETE.BMP</iconset>
+   </property>
    <property name="text">
     <string>Quit</string>
    </property>
@@ -394,6 +442,10 @@
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/DELETE.BMP</normaloff>:/icons/images/DELETE.BMP</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -617,6 +669,9 @@
   </action>
   <action name="actionHide_ToolBar">
    <property name="text">
+    <string>Hide ToolBar</string>
+   </property>
+   <property name="toolTip">
     <string>隐藏工具栏</string>
    </property>
   </action>
@@ -652,7 +707,90 @@
     <string>最近文件</string>
    </property>
   </action>
+  <action name="actionPen_Thickness">
+   <property name="text">
+    <string>Pen Thickness</string>
+   </property>
+   <property name="toolTip">
+    <string>画笔粗细</string>
+   </property>
+  </action>
+  <action name="actionPen_Color">
+   <property name="text">
+    <string>Pen Color</string>
+   </property>
+   <property name="toolTip">
+    <string>画笔颜色</string>
+   </property>
+  </action>
+  <action name="actionBackground_Color">
+   <property name="text">
+    <string>Background Color</string>
+   </property>
+   <property name="toolTip">
+    <string>背景色</string>
+   </property>
+  </action>
+  <action name="actionArc">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/ARC.BMP</normaloff>:/icons/images/ARC.BMP</iconset>
+   </property>
+   <property name="text">
+    <string>Arc</string>
+   </property>
+   <property name="toolTip">
+    <string>弧线</string>
+   </property>
+  </action>
+  <action name="actionStraight_Line">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/LINE.BMP</normaloff>:/icons/images/LINE.BMP</iconset>
+   </property>
+   <property name="text">
+    <string>Straight Line</string>
+   </property>
+   <property name="toolTip">
+    <string>直线</string>
+   </property>
+  </action>
+  <action name="actionPoint">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/Point.png</normaloff>:/icons/images/Point.png</iconset>
+   </property>
+   <property name="text">
+    <string>Point</string>
+   </property>
+   <property name="toolTip">
+    <string>点</string>
+   </property>
+  </action>
+  <action name="actionEllipse">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/ELLIPSE.BMP</normaloff>:/icons/images/ELLIPSE.BMP</iconset>
+   </property>
+   <property name="text">
+    <string>Ellipse</string>
+   </property>
+   <property name="toolTip">
+    <string>椭圆</string>
+   </property>
+  </action>
+  <action name="actionRectangle">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/RECTANGL.BMP</normaloff>:/icons/images/RECTANGL.BMP</iconset>
+   </property>
+   <property name="text">
+    <string>Rectangle</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
