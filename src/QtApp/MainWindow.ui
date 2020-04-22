@@ -242,7 +242,8 @@
   </widget>
   <action name="actionNew">
    <property name="icon">
-    <iconset theme=":/icons/images/app.ico"/>
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/128.bmp</normaloff>:/icons/images/128.bmp</iconset>
    </property>
    <property name="text">
     <string>New File</string>
@@ -255,6 +256,10 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/132.bmp</normaloff>:/icons/images/132.bmp</iconset>
+   </property>
    <property name="text">
     <string>Open File</string>
    </property>
@@ -653,6 +658,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
