@@ -6,39 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1111</width>
-    <height>741</height>
+    <width>1096</width>
+    <height>736</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>1091</width>
-      <height>671</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QWidget" name="widget" native="true"/>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
+  <widget class="QWidget" name="centralwidget"/>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1111</width>
+     <width>1096</width>
      <height>26</height>
     </rect>
    </property>
@@ -220,10 +201,18 @@
     <property name="title">
      <string>Winodws</string>
     </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+     <addaction name="actionSetEnglish"/>
+     <addaction name="actionSetChinese"/>
+    </widget>
     <addaction name="actionMinimise"/>
     <addaction name="actionMaximize"/>
     <addaction name="actionMini_Mode"/>
     <addaction name="actionHide_ToolBar"/>
+    <addaction name="menuLanguage"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -252,6 +241,13 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionUodo"/>
+   <addaction name="actionRedo"/>
+   <addaction name="actionDelete"/>
+   <addaction name="separator"/>
   </widget>
   <widget class="QToolBar" name="graphical_toolBar">
    <property name="windowTitle">
@@ -263,6 +259,84 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionArc"/>
+   <addaction name="actionStraight_Line"/>
+   <addaction name="actionPoint"/>
+   <addaction name="actionEllipse"/>
+   <addaction name="actionRectangle"/>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <widget class="QWidget" name="verticalLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>10</y>
+       <width>251</width>
+       <height>621</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTabWidget" name="tabWidget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="tab">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+         <widget class="QUndoView" name="undoView">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>241</width>
+            <height>591</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="tab_2">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+         <widget class="QListView" name="listView">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>10</y>
+            <width>241</width>
+            <height>581</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTabWidget" name="tabWidget_2">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>Tab 1</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_4">
+         <attribute name="title">
+          <string>Tab 2</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
   </widget>
   <action name="actionNew">
    <property name="icon">
@@ -661,6 +735,9 @@
    </property>
   </action>
   <action name="actionHide_ToolBar">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Hide ToolBar</string>
    </property>
@@ -781,9 +858,106 @@
     <string>Rectangle</string>
    </property>
   </action>
+  <action name="actionSetEnglish">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>English</string>
+   </property>
+  </action>
+  <action name="actionSetChinese">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Chinese</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionQuit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>555</x>
+     <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHide_ToolBar</sender>
+   <signal>triggered()</signal>
+   <receiver>general_utility_toolBar</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>555</x>
+     <y>32</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHide_ToolBar</sender>
+   <signal>triggered()</signal>
+   <receiver>graphical_toolBar</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>377</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMinimise</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showMinimized()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>555</x>
+     <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionMaximize</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showMaximized()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>555</x>
+     <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

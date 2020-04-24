@@ -1,20 +1,19 @@
+# -*- coding: utf-8 -*-
+
+##  GUI应用程序主程序入口
+
 import sys
 
-from PyQt5.QtWidgets import QApplication, QMainWindow
-from MainWindow import Ui_MainWindow
+from PyQt5.QtWidgets import QApplication
 
+from MainWindow import MainWindow
 
-class TestWidget(QMainWindow):
-    def __init__(self):
-        super(TestWidget, self).__init__()
-        self.ui=Ui_MainWindow()
-        self.ui.setupUi(self)
+app = QApplication(sys.argv)  # 创建GUI应用程序
+##icon = QIcon(":/icons/images/app.ico")
+##app.setWindowIcon(icon)
 
+mainform = MainWindow()  # 创建主窗体
 
+mainform.show()  # 显示主窗体
 
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    form = TestWidget()
-    form.show()
-    sys.exit(app.exec_())
+sys.exit(app.exec_())
