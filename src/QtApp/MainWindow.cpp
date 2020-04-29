@@ -41,3 +41,8 @@ void MainWindow::on_actionBackground_Color_triggered()
 {
 
 }
+
+void MainWindow::on_actionProperty_And_History_triggered(bool checked)
+{
+
+}

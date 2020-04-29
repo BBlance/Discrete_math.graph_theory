@@ -20,6 +20,8 @@ private slots:
 
     void on_btnOk_clicked();
 
+    void on_penStyleComboBox_currentIndexChanged(int index);
+
 private:
     Ui::ThicknessDialog *ui;
 };

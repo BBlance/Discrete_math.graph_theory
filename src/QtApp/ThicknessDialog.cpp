@@ -22,3 +22,8 @@ void ThicknessDialog::on_btnOk_clicked()
 {
 
 }
+
+void ThicknessDialog::on_penStyleComboBox_currentIndexChanged(int index)
+{
+
+}

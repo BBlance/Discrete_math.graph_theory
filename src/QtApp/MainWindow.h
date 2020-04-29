@@ -46,6 +46,8 @@ private slots:
 
     void on_actionClues_Thickness_triggered();
 
+    void on_actionProperty_And_History_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
 };
