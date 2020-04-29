@@ -38,5 +38,12 @@
         <file>images/zoomout.png</file>
         <file>images/Point.png</file>
         <file>images/SaveFile.png</file>
+        <file>images/redo.png</file>
+        <file>images/undo.png</file>
+        <file>images/DashDotDotLine.png</file>
+        <file>images/DashDotLine.png</file>
+        <file>images/DashLine.png</file>
+        <file>images/DotLine.png</file>
+        <file>images/SolidLine.png</file>
     </qresource>
 </RCC>

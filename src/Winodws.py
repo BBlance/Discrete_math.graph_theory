@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QApplication, QAction, \
     QMessageBox, QFileDialog, QActionGroup
 from PyQt5.QtGui import QIcon, QColor
 from PyQt5.QtCore import Qt
-from src.PainterBoard import Demo
+from src.PainterBoard import PainterBoard
 from src.OperatorFile import OperatorData
 
 
@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         self.__InitView()
 
     def __InitData(self, desktop=QApplication.desktop()):
-        self.painterBoard = Demo()
+        self.painterBoard = PainterBoard()
         self.operatorData = OperatorData()
         self.painterBoard.ChangePenColor(QColor('black'))
         self.painterBoard.ChangePenThickness(3, 5)

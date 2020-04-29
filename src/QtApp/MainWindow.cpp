@@ -13,3 +13,31 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+
+void MainWindow::on_actionArc_triggered()
+{
+
+}
+
+void MainWindow::on_actionStraight_Line_triggered()
+{
+
+}
+
+
+
+void MainWindow::on_actionClues_Color_triggered()
+{
+
+}
+
+void MainWindow::on_actionClues_Thickness_triggered()
+{
+
+}
+
+void MainWindow::on_actionBackground_Color_triggered()
+{
+
+}

@@ -6,20 +6,56 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1096</width>
+    <width>1117</width>
     <height>736</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>1</width>
+      <height>1</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>-50</x>
+       <y>0</y>
+       <width>800</width>
+       <height>600</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>800</width>
+       <height>600</height>
+      </size>
+     </property>
+    </widget>
+   </widget>
+  </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1096</width>
+     <width>1117</width>
      <height>26</height>
     </rect>
    </property>
@@ -60,7 +96,7 @@
      <addaction name="actionFind"/>
      <addaction name="actionReplace"/>
     </widget>
-    <addaction name="actionUodo"/>
+    <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
@@ -83,9 +119,8 @@
       <addaction name="actionArc"/>
       <addaction name="actionStraight_Line"/>
      </widget>
-     <addaction name="actionPoint"/>
      <addaction name="menuLine"/>
-     <addaction name="actionEllipse"/>
+     <addaction name="actionCircle"/>
      <addaction name="actionRectangle"/>
     </widget>
     <addaction name="menuDraw_Tools"/>
@@ -93,6 +128,8 @@
     <addaction name="actionPen_Thickness"/>
     <addaction name="actionPen_Color"/>
     <addaction name="actionBackground_Color"/>
+    <addaction name="actionClues_Color"/>
+    <addaction name="actionClues_Thickness"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -244,10 +281,15 @@
    <addaction name="actionNew"/>
    <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="actionUodo"/>
+   <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
+   <addaction name="actionPen_Color"/>
+   <addaction name="actionPen_Thickness"/>
+   <addaction name="actionBackground_Color"/>
+   <addaction name="actionClues_Color"/>
+   <addaction name="actionClues_Thickness"/>
   </widget>
   <widget class="QToolBar" name="graphical_toolBar">
    <property name="windowTitle">
@@ -261,9 +303,9 @@
    </attribute>
    <addaction name="actionArc"/>
    <addaction name="actionStraight_Line"/>
-   <addaction name="actionPoint"/>
-   <addaction name="actionEllipse"/>
+   <addaction name="actionCircle"/>
    <addaction name="actionRectangle"/>
+   <addaction name="actionAdd_Annotation"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
    <attribute name="dockWidgetArea">
@@ -453,9 +495,13 @@
     <string>退出应用</string>
    </property>
   </action>
-  <action name="actionUodo">
+  <action name="actionUndo">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/undo.png</normaloff>:/icons/images/undo.png</iconset>
+   </property>
    <property name="text">
-    <string>Uodo</string>
+    <string>Undo</string>
    </property>
    <property name="toolTip">
     <string>撤销</string>
@@ -465,6 +511,10 @@
    </property>
   </action>
   <action name="actionRedo">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/redo.png</normaloff>:/icons/images/redo.png</iconset>
+   </property>
    <property name="text">
     <string>Redo</string>
    </property>
@@ -687,27 +737,45 @@
    </property>
   </action>
   <action name="actionDigraph_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Digraph Mode</string>
    </property>
    <property name="toolTip">
     <string>有向图模式</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
   </action>
   <action name="actionRedigraph_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Redigraph Mode</string>
    </property>
    <property name="toolTip">
     <string>无向图模式</string>
    </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
   </action>
   <action name="actionTree_Mode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>Tree Mode</string>
    </property>
    <property name="toolTip">
     <string>树模式</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
    </property>
   </action>
   <action name="actionMinimise">
@@ -825,25 +893,13 @@
     <string>直线</string>
    </property>
   </action>
-  <action name="actionPoint">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/icons/images/Point.png</normaloff>:/icons/images/Point.png</iconset>
-   </property>
-   <property name="text">
-    <string>Point</string>
-   </property>
-   <property name="toolTip">
-    <string>点</string>
-   </property>
-  </action>
-  <action name="actionEllipse">
+  <action name="actionCircle">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/ELLIPSE.BMP</normaloff>:/icons/images/ELLIPSE.BMP</iconset>
    </property>
    <property name="text">
-    <string>Ellipse</string>
+    <string>Circle</string>
    </property>
    <property name="toolTip">
     <string>椭圆</string>
@@ -874,27 +930,34 @@
     <string>Chinese</string>
    </property>
   </action>
+  <action name="actionAdd_Annotation">
+   <property name="icon">
+    <iconset>
+     <normalon>:/icons/images/800.bmp</normalon>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Add Annotation</string>
+   </property>
+   <property name="toolTip">
+    <string>添加注释</string>
+   </property>
+  </action>
+  <action name="actionClues_Color">
+   <property name="text">
+    <string>Clues Color</string>
+   </property>
+  </action>
+  <action name="actionClues_Thickness">
+   <property name="text">
+    <string>Clues Thickness</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="res.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>actionQuit</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>555</x>
-     <y>370</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionHide_ToolBar</sender>
    <signal>triggered()</signal>
