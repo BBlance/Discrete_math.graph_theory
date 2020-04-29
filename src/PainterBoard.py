@@ -1,16 +1,16 @@
 import sys
 from PyQt5.Qt import *
 from PyQt5.QtWidgets import QApplication, QMainWindow
-from src.Graph import Graph
+from src.Graph import Graph, Vertex
 import math
 
 
 class PainterBoard(QWidget):
     mouseMove = pyqtSignal(QPoint)  # 鼠标移动
 
-    mouseClicked = pyqtSignal(QPoint)  # 鼠标单击
+    mouseClicked = pyqtSignal(Vertex)  # 鼠标单击
 
-    mouseReleased = pyqtSignal(QPoint)  # 鼠标释放
+    mouseReleased = pyqtSignal(Vertex)  # 鼠标释放
 
     mouseDoubleClick = pyqtSignal(QPoint)  # 鼠标双击
 
@@ -25,7 +25,7 @@ class PainterBoard(QWidget):
 
     def __InitData(self):
 
-        self.__size = QSize(2435, 1276)
+        self.__size = QSize(2199, 1234)
 
         # 新建画板，尺寸为__size
 
@@ -45,7 +45,6 @@ class PainterBoard(QWidget):
         self.__penStyle = Qt.SolidLine
         self.__RT_penStyle = Qt.SolidLine
         self.__pen = QPen(self.__penColor, self.__thickness, self.__penStyle)
-        #self.__RT_pen = QPen(self.__RT_pen, self.__RT_thickness, self.__RT_penStyle)
         self.__painter = QPainter()
 
         self.__whiteboard.fill(self.__backgroundColor)
@@ -55,10 +54,6 @@ class PainterBoard(QWidget):
         self.__rect = QRect()
 
         self.graph = Graph()
-
-        self.pressLocation = QPoint()  # 鼠标点击点坐标
-        self.releaseLocation = QPoint()  # 鼠标释放点坐标
-        self.RT_MouseLocation = QPoint()  # 鼠标实时位置
 
         self.brush = QBrush()  # 填充颜色
 
@@ -113,7 +108,10 @@ class PainterBoard(QWidget):
         self.__painter = QPainter(self)  # 定义画笔
         self.__painter.begin(self)
         self.__painter.drawPixmap(0, 0, self.__whiteboard)  # 绘制绘图板
-        self.__painter.setPen(QPen(self.__RT_penColor,self.__RT_thickness,self.__RT_penStyle))  # 设置绘图笔的颜色
+        self.__painter.setPen(QPen(self.__RT_penColor, self.__RT_thickness, self.__RT_penStyle))  # 设置绘图笔的颜色
+
+        line = QLine(QPoint(0, 0), QPoint(400, 400))  # 绘制的线
+        self.__painter.drawLine(line)  # 实时绘制线
 
         if self.begin_point and self.end_point:  # 如果起始点终结点都存在则进行绘图
             line = QLine(self.begin_point, self.end_point)  # 绘制的线
@@ -126,18 +124,22 @@ class PainterBoard(QWidget):
 
             self.begin_point = event.pos()  # 鼠标点击起始点
 
-            self.pressLocation = event.pos()  # 鼠标点击原点
-
             if self.graph.getTotalVertex():
                 self.begin_point = self.lockLineToPoint(event.pos())
             if not self.graph.IsContainsPoint(self.begin_point):
                 self.graph.addVertex(self.graph.getTotalVertex(), self.begin_point)
+
                 self.__painter = QPainter(self.__whiteboard)
                 self.__painter.setPen(self.__pen)
                 self.__painter.setBrush(Qt.darkYellow)
                 self.__painter.drawEllipse(self.begin_point, 10, 10)
             self.end_point = self.begin_point
             self.update()  # 3
+
+        rt_vert = self.graph.getVertex(point=self.lockLineToPoint(event.pos()))
+
+        self.mouseClicked.emit(rt_vert)
+        super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):  # 鼠标移动事件
         self.setMouseTracking(True)
@@ -187,6 +189,9 @@ class PainterBoard(QWidget):
             self.begin_point = self.end_point = QPoint()  # 初始化绘图点
             self.update()
             self.__IsEmpty = False
+        rt_vert = self.graph.getVertex(point=self.lockLineToPoint(event.pos()))
+        self.mouseReleased.emit(rt_vert)
+        super().mouseReleaseEvent(event)
 
     #  =============自定义槽函数===============================
 
@@ -221,22 +226,25 @@ class PainterBoard(QWidget):
         self.__pen.setColor(QColor(color))
 
     def setRT_PenColor(self, color="blue"):  # 改变提示画笔颜色
-        self.__RT_penColor=QColor(color)
+        self.__RT_penColor = QColor(color)
 
     def setPenThickness(self, thickness=3):  # 改变画笔粗细
         self.__pen.setWidth(thickness)
 
     def setRT_PenThickness(self, RT_thickness=5):
-        self.__RT_thickness=RT_thickness
+        self.__RT_thickness = RT_thickness
 
-    def setRT_PenStyle(self,RT_penStyle=Qt.SolidLine):
-        self.__RT_penStyle=RT_penStyle
+    def setRT_PenStyle(self, RT_penStyle=Qt.SolidLine):
+        self.__RT_penStyle = RT_penStyle
 
     def setBackgroundColor(self, color='white'):
         self.__whiteboard.fill(QColor(color))
 
     def isEmpty(self):  # 判断桌面是否为空
         return self.__IsEmpty
+
+    def getNewVertex(self):
+        return self.__RT_Vert
 
     def getContentAsQImage(self):  # 存储图片
         image = self.__whiteboard.toImage()

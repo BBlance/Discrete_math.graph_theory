@@ -7,7 +7,7 @@ from PyQt5.QtGui import QBrush, QPolygonF, QPen, QFont, QTransform, QPainterPath
 
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QColorDialog,
                              QFontDialog, QInputDialog, QLabel, QMessageBox, QMenu, QFileDialog,
-                             QActionGroup, QScrollArea)
+                             QActionGroup, QScrollArea, QHBoxLayout)
 from ui_MainWindow import Ui_MainWindow
 from PainterBoard import PainterBoard
 from ThicknessDialog import ThicknessDialog
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.__labelViewCord.setMinimumWidth(150)
         self.ui.statusbar.addWidget(self.__labelViewCord)
 
-        self.__labelItemInfo = QLabel('图形信息')
+        self.__labelItemInfo = QLabel('<===图形信息===>')
         self.ui.statusbar.addPermanentWidget(self.__labelItemInfo)
 
         self.__softwareDetailLabel = QLabel("CopyRight @ LiXiaolong 2020")
@@ -49,14 +49,19 @@ class MainWindow(QMainWindow):
         self.view.setPalette(QPalette(Qt.white))
         self.view.setAutoFillBackground(True)
 
-        self.setCentralWidget(self.view)
-
         self.view.setCursor(Qt.CrossCursor)  # 设置鼠标
         self.view.setMouseTracking(True)
 
+        self.ui.scrollArea.setWidgetResizable(True)
+
+        self.view.setFixedSize(2199, 1234)
+
+        self.ui.scrollArea.setWidget(self.view)
+
         # 4个信号与槽函数的关联
         self.view.mouseMove.connect(self.do_mouseMove)
-        # self.view.mouseClicked.connect(self.do_mouseClicked)
+        self.view.mouseClicked.connect(self.do_mouseClicked)
+        self.view.mouseReleased.connect(self.do_mouseRelease)
 
         # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)
         # self.view.keyPress.connect(self.do_keyPress)
@@ -163,14 +168,13 @@ class MainWindow(QMainWindow):
         diaTit = "警告"
         strInfo = "修改背景色会清空画板数据！"
         message = QMessageBox.warning(self, diaTit, strInfo, QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.NoButton)
-        if message==QMessageBox.Yes:
+        if message == QMessageBox.Yes:
             iniColor = self.view.getBackgroundColor()
             color = QColorDialog.getColor(iniColor, self, "选择颜色")
             if color.isValid():
                 self.view.setBackgroundColor(color)
-        elif message==QMessageBox.Cancel:
+        elif message == QMessageBox.Cancel:
             pass
-
 
     @pyqtSlot()
     def on_actionClues_Color_triggered(self):
@@ -224,15 +228,16 @@ class MainWindow(QMainWindow):
         return dict_file
 
     def do_mouseMove(self, point):  # 鼠标移动
-        # 鼠标移动时间
-        self.__endPoint = point
         self.__labelViewCord.setText("坐标：%d,%d" % (point.x(), point.y()))
 
-    def do_mouseRelease(self, point):
-        self.__labelViewCord.setText("坐标：%.0f,%.0f" % (point.x(), point.y()))
+    def do_mouseRelease(self, vert):  # 鼠标释放
 
-    def do_mouseClicked(self, point):  # 鼠标单击
-        pass
+        x, y = vert.getCoordinates()
+        self.__labelItemInfo.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
+
+    def do_mouseClicked(self, vert):  # 鼠标单击
+        x, y = vert.getCoordinates()
+        self.__labelItemInfo.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
 
     # def do_mouseDoubleClick(self, point):  # 鼠标双击
 

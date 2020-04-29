@@ -3,7 +3,6 @@ import sys
 from PyQt5.QtCore import QPoint
 from src.OperatorFile import OperatorData
 
-
 from pythonds.graphs import PriorityQueue
 
 
@@ -12,25 +11,36 @@ class Graph:
     def __init__(self):
         self.vertDict = {}
         self.numVertices = 0
+        self.rt_Vertex = Vertex(0)
 
     #  向图中添加一个顶点实例
     def addVertex(self, key, point=QPoint()):
         x, y = point.x(), point.y()
         self.numVertices = self.numVertices + 1
         newVertex = Vertex(key, x, y)
+        self.rt_Vertex = newVertex
         self.vertDict[key] = newVertex
         return newVertex
 
     #  在图中找到名为vertKey的顶点
-    def getVertex(self, n):
-        if n in self.vertDict:
-            return self.vertDict[n]
+    def getVertex(self, n=-1, point=QPoint()):
+        if n != -1:
+            if n in self.vertDict:
+                return self.vertDict[n]
+            else:
+                return None
         else:
-            return None
+            if self.get_VertexKey(point) in self.vertDict:
+                return self.vertDict[self.get_VertexKey(point)]
+            else:
+                return None
 
     #  获取总顶点数
     def getTotalVertex(self):
         return self.numVertices
+
+    def getNewVertex(self):
+        return self.rt_Vertex
 
     def __contains__(self, n):
         return n in self.vertDict
@@ -160,6 +170,7 @@ class Graph:
 
         print(currentVerts)
 
+
 #
 # class PriorityQueue:
 #     def __init__(self):
@@ -267,7 +278,8 @@ class Vertex:
 
     # 返回邻接表中所有的顶点
     def __str__(self):
-        return str(self.id) + ":(color:" + self.color + " disc: " + str(self.disc) + " fin:" + str(
+        return str(self.id) + ':(connectedTo:' + str(
+            [x.id for x in self.connectedTo]) + "color:" + self.color + " disc: " + str(self.disc) + " fin:" + str(
             self.fin) + " dist:" + str(self.dist) + ") pred:\n\t[" + str(self.pred) + "]\n"
 
     def setColor(self, color):
