@@ -25,6 +25,7 @@ class MainWindow(QMainWindow):
         self.__initDrawBoardSystem()
         self.__initModeMenu()
         self.__initFileMenu()
+        self.__initEditMenu()
 
         self.__graphicsToolId = 0
         self.__backgroundColor = QColor(Qt.white)
@@ -69,6 +70,7 @@ class MainWindow(QMainWindow):
         self.ui.actionQuit.triggered.connect(self.close)
 
     def __initEditMenu(self):
+        self.ui.actionProperty_And_History.setChecked(True)
         pass
 
     def __initModeMenu(self):
@@ -147,7 +149,9 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_actionPen_Thickness_triggered(self):  # 画笔粗细
-        thicknessDialog = ThicknessDialog(None, "画笔粗细与样式")
+        iniThickness = self.view.getPenThickness()
+        intPenStyle = self.view.getPenStyle()
+        thicknessDialog = ThicknessDialog(None, "画笔粗细与样式", iniThickness, intPenStyle)
         ret = thicknessDialog.exec_()
         thickness = thicknessDialog.getThickness()
         penStyle = thicknessDialog.getPenStyle()
@@ -156,10 +160,17 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_actionBackground_Color_triggered(self):
-        iniColor = self.view.getBackgroundColor()
-        color = QColorDialog.getColor(iniColor, self, "选择颜色")
-        if color.isValid():
-            self.view.setBackgroundColor(color)
+        diaTit = "警告"
+        strInfo = "修改背景色会清空画板数据！"
+        message = QMessageBox.warning(self, diaTit, strInfo, QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.NoButton)
+        if message==QMessageBox.Yes:
+            iniColor = self.view.getBackgroundColor()
+            color = QColorDialog.getColor(iniColor, self, "选择颜色")
+            if color.isValid():
+                self.view.setBackgroundColor(color)
+        elif message==QMessageBox.Cancel:
+            pass
+
 
     @pyqtSlot()
     def on_actionClues_Color_triggered(self):
@@ -170,12 +181,18 @@ class MainWindow(QMainWindow):
 
     @pyqtSlot()
     def on_actionClues_Thickness_triggered(self):
-        thicknessDialog = ThicknessDialog(None, "提示画笔粗细与样式")
+        iniThickness = self.view.getPenThickness()
+        intPenStyle = self.view.getPenStyle()
+        thicknessDialog = ThicknessDialog(None, "提示画笔粗细与样式", iniThickness, intPenStyle)
         ret = thicknessDialog.exec_()
         thickness = thicknessDialog.getThickness()
         penStyle = thicknessDialog.getPenStyle()
         self.view.setRT_PenStyle(penStyle)
-        self.view.setRt_PenThickness(thickness)
+        self.view.setRT_PenThickness(thickness)
+
+    @pyqtSlot(bool)
+    def on_actionProperty_And_History_triggered(self, checked):
+        self.ui.dockWidget.setVisible(checked)
 
     #  =============自定义槽函数===============================
 

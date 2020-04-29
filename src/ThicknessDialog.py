@@ -9,13 +9,13 @@ from ui_ThicknessDialog import Ui_ThicknessDialog
 
 class ThicknessDialog(QDialog):
 
-    def __init__(self, parent=None, str="Dialogs"):
+    def __init__(self, parent=None, str="Dialogs", thickness=3, penStyle=Qt.SolidLine):
         super().__init__(parent)
         self.dialog_ui = Ui_ThicknessDialog()
         self.dialog_ui.setupUi(self)
-        self.dialog_ui.rt_thickness = Painter(self)
 
-
+        self.__thickness = thickness
+        self.__penStyle = penStyle
 
         self.setWindowTitle(str)
 
@@ -24,11 +24,12 @@ class ThicknessDialog(QDialog):
     #  ==============自定义功能函数========================
 
     def __initData(self):
-        self.__thickness = 5
-        self.__penStyle = Qt.SolidLine
+        self.dialog_ui.rt_thickness = Painter(self, self.__thickness, self.__penStyle)
         self.__slider = self.dialog_ui.thicknessSlider
         self.__colorComboBox = self.dialog_ui.penStyleComboBox
+        self.__slider.setValue(self.getThickness())
         self.__slider.valueChanged.connect(self.do_valueChanged)
+        self.dialog_ui.thicknessNumber.display(str(self.getThickness()))
 
     def getThickness(self):
         return self.__thickness
@@ -65,10 +66,10 @@ class ThicknessDialog(QDialog):
 
 class Painter(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, thickness=3, penStyle=Qt.SolidLine):
         super().__init__(parent)
-        self.thickness = 5
-        self.penStyle = Qt.SolidLine
+        self.thickness = thickness
+        self.penStyle = penStyle
         self.setFixedWidth(334)
         self.setFixedHeight(50)
         self.width = self.width()

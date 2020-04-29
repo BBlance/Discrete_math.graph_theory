@@ -45,5 +45,10 @@
         <file>images/DashLine.png</file>
         <file>images/DotLine.png</file>
         <file>images/SolidLine.png</file>
+        <file>images/backgroundColor.png</file>
+        <file>images/penColor.png</file>
+        <file>images/penStyle.png</file>
+        <file>images/rt_penColor.png</file>
+        <file>images/rt_penStyle.png</file>
     </qresource>
 </RCC>

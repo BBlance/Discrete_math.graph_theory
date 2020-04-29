@@ -45,7 +45,7 @@ class PainterBoard(QWidget):
         self.__penStyle = Qt.SolidLine
         self.__RT_penStyle = Qt.SolidLine
         self.__pen = QPen(self.__penColor, self.__thickness, self.__penStyle)
-        self.__RT_pen = QPen(self.__RT_pen, self.__RT_thickness, self.__RT_penStyle)
+        #self.__RT_pen = QPen(self.__RT_pen, self.__RT_thickness, self.__RT_penStyle)
         self.__painter = QPainter()
 
         self.__whiteboard.fill(self.__backgroundColor)
@@ -113,7 +113,7 @@ class PainterBoard(QWidget):
         self.__painter = QPainter(self)  # 定义画笔
         self.__painter.begin(self)
         self.__painter.drawPixmap(0, 0, self.__whiteboard)  # 绘制绘图板
-        self.__painter.setPen(self.__RT_pen)  # 设置绘图笔的颜色
+        self.__painter.setPen(QPen(self.__RT_penColor,self.__RT_thickness,self.__RT_penStyle))  # 设置绘图笔的颜色
 
         if self.begin_point and self.end_point:  # 如果起始点终结点都存在则进行绘图
             line = QLine(self.begin_point, self.end_point)  # 绘制的线
@@ -221,13 +221,16 @@ class PainterBoard(QWidget):
         self.__pen.setColor(QColor(color))
 
     def setRT_PenColor(self, color="blue"):  # 改变提示画笔颜色
-        self.__RT_pen.setColor(QColor(color))
+        self.__RT_penColor=QColor(color)
 
     def setPenThickness(self, thickness=3):  # 改变画笔粗细
-        self.__pen.setWidth(thickness),
+        self.__pen.setWidth(thickness)
 
-    def setRT_PenCThickness(self, RT_thickness=5):
-        self.__RT_pen.setWidth(RT_thickness)
+    def setRT_PenThickness(self, RT_thickness=5):
+        self.__RT_thickness=RT_thickness
+
+    def setRT_PenStyle(self,RT_penStyle=Qt.SolidLine):
+        self.__RT_penStyle=RT_penStyle
 
     def setBackgroundColor(self, color='white'):
         self.__whiteboard.fill(QColor(color))
