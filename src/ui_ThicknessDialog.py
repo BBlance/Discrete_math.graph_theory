@@ -1,121 +1,154 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ThicknessDialog.ui'
-#
-# Created by: PyQt5 UI code generator 5.14.1
-#
-# WARNING! All changes made in this file will be lost!
+################################################################################
+## Form generated from reading UI file 'ThicknessDialog.ui'
+##
+## Created by: Qt User Interface Compiler version 5.14.2
+##
+## WARNING! All changes made in this file will be lost when recompiling UI file!
+################################################################################
 
+from PySide2.QtCore import (QCoreApplication, QDate, QDateTime, QMetaObject,
+    QObject, QPoint, QRect, QSize, QTime, QUrl, Qt)
+from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
+    QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter,
+    QPixmap, QRadialGradient)
+from PySide2.QtWidgets import *
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+import res_rc
 
 class Ui_ThicknessDialog(object):
     def setupUi(self, ThicknessDialog):
-        ThicknessDialog.setObjectName("ThicknessDialog")
+        if not ThicknessDialog.objectName():
+            ThicknessDialog.setObjectName(u"ThicknessDialog")
         ThicknessDialog.resize(350, 250)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(ThicknessDialog.sizePolicy().hasHeightForWidth())
         ThicknessDialog.setSizePolicy(sizePolicy)
-        ThicknessDialog.setMinimumSize(QtCore.QSize(350, 250))
-        ThicknessDialog.setMaximumSize(QtCore.QSize(350, 250))
+        ThicknessDialog.setMinimumSize(QSize(350, 250))
+        ThicknessDialog.setMaximumSize(QSize(350, 250))
         ThicknessDialog.setAutoFillBackground(True)
-        self.verticalLayoutWidget = QtWidgets.QWidget(ThicknessDialog)
-        self.verticalLayoutWidget.setGeometry(QtCore.QRect(0, 0, 360, 251))
-        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
-        self.verticalLayout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
-        self.verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.verticalLayout.setContentsMargins(10, 10, 20, 5)
+        self.verticalLayoutWidget = QWidget(ThicknessDialog)
+        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
+        self.verticalLayoutWidget.setGeometry(QRect(0, 0, 360, 251))
+        self.verticalLayout = QVBoxLayout(self.verticalLayoutWidget)
         self.verticalLayout.setSpacing(6)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.rt_thickness = QtWidgets.QWidget(self.verticalLayoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.rt_thickness.sizePolicy().hasHeightForWidth())
-        self.rt_thickness.setSizePolicy(sizePolicy)
-        self.rt_thickness.setMinimumSize(QtCore.QSize(0, 30))
-        self.rt_thickness.setMaximumSize(QtCore.QSize(334, 30))
-        self.rt_thickness.setObjectName("rt_thickness")
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setSizeConstraint(QLayout.SetMinimumSize)
+        self.verticalLayout.setContentsMargins(10, 10, 20, 5)
+        self.rt_thickness = QWidget(self.verticalLayoutWidget)
+        self.rt_thickness.setObjectName(u"rt_thickness")
+        sizePolicy1 = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy1.setHorizontalStretch(0)
+        sizePolicy1.setVerticalStretch(0)
+        sizePolicy1.setHeightForWidth(self.rt_thickness.sizePolicy().hasHeightForWidth())
+        self.rt_thickness.setSizePolicy(sizePolicy1)
+        self.rt_thickness.setMinimumSize(QSize(0, 30))
+        self.rt_thickness.setMaximumSize(QSize(334, 30))
+
         self.verticalLayout.addWidget(self.rt_thickness)
-        self.penStyleComboBox = QtWidgets.QComboBox(self.verticalLayoutWidget)
-        self.penStyleComboBox.setMinimumSize(QtCore.QSize(330, 36))
-        self.penStyleComboBox.setMaximumSize(QtCore.QSize(330, 36))
-        self.penStyleComboBox.setSizeAdjustPolicy(QtWidgets.QComboBox.AdjustToContents)
-        self.penStyleComboBox.setIconSize(QtCore.QSize(180, 30))
-        self.penStyleComboBox.setObjectName("penStyleComboBox")
-        icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/icons/images/SolidLine.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+
+        self.penStyleComboBox = QComboBox(self.verticalLayoutWidget)
+        icon = QIcon()
+        icon.addFile(u":/icons/images/SolidLine.png", QSize(), QIcon.Normal, QIcon.Off)
         self.penStyleComboBox.addItem(icon, "")
-        icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/icons/images/DashLine.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1 = QIcon()
+        icon1.addFile(u":/icons/images/DashLine.png", QSize(), QIcon.Normal, QIcon.Off)
         self.penStyleComboBox.addItem(icon1, "")
-        icon2 = QtGui.QIcon()
-        icon2.addPixmap(QtGui.QPixmap(":/icons/images/DotLine.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon2 = QIcon()
+        icon2.addFile(u":/icons/images/DotLine.png", QSize(), QIcon.Normal, QIcon.Off)
         self.penStyleComboBox.addItem(icon2, "")
-        icon3 = QtGui.QIcon()
-        icon3.addPixmap(QtGui.QPixmap(":/icons/images/DashDotLine.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon3 = QIcon()
+        icon3.addFile(u":/icons/images/DashDotLine.png", QSize(), QIcon.Normal, QIcon.Off)
         self.penStyleComboBox.addItem(icon3, "")
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icons/images/DashDotDotLine.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4 = QIcon()
+        icon4.addFile(u":/icons/images/DashDotDotLine.png", QSize(), QIcon.Normal, QIcon.Off)
         self.penStyleComboBox.addItem(icon4, "")
+        self.penStyleComboBox.setObjectName(u"penStyleComboBox")
+        self.penStyleComboBox.setMinimumSize(QSize(330, 36))
+        self.penStyleComboBox.setMaximumSize(QSize(330, 36))
+        self.penStyleComboBox.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        self.penStyleComboBox.setIconSize(QSize(180, 30))
+
         self.verticalLayout.addWidget(self.penStyleComboBox)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setContentsMargins(5, -1, 5, -1)
+
+        self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setSpacing(10)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.thicknessSlider = QtWidgets.QSlider(self.verticalLayoutWidget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.horizontalLayout.setContentsMargins(5, -1, 5, -1)
+        self.thicknessSlider = QSlider(self.verticalLayoutWidget)
+        self.thicknessSlider.setObjectName(u"thicknessSlider")
         self.thicknessSlider.setMinimum(1)
         self.thicknessSlider.setMaximum(20)
-        self.thicknessSlider.setOrientation(QtCore.Qt.Horizontal)
-        self.thicknessSlider.setTickPosition(QtWidgets.QSlider.TicksBelow)
-        self.thicknessSlider.setObjectName("thicknessSlider")
+        self.thicknessSlider.setOrientation(Qt.Horizontal)
+        self.thicknessSlider.setTickPosition(QSlider.TicksBelow)
+
         self.horizontalLayout.addWidget(self.thicknessSlider)
-        self.thicknessNumber = QtWidgets.QLCDNumber(self.verticalLayoutWidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.thicknessNumber.sizePolicy().hasHeightForWidth())
-        self.thicknessNumber.setSizePolicy(sizePolicy)
-        self.thicknessNumber.setMaximumSize(QtCore.QSize(64, 66))
-        self.thicknessNumber.setLayoutDirection(QtCore.Qt.LeftToRight)
+
+        self.thicknessNumber = QLCDNumber(self.verticalLayoutWidget)
+        self.thicknessNumber.setObjectName(u"thicknessNumber")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(self.thicknessNumber.sizePolicy().hasHeightForWidth())
+        self.thicknessNumber.setSizePolicy(sizePolicy2)
+        self.thicknessNumber.setMaximumSize(QSize(64, 66))
+        self.thicknessNumber.setLayoutDirection(Qt.LeftToRight)
         self.thicknessNumber.setAutoFillBackground(True)
-        self.thicknessNumber.setProperty("value", 1.0)
-        self.thicknessNumber.setObjectName("thicknessNumber")
+        self.thicknessNumber.setProperty("value", 1.000000000000000)
+
         self.horizontalLayout.addWidget(self.thicknessNumber)
+
+
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_2.setSizeConstraint(QtWidgets.QLayout.SetMinimumSize)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem)
-        self.btnOk = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        self.btnOk.setObjectName("btnOk")
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setSizeConstraint(QLayout.SetMinimumSize)
+        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer)
+
+        self.btnOk = QPushButton(self.verticalLayoutWidget)
+        self.btnOk.setObjectName(u"btnOk")
+
         self.horizontalLayout_2.addWidget(self.btnOk)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem1)
-        self.btnCancel = QtWidgets.QPushButton(self.verticalLayoutWidget)
-        self.btnCancel.setObjectName("btnCancel")
+
+        self.horizontalSpacer_2 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
+
+        self.btnCancel = QPushButton(self.verticalLayoutWidget)
+        self.btnCancel.setObjectName(u"btnCancel")
+
         self.horizontalLayout_2.addWidget(self.btnCancel)
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout_2.addItem(spacerItem2)
+
+        self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+
+        self.horizontalLayout_2.addItem(self.horizontalSpacer_3)
+
+
         self.verticalLayout.addLayout(self.horizontalLayout_2)
+
 
         self.retranslateUi(ThicknessDialog)
         self.btnOk.clicked.connect(ThicknessDialog.accept)
         self.btnCancel.clicked.connect(ThicknessDialog.reject)
-        QtCore.QMetaObject.connectSlotsByName(ThicknessDialog)
+
+        QMetaObject.connectSlotsByName(ThicknessDialog)
+    # setupUi
 
     def retranslateUi(self, ThicknessDialog):
-        _translate = QtCore.QCoreApplication.translate
-        ThicknessDialog.setWindowTitle(_translate("ThicknessDialog", "Dialog"))
-        self.penStyleComboBox.setItemText(0, _translate("ThicknessDialog", "SolidLine"))
-        self.penStyleComboBox.setItemText(1, _translate("ThicknessDialog", "DashLine"))
-        self.penStyleComboBox.setItemText(2, _translate("ThicknessDialog", "DotLine"))
-        self.penStyleComboBox.setItemText(3, _translate("ThicknessDialog", "DashDotLine"))
-        self.penStyleComboBox.setItemText(4, _translate("ThicknessDialog", "DashDotDotLine"))
-        self.btnOk.setText(_translate("ThicknessDialog", "OK"))
-        self.btnCancel.setText(_translate("ThicknessDialog", "Cancel"))
-import res_rc
+        ThicknessDialog.setWindowTitle(QCoreApplication.translate("ThicknessDialog", u"Dialog", None))
+        self.penStyleComboBox.setItemText(0, QCoreApplication.translate("ThicknessDialog", u"SolidLine", None))
+        self.penStyleComboBox.setItemText(1, QCoreApplication.translate("ThicknessDialog", u"DashLine", None))
+        self.penStyleComboBox.setItemText(2, QCoreApplication.translate("ThicknessDialog", u"DotLine", None))
+        self.penStyleComboBox.setItemText(3, QCoreApplication.translate("ThicknessDialog", u"DashDotLine", None))
+        self.penStyleComboBox.setItemText(4, QCoreApplication.translate("ThicknessDialog", u"DashDotDotLine", None))
+
+        self.btnOk.setText(QCoreApplication.translate("ThicknessDialog", u"OK", None))
+        self.btnCancel.setText(QCoreApplication.translate("ThicknessDialog", u"Cancel", None))
+    # retranslateUi
+

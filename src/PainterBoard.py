@@ -1,20 +1,21 @@
 import sys
-from PyQt5.Qt import *
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PySide2.QtCore import Signal, QPoint, QSize, QRect, QLine, Qt, QByteArray, QBuffer, QIODevice
+from PySide2.QtGui import QKeyEvent, QPixmap, QColor, QPen, QPainter, QBrush
+from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 from src.Graph import Graph, Vertex
 import math
 
 
 class PainterBoard(QWidget):
-    mouseMove = pyqtSignal(QPoint)  # 鼠标移动
+    mouseMove = Signal(QPoint)  # 鼠标移动
 
-    mouseClicked = pyqtSignal(Vertex)  # 鼠标单击
+    mouseClicked = Signal(Vertex)  # 鼠标单击
 
-    mouseReleased = pyqtSignal(Vertex)  # 鼠标释放
+    mouseReleased = Signal(Vertex)  # 鼠标释放
 
-    mouseDoubleClick = pyqtSignal(QPoint)  # 鼠标双击
+    mouseDoubleClick = Signal(QPoint)  # 鼠标双击
 
-    keyPress = pyqtSignal(QKeyEvent)  # 按键按下
+    keyPress = Signal(QKeyEvent)  # 按键按下
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -24,8 +25,10 @@ class PainterBoard(QWidget):
     ##  =================自定义功能函数=================================
 
     def __InitData(self):
+        self.width = 2199
+        self.height = 1234
 
-        self.__size = QSize(2199, 1234)
+        self.__size = QSize(self.width, self.height)
 
         # 新建画板，尺寸为__size
 
@@ -46,6 +49,9 @@ class PainterBoard(QWidget):
         self.__RT_penStyle = Qt.SolidLine
         self.__pen = QPen(self.__penColor, self.__thickness, self.__penStyle)
         self.__painter = QPainter()
+        self.__pixmap = QPixmap()
+        self.__pixmapList = []
+        self.__rect = QRect(0, 0, self.width, self.height)
 
         self.__whiteboard.fill(self.__backgroundColor)
 
@@ -110,13 +116,14 @@ class PainterBoard(QWidget):
         self.__painter.drawPixmap(0, 0, self.__whiteboard)  # 绘制绘图板
         self.__painter.setPen(QPen(self.__RT_penColor, self.__RT_thickness, self.__RT_penStyle))  # 设置绘图笔的颜色
 
-        line = QLine(QPoint(0, 0), QPoint(400, 400))  # 绘制的线
-        self.__painter.drawLine(line)  # 实时绘制线
+        # line = QLine(QPoint(0, 0), QPoint(400, 400))  # 绘制的线
+        # self.__painter.drawLine(line)  # 实时绘制线
 
         if self.begin_point and self.end_point:  # 如果起始点终结点都存在则进行绘图
             line = QLine(self.begin_point, self.end_point)  # 绘制的线
             self.__painter.drawLine(line)  # 实时绘制线
         self.__painter.end()
+        self.update()
 
     def mousePressEvent(self, event):  # 鼠标点击检测函数
         self.setMouseTracking(True)  # 鼠标跟踪默认触发
@@ -133,6 +140,9 @@ class PainterBoard(QWidget):
                 self.__painter.setPen(self.__pen)
                 self.__painter.setBrush(Qt.darkYellow)
                 self.__painter.drawEllipse(self.begin_point, 10, 10)
+
+                # self.__pixmap.copy(QRect())
+                # self.__pixmapList.append(self.__pixmap)
             self.end_point = self.begin_point
             self.update()  # 3
 
@@ -186,9 +196,12 @@ class PainterBoard(QWidget):
                 self.__painter.setPen(self.__pen)
                 self.__painter.drawEllipse(self.end_point, 10, 10)
 
+            self.__pixmap = self.__whiteboard.copy(QRect())
+            self.__pixmapList.append(self.__pixmap)
             self.begin_point = self.end_point = QPoint()  # 初始化绘图点
             self.update()
             self.__IsEmpty = False
+
         rt_vert = self.graph.getVertex(point=self.lockLineToPoint(event.pos()))
         self.mouseReleased.emit(rt_vert)
         super().mouseReleaseEvent(event)
@@ -240,15 +253,34 @@ class PainterBoard(QWidget):
     def setBackgroundColor(self, color='white'):
         self.__whiteboard.fill(QColor(color))
 
+    def setWhiteboard(self, pixmap):
+        self.__whiteboard=pixmap
+
+    def setGraph(self, graph):
+        self.graph = graph
+
     def isEmpty(self):  # 判断桌面是否为空
         return self.__IsEmpty
 
     def getNewVertex(self):
         return self.__RT_Vert
 
-    def getContentAsQImage(self):  # 存储图片
+    def getGraph(self):
+        return self.graph
+
+    def getPixmapList(self):
+        return self.__pixmapList
+
+    def saveImage(self, filename, fileType, quality=-1):
+        if fileType == '*.jpg':
+            fileType = "JPG"
+        elif fileType == '*.png':
+            fileType = "PNG"
+
         image = self.__whiteboard.toImage()
-        return image
+        if not image.save(filename, fileType, quality):
+            QMessageBox.critical(self, "警告", "保存失败")
+            return
 
     def getContentAsGraph(self):
         return self.graph.getStandardData()

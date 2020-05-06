@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import sys, random
-from PyQt5.QtCore import pyqtSlot, Qt, QPointF, QPoint
+from PySide2.QtCore import Slot, Qt, QPointF, QPoint
 
-from PyQt5.QtGui import QBrush, QPolygonF, QPen, QFont, QTransform, QPainterPath, QColor, QPixmap, QPalette
+from PySide2.QtGui import QBrush, QPolygonF, QPen, QFont, QTransform, QPainterPath, QColor, QPixmap, QPalette
 
-from PyQt5.QtWidgets import (QApplication, QMainWindow, QColorDialog,
-                             QFontDialog, QInputDialog, QLabel, QMessageBox, QMenu, QFileDialog,
-                             QActionGroup, QScrollArea, QHBoxLayout)
+from PySide2.QtWidgets import (QApplication, QMainWindow, QColorDialog,
+                               QInputDialog, QLabel, QMessageBox, QMenu, QFileDialog,
+                               QActionGroup, QScrollArea, QHBoxLayout, QUndoStack, QUndoView)
+from UndoCommand import UndoCommand
 from ui_MainWindow import Ui_MainWindow
 from PainterBoard import PainterBoard
 from ThicknessDialog import ThicknessDialog
@@ -20,6 +21,8 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()  # 创建UI对象
 
         self.ui.setupUi(self)  # 构造UI界面
+
+        self.undoStack = QUndoStack()
 
         self.__buildStatusBar()
         self.__initDrawBoardSystem()
@@ -52,6 +55,9 @@ class MainWindow(QMainWindow):
         self.view.setCursor(Qt.CrossCursor)  # 设置鼠标
         self.view.setMouseTracking(True)
 
+        self.ui.undoView.setStack(self.undoStack)
+
+
         self.ui.scrollArea.setWidgetResizable(True)
 
         self.view.setFixedSize(2199, 1234)
@@ -76,6 +82,11 @@ class MainWindow(QMainWindow):
 
     def __initEditMenu(self):
         self.ui.actionProperty_And_History.setChecked(True)
+
+        self.ui.actionUndo = self.undoStack.createRedoAction(self, "redo")
+        self.ui.actionRedo = self.undoStack.createRedoAction(self, "Redo")
+        self.addAction(self.ui.actionRedo)
+        self.addAction(self.ui.actionUndo)
         pass
 
     def __initModeMenu(self):
@@ -122,37 +133,39 @@ class MainWindow(QMainWindow):
         self.action = rightMouseMenu.exec_(self.mapToGlobal(event.pos()))
 
     #  ==========由connectSlotsByName()自动连接的槽函数============
-    @pyqtSlot()
+    @Slot()
     def on_actionArc_triggered(self):  # 添加弧
         self.view.setDrawGraphStyle(0)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionStraight_Line_triggered(self):  # 添加直线
         self.view.setDrawGraphStyle(1)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionCircle_triggered(self):  # 添加原点
         self.view.setDrawGraphStyle(2)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionRectangle_triggered(self):  # 添加矩形
         self.view.setDrawGraphStyle(3)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionUndo_triggered(self):  # 撤销
-        pass
 
+        self.command.undo()
+
+    @Slot()
     def on_actionRedo_triggered(self):  # 重做
-        pass
+        self.command.redo()
 
-    @pyqtSlot()
+    @Slot()
     def on_actionPen_Color_triggered(self):  # 画笔颜色
         iniColor = self.view.getPenColor()
         color = QColorDialog.getColor(iniColor, self, "选择颜色")
         if color.isValid():
             self.view.setPenColor(color)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionPen_Thickness_triggered(self):  # 画笔粗细
         iniThickness = self.view.getPenThickness()
         intPenStyle = self.view.getPenStyle()
@@ -163,7 +176,7 @@ class MainWindow(QMainWindow):
         self.view.setPenStyle(penStyle)
         self.view.setPenThickness(thickness)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionBackground_Color_triggered(self):
         diaTit = "警告"
         strInfo = "修改背景色会清空画板数据！"
@@ -176,14 +189,14 @@ class MainWindow(QMainWindow):
         elif message == QMessageBox.Cancel:
             pass
 
-    @pyqtSlot()
+    @Slot()
     def on_actionClues_Color_triggered(self):
         iniColor = self.view.getRt_PenColor()
         color = QColorDialog.getColor(iniColor, self, "选择颜色")
         if color.isValid():
             self.view.setRT_PenColor(color)
 
-    @pyqtSlot()
+    @Slot()
     def on_actionClues_Thickness_triggered(self):
         iniThickness = self.view.getPenThickness()
         intPenStyle = self.view.getPenStyle()
@@ -194,9 +207,19 @@ class MainWindow(QMainWindow):
         self.view.setRT_PenStyle(penStyle)
         self.view.setRT_PenThickness(thickness)
 
-    @pyqtSlot(bool)
+    @Slot(bool)
     def on_actionProperty_And_History_triggered(self, checked):
         self.ui.dockWidget.setVisible(checked)
+
+    @Slot()
+    def on_actionSave_Image_triggered(self):
+        savePath, fileType = QFileDialog.getSaveFileName(self, '保存图片', '.\\', '*bmp;;*.png')
+        # if savePath[0] == "":
+        #     print("Save cancel")
+        #     return
+        filename = os.path.basename(savePath)
+        if filename != "":
+            self.view.saveImage(savePath, fileType)
 
     #  =============自定义槽函数===============================
 
@@ -205,14 +228,15 @@ class MainWindow(QMainWindow):
 
         filename = os.path.basename(savePath)
 
-        if fileType == '*.json':
-            pass
-            # self.operatorData.save_Json(filename, nodes)
-        elif fileType == '*.csv':
-            pass
-            # self.operatorData.save_Csv(filename, ['point(1)', 'point(2)'], nodes)
-        elif fileType == '*.graph':
-            self.operatorData.save_Graph(filename, self.painterBoard.GetContentAsGraph())
+        if filename != "":
+            if fileType == '*.json':
+                pass
+                # self.operatorData.save_Json(filename, nodes)
+            elif fileType == '*.csv':
+                pass
+                # self.operatorData.save_Csv(filename, ['point(1)', 'point(2)'], nodes)
+            elif fileType == '*.graph':
+                self.operatorData.save_Graph(filename, self.painterBoard.GetContentAsGraph())
 
     def do_open_file(self):  # 打开文件
         dict_file = {}
@@ -234,6 +258,8 @@ class MainWindow(QMainWindow):
 
         x, y = vert.getCoordinates()
         self.__labelItemInfo.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
+        self.command = UndoCommand(self.view)
+        self.undoStack.push(self.command)
 
     def do_mouseClicked(self, vert):  # 鼠标单击
         x, y = vert.getCoordinates()

@@ -46,3 +46,13 @@ void MainWindow::on_actionProperty_And_History_triggered(bool checked)
 {
 
 }
+
+void MainWindow::on_actionSave_Image_triggered()
+{
+
+}
+
+void MainWindow::on_actionUndo_triggered()
+{
+
+}

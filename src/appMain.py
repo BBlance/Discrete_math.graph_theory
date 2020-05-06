@@ -4,9 +4,9 @@
 
 import sys
 
-from PyQt5.QtWidgets import QApplication
+from PySide2.QtWidgets import QApplication
 
-from MainWindow import MainWindow
+from Windows import MainWindow
 
 app = QApplication(sys.argv)  # 创建GUI应用程序
 ##icon = QIcon(":/icons/images/app.ico")

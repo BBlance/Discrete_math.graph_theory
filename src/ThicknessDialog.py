@@ -1,8 +1,8 @@
 import sys
 
-from PyQt5.QtCore import pyqtSlot, Qt, QSize
-from PyQt5.QtGui import QPainter, QPen, QColor, QIcon
-from PyQt5.QtWidgets import QDialog, QWidget, QApplication, QComboBox
+from PySide2.QtCore import Slot, Qt, QSize
+from PySide2.QtGui import QPainter, QPen, QColor, QIcon
+from PySide2.QtWidgets import QDialog, QWidget, QApplication, QComboBox
 
 from ui_ThicknessDialog import Ui_ThicknessDialog
 
@@ -41,7 +41,7 @@ class ThicknessDialog(QDialog):
 
     #  ==========由connectSlotsByName()自动连接的槽函数============
 
-    @pyqtSlot(int)
+    @Slot(int)
     def on_penStyleComboBox_currentIndexChanged(self, value):
         if value == 0:
             self.__penStyle = Qt.SolidLine

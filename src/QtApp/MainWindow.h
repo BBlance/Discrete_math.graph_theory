@@ -48,6 +48,8 @@ private slots:
 
     void on_actionProperty_And_History_triggered(bool checked);
 
+    void on_actionSave_Image_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

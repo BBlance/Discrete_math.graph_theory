@@ -1,6 +1,6 @@
 import sys
-
-from PyQt5.QtCore import QPoint
+import gc
+from PySide2.QtCore import QPoint
 from src.OperatorFile import OperatorData
 
 from pythonds.graphs import PriorityQueue
@@ -85,6 +85,18 @@ class Graph:
                 return vertices.getCoordinates()
         return False
 
+    def copyGraph(self):
+        return self.vertDict
+
+    def removeVert(self, id):
+        if id in self.vertDict.keys():
+            self.vertDict.pop(id)
+            for v in self.vertDict.values():
+                v.removeConnection(id)
+            return True
+        else:
+            return False
+
     def __iter__(self):
         return iter(self.vertDict.values())
 
@@ -137,7 +149,7 @@ class Graph:
             standardData[vertices.getId()] = {vertices.getCoordinates(): listDict}
         return standardData
 
-    def setGraphData(self, standardData):
+    def setDataFromFile(self, standardData):
         vertexToCoordinates = {}
         vertexToConnectionsTo = {}
         for vertices, midData in standardData.items():
@@ -325,6 +337,12 @@ class Vertex:
     def getWeight(self, nbr):
         return self.connectedTo[nbr]
 
+    def removeConnection(self, id):
+        for x in list(self.connectedTo.keys()):
+            if x.getId() == id:
+                del self.connectedTo[x]
+
+
 
 if __name__ == '__main__':
     g = Graph()
@@ -342,7 +360,15 @@ if __name__ == '__main__':
     g.addEdge(5, 4, 8)
     g.addEdge(5, 2, 1)
 
-    for v in g:
-        print(v.getDistance(), v)
+    g.PrintDetails()
 
-    print(g.dijkstra(g, g.getVertex(0)))
+    print(g.IsEmptyEdge())
+
+    g.removeVert(5)
+
+    print()
+    #
+    g.PrintDetails()
+    print(g.IsEmptyEdge())
+
+
