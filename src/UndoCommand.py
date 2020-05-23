@@ -1,38 +1,41 @@
-from datetime import datetime
+from random import random
 
-from PySide2.QtGui import QPixmap
-from PySide2.QtWidgets import QUndoCommand
-from Graph import Graph
+from PySide2.QtCore import QPointF
+from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
+
+from BezierItem import BezierPath
 
 
-class UndoCommand(QUndoCommand):
-    def __init__(self, widget):
-        super(UndoCommand, self).__init__()
+class AddCommand(QUndoCommand):
+    def __init__(self, scene: QGraphicsScene):
+        super(AddCommand, self).__init__()
 
-        self.__widget = widget
-        self.__graph = widget.getGraph()
-
-        self.__pixmapList = self.__widget.getPixmapList()
-        self.__number = len(self.__pixmapList)
-        self.setText("步骤")
+        self.scene = scene
+        self.shape = BezierPath(QPointF(0, 0), QPointF(100, 100))
+        self.m_initPos = QPointF(random.randint(1, 10), random.randint(1, 10))
+        self.setText("添加曲线")
 
     def undo(self):
-        vert = self.__graph.getNewVertex()
-        self.__graph.removeVert(verts)
-        if len(self.__pixmapList) >= self.__number:
-            if self.__number >= 1:
-                self.__number = self.__number - 1
-        print(len(self.__pixmapList))
-        # self.__widget.saveImage("graph.png", "png")
-        self.__widget.setWhiteboard(QPixmap(self.__pixmapList[self.__number-1]))
-        self.__widget.update()
+        self.scene.removeItem(self.shape)
+        self.scene.update()
 
     def redo(self):
+        self.scene.addItem(self.shape)
+        self.shape.setPos(self.m_initPos)
+        self.scene.clearSelection()
 
-        vert = self.__graph.getNewVertex()
-        x, y = vert.getCoordinates()
-        self.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
 
-        if len(self.__pixmapList) > self.__number:
-            self.__number = self.__number + 1
-        self.__widget.update()
+class MoveCommand(QUndoCommand):
+    def __init__(self, item: BezierPath, oldPos: QPointF):
+        super(MoveCommand, self).__init__()
+        self.shape = item
+        self.m_oldPos = oldPos
+        self.m_newPos = self.shape.pos()
+
+    def redo(self):
+        self.shape.setPos(self.m_newPos)
+        self.setText("图形移动到%d,%d" % (self.shape.pos().x(), self.shape.pos().y()))
+
+    def undo(self):
+        self.shape.setPos(self.m_oldPos)
+        self.setText("图形移动到%d,%d" % (self.shape.pos().x(), self.shape.pos().y()))

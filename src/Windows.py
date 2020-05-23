@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 import os
 import sys, random
-from PySide2.QtCore import Slot, Qt, QPointF, QPoint
+from PySide2.QtCore import Slot, Qt, QPointF, QPoint, QRectF
 
 from PySide2.QtGui import QBrush, QPolygonF, QPen, QFont, QTransform, QPainterPath, QColor, QPixmap, QPalette
 
 from PySide2.QtWidgets import (QApplication, QMainWindow, QColorDialog,
                                QInputDialog, QLabel, QMessageBox, QMenu, QFileDialog,
-                               QActionGroup, QScrollArea, QHBoxLayout, QUndoStack, QUndoView)
-from UndoCommand import UndoCommand
+                               QActionGroup, QScrollArea, QHBoxLayout, QUndoStack, QUndoView, QGraphicsItem,
+                               QGraphicsScene, QGraphicsView, QGraphicsTextItem)
+
+from BezierItem import BezierPath, BezierPoint, BezierText
+from GraphicsScene import GraphicsScene
+from GraphicsView import GraphicsView
+from UndoCommand import AddCommand, MoveCommand
 from ui_MainWindow import Ui_MainWindow
-from PainterBoard import PainterBoard
 from ThicknessDialog import ThicknessDialog
+from OperatorFile import OperatorData
 
 
 class MainWindow(QMainWindow):
@@ -19,58 +24,90 @@ class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)  # 调用父类构造函数，创建窗体
         self.ui = Ui_MainWindow()  # 创建UI对象
-
         self.ui.setupUi(self)  # 构造UI界面
 
-        self.undoStack = QUndoStack()
-
-        self.__buildStatusBar()
-        self.__initDrawBoardSystem()
-        self.__initModeMenu()
-        self.__initFileMenu()
-        self.__initEditMenu()
-
-        self.__graphicsToolId = 0
-        self.__backgroundColor = QColor(Qt.white)
         self.setWindowTitle("离散数学可视化认知系统")
 
-    #  ==============自定义功能函数========================
-    def __buildStatusBar(self):  # 构造状态栏
-        self.__labelViewCord = QLabel("坐标：")
-        self.__labelViewCord.setMinimumWidth(150)
-        self.ui.statusbar.addWidget(self.__labelViewCord)
+        self.__buildStatusBar()  # 构造状态栏
+        self.__iniGraphicsSystem()  # 初始化 graphics View系统
+        self.__buildUndoCommand()  # 初始化撤销重做系统
 
-        self.__labelItemInfo = QLabel('<===图形信息===>')
-        self.ui.statusbar.addPermanentWidget(self.__labelItemInfo)
+        self.__ItemId = 1  # 绘图项自定义数据的key
+        self.__ItemDesc = 2  # 绘图项自定义数据的key
 
-        self.__softwareDetailLabel = QLabel("CopyRight @ LiXiaolong 2020")
-        self.ui.statusbar.addPermanentWidget(self.__softwareDetailLabel)
+        self.__seqNum = 0  # 每个图形项设置一个序号
+        self.__backZ = 0  # 后置序号
+        self.__frontZ = 0  # 前置序号
 
-    def __initDrawBoardSystem(self):  # 初始化 DrawBoard系统
-        self.view = PainterBoard(self)  # 创建图形视图组件
+    ##  ==============自定义功能函数============
+    def __buildStatusBar(self):  ##构造状态栏
+        self.__labViewCord = QLabel("View 坐标：")
+        self.__labViewCord.setMinimumWidth(150)
+        self.ui.statusbar.addWidget(self.__labViewCord)
 
-        self.view.setPalette(QPalette(Qt.white))
-        self.view.setAutoFillBackground(True)
+        self.__labSceneCord = QLabel("Scene 坐标：")
+        self.__labSceneCord.setMinimumWidth(150)
+        self.ui.statusbar.addWidget(self.__labSceneCord)
+
+        self.__labItemCord = QLabel("Item 坐标：")
+        self.__labItemCord.setMinimumWidth(150)
+        self.ui.statusbar.addWidget(self.__labItemCord)
+
+        self.__labItemInfo = QLabel("ItemInfo: ")
+        self.ui.statusbar.addPermanentWidget(self.__labItemInfo)
+
+    def __iniGraphicsSystem(self):  ##初始化 Graphics View系统
+        self.view = GraphicsView(self)  # 创建图形视图组件
+        self.setCentralWidget(self.view)
+
+        self.scene = GraphicsScene()  # 创建QGraphicsScene
+        self.scene.setSceneRect(QRectF(-300, -200, 600, 200))
+        self.scene.itemMoveSignal.connect(self.do_shapeMoved)
+
+        self.view.setScene(self.scene)  # 与view关联
 
         self.view.setCursor(Qt.CrossCursor)  # 设置鼠标
         self.view.setMouseTracking(True)
+        self.view.setDragMode(QGraphicsView.RubberBandDrag)
+
+        ##  4个信号与槽函数的关联
+        self.view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
+        self.view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+        # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)  # 鼠标双击
+        # self.view.keyPress.connect(self.do_keyPress)  # 左键按下
+
+    def __buildUndoCommand(self):
+        self.undoStack = QUndoStack()
+        self.ui.actionUndo = self.undoStack.createUndoAction(self, "撤销")
+        self.ui.actionRedo = self.undoStack.createRedoAction(self, "重做")
+
+        self.addAction(self.ui.actionUndo)
+        self.addAction(self.ui.actionRedo)
 
         self.ui.undoView.setStack(self.undoStack)
 
+    def __setItemProperties(self, item, desc):  ##item是具体类型的QGraphicsItem
+        item.setFlag(QGraphicsItem.ItemIsFocusable)
+        item.setFlag(QGraphicsItem.ItemIsMovable)
+        item.setFlag(QGraphicsItem.ItemIsSelectable)
 
-        self.ui.scrollArea.setWidgetResizable(True)
+        self.__frontZ = 1 + self.__frontZ
+        item.setZValue(self.__frontZ)  # 叠放次序
+        item.setPos(-150 + random.randint(1, 200), -200 + random.randint(1, 200))
 
-        self.view.setFixedSize(2199, 1234)
+        self.__seqNum = 1 + self.__seqNum
+        item.setData(self.__ItemId, self.__seqNum)  # 图件编号
+        item.setData(self.__ItemDesc, desc)  # 图件描述
 
-        self.ui.scrollArea.setWidget(self.view)
+        self.scene.addItem(item)
+        self.scene.clearSelection()
+        item.setSelected(True)
 
-        # 4个信号与槽函数的关联
-        self.view.mouseMove.connect(self.do_mouseMove)
-        self.view.mouseClicked.connect(self.do_mouseClicked)
-        self.view.mouseReleased.connect(self.do_mouseRelease)
-
-        # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)
-        # self.view.keyPress.connect(self.do_keyPress)
+    def __setBrushColor(self, item):  ##设置填充颜色
+        color = item.brush().color()
+        color = QColorDialog.getColor(color, self, "选择填充颜色")
+        if color.isValid():
+            item.setBrush(QBrush(color))
 
     def __initFileMenu(self):
 
@@ -96,12 +133,6 @@ class MainWindow(QMainWindow):
         self.modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
         self.ui.actionDigraph_Mode.setChecked(True)
 
-    def __setBrushColor(self, item):  # 设置填充颜色
-        color = item.brush().color()
-        color = QColorDialog.getColor(color, self, "选择填充颜色")
-        if color.isValid():
-            item.setBrush(QBrush(color))
-
     # ==============event处理函数==========================
 
     def closeEvent(self, event):  # 退出函数
@@ -124,46 +155,52 @@ class MainWindow(QMainWindow):
             self.do_save_file()
             event.accept()
 
-    def contextMenuEvent(self, event):  # 右键菜单功能
-        rightMouseMenu = QMenu(self)
-
-        rightMouseMenu.addAction(self.ui.actionNew)
-        rightMouseMenu.addAction(self.ui.actionOpen)
-
-        self.action = rightMouseMenu.exec_(self.mapToGlobal(event.pos()))
+    # def contextMenuEvent(self, event):  # 右键菜单功能
+    #     rightMouseMenu = QMenu(self)
+    #
+    #     rightMouseMenu.addAction(self.ui.actionNew)
+    #     rightMouseMenu.addAction(self.ui.actionOpen)
+    #
+    #     self.action = rightMouseMenu.exec_(self.mapToGlobal(event.pos()))
 
     #  ==========由connectSlotsByName()自动连接的槽函数============
     @Slot()
-    def on_actionArc_triggered(self):  # 添加弧
-        self.view.setDrawGraphStyle(0)
-
-    @Slot()
-    def on_actionStraight_Line_triggered(self):  # 添加直线
-        self.view.setDrawGraphStyle(1)
+    def on_actionArc_triggered(self):  # 添加曲线
+        item = BezierPath(QPointF(0, 0), QPointF(100, 100))
+        self.__setItemProperties(item, "曲线")
 
     @Slot()
     def on_actionCircle_triggered(self):  # 添加原点
-        self.view.setDrawGraphStyle(2)
+        item = BezierPoint()
+        self.__setItemProperties(item, "结点")
 
     @Slot()
     def on_actionRectangle_triggered(self):  # 添加矩形
         self.view.setDrawGraphStyle(3)
 
     @Slot()
-    def on_actionUndo_triggered(self):  # 撤销
+    def on_actionAdd_Annotation_triggered(self):
+        strText, OK = QInputDialog.getText(self, "输入", "请输入文字")
+        if not OK:
+            return
+        item = BezierText(strText)
+        self.__setItemProperties(item, "文字")
 
-        self.command.undo()
+    # @Slot()
+    # def on_actionUndo_triggered(self):  # 撤销
+    #
+    #     self.command.undo()
+    #
+    # @Slot()
+    # def on_actionRedo_triggered(self):  # 重做
+    #     self.command.redo()
 
-    @Slot()
-    def on_actionRedo_triggered(self):  # 重做
-        self.command.redo()
-
-    @Slot()
-    def on_actionPen_Color_triggered(self):  # 画笔颜色
-        iniColor = self.view.getPenColor()
-        color = QColorDialog.getColor(iniColor, self, "选择颜色")
-        if color.isValid():
-            self.view.setPenColor(color)
+    # @Slot()
+    # def on_actionPen_Color_triggered(self):  # 画笔颜色
+    #     iniColor = self.view.getPenColor()
+    #     color = QColorDialog.getColor(iniColor, self, "选择颜色")
+    #     if color.isValid():
+    #         self.view.setPenColor(color)
 
     @Slot()
     def on_actionPen_Thickness_triggered(self):  # 画笔粗细
@@ -178,34 +215,11 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_actionBackground_Color_triggered(self):
-        diaTit = "警告"
-        strInfo = "修改背景色会清空画板数据！"
-        message = QMessageBox.warning(self, diaTit, strInfo, QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.NoButton)
-        if message == QMessageBox.Yes:
-            iniColor = self.view.getBackgroundColor()
-            color = QColorDialog.getColor(iniColor, self, "选择颜色")
-            if color.isValid():
-                self.view.setBackgroundColor(color)
-        elif message == QMessageBox.Cancel:
-            pass
 
-    @Slot()
-    def on_actionClues_Color_triggered(self):
-        iniColor = self.view.getRt_PenColor()
+        iniColor = self.view.getBackgroundColor()
         color = QColorDialog.getColor(iniColor, self, "选择颜色")
         if color.isValid():
-            self.view.setRT_PenColor(color)
-
-    @Slot()
-    def on_actionClues_Thickness_triggered(self):
-        iniThickness = self.view.getPenThickness()
-        intPenStyle = self.view.getPenStyle()
-        thicknessDialog = ThicknessDialog(None, "提示画笔粗细与样式", iniThickness, intPenStyle)
-        ret = thicknessDialog.exec_()
-        thickness = thicknessDialog.getThickness()
-        penStyle = thicknessDialog.getPenStyle()
-        self.view.setRT_PenStyle(penStyle)
-        self.view.setRT_PenThickness(thickness)
+            self.view.setBackgroundBrush(color)
 
     @Slot(bool)
     def on_actionProperty_And_History_triggered(self, checked):
@@ -221,7 +235,58 @@ class MainWindow(QMainWindow):
         if filename != "":
             self.view.saveImage(savePath, fileType)
 
+    @Slot()
+    def on_actionDelete_triggered(self):
+        items = self.scene.selectedItems()
+        cnt = len(items)
+        for i in range(cnt):
+            item = items[i]
+            self.scene.removeItem(item)  # 删除绘图项
+
     #  =============自定义槽函数===============================
+    def do_mouseMove(self, point):  ##鼠标移动
+        ##鼠标移动事件，point是 GraphicsView的坐标,物理坐标
+        self.__labViewCord.setText("View 坐标：%d,%d" % (point.x(), point.y()))
+        pt = self.view.mapToScene(point)  # 转换到Scene坐标
+        self.__labSceneCord.setText("Scene 坐标：%.0f,%.0f" % (pt.x(), pt.y()))
+
+    def do_mouseClicked(self, point):  ##鼠标单击
+        pt = self.view.mapToScene(point)  # 转换到Scene坐标
+        item = self.scene.itemAt(pt, self.view.transform())  # 获取光标下的图形项
+        if item is None:
+            return
+        pm = item.mapFromScene(pt)  # 转换为绘图项的局部坐标
+        self.__labItemCord.setText("Item 坐标：%.0f,%.0f" % (pm.x(), pm.y()))
+        self.__labItemInfo.setText(str(item.data(self.__ItemDesc))
+                                   + ", ItemId=" + str(item.data(self.__ItemId)))
+
+    def do_mouseDoubleClick(self, point):  ##鼠标双击
+        pt = self.view.mapToScene(point)  # 转换到Scene坐标,QPointF
+        item = self.scene.itemAt(pt, self.view.transform())  # 获取光标下的绘图项
+        if item is None:
+            return
+
+        className = str(type(item))  # 将类名称转换为字符串
+        ##      print(className)
+
+        if (className.find("QGraphicsRectItem") >= 0):  # 矩形框
+            self.__setBrushColor(item)
+        elif (className.find("QGraphicsEllipseItem") >= 0):  # 椭圆和圆都是 QGraphicsEllipseItem
+            self.__setBrushColor(item)
+        elif (className.find("QGraphicsPolygonItem") >= 0):  # 梯形和三角形
+            self.__setBrushColor(item)
+        elif (className.find("QGraphicsLineItem") >= 0):  # 直线，设置线条颜色
+            pen = item.pen()
+            color = item.pen().color()
+            color = QColorDialog.getColor(color, self, "选择线条颜色")
+            if color.isValid():
+                pen.setColor(color)
+                item.setPen(pen)
+        elif (className.find("QGraphicsTextItem") >= 0):  # 文字，设置字体
+            font = item.font()
+            font, OK = QFontDialog.getFont(font)
+            if OK:
+                item.setFont(font)
 
     def do_save_file(self):  # 保存文件
         savePath, fileType = QFileDialog.getSaveFileName(self, '保存文件', '.\\', '*.graph;;*.json;;*.csv')
@@ -236,7 +301,7 @@ class MainWindow(QMainWindow):
                 pass
                 # self.operatorData.save_Csv(filename, ['point(1)', 'point(2)'], nodes)
             elif fileType == '*.graph':
-                self.operatorData.save_Graph(filename, self.painterBoard.GetContentAsGraph())
+                self.operatorData.save_Graph(filename, self.view.getContentAsGraph())
 
     def do_open_file(self):  # 打开文件
         dict_file = {}
@@ -251,23 +316,13 @@ class MainWindow(QMainWindow):
 
         return dict_file
 
-    def do_mouseMove(self, point):  # 鼠标移动
-        self.__labelViewCord.setText("坐标：%d,%d" % (point.x(), point.y()))
+    def do_addItem(self):
+        add = AddCommand(self.scene)
+        self.undoStack.push(add)
 
-    def do_mouseRelease(self, vert):  # 鼠标释放
-
-        x, y = vert.getCoordinates()
-        self.__labelItemInfo.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
-        self.command = UndoCommand(self.view)
-        self.undoStack.push(self.command)
-
-    def do_mouseClicked(self, vert):  # 鼠标单击
-        x, y = vert.getCoordinates()
-        self.__labelItemInfo.setText("node:%d,coordinates:%d,%d" % (vert.getId(), x, y))
-
-    # def do_mouseDoubleClick(self, point):  # 鼠标双击
-
-    # def do_keyPress(self, event):  # 键盘输入
+    def do_shapeMoved(self, item, pos):
+        move = MoveCommand(item, pos)
+        self.undoStack.push(move)
 
 
 ##  ============窗体测试程序 ================================

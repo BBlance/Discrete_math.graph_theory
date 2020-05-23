@@ -1,8 +1,5 @@
 import sys
-import gc
 from PySide2.QtCore import QPoint
-from src.OperatorFile import OperatorData
-
 from pythonds.graphs import PriorityQueue
 
 
@@ -128,11 +125,15 @@ class Graph:
         return False
 
     # 打印所有的边的详细信息
-    def PrintDetails(self):
-        for vertices in self.vertDict.values():
-            for vert in vertices.getConnections():
-                print("{ %s-%s -> %s-%s }" % (
-                    vertices.getId(), vertices.getCoordinates(), vert.getId(), vert.getCoordinates()))
+    # def PrintDetails(self):
+    #     dict={}
+    #     for vertices in self.vertDict.values():
+    #         for vert in vertices.getConnections():
+    #             print("{ %s-%s -> %s-%s }" % (
+    #                 dict[str(vertices.getId())vert.getId())]=vert.getWeight()
+    #                 vertices.getId(), vertices.getCoordinates(), vert.getId(), vert.getCoordinates()))
+
+
 
     #  清空所有数据
     def ClearAllDetails(self):

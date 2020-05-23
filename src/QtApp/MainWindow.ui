@@ -16,37 +16,10 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Ignored">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QGraphicsView" name="graphicsView">
+      <property name="renderHints">
+       <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
       </property>
-      <property name="widgetResizable">
-       <bool>false</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>800</width>
-         <height>610</height>
-        </rect>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>800</width>
-         <height>600</height>
-        </size>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QWidget" name="pixmap" native="true"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </item>
    </layout>
@@ -62,11 +35,11 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string> 文件</string>
     </property>
     <widget class="QMenu" name="menuRecent_File">
      <property name="title">
-      <string>Recent File</string>
+      <string> 最近打开的文件</string>
      </property>
      <addaction name="actionFlie_List"/>
     </widget>
@@ -88,37 +61,33 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>编辑</string>
     </property>
     <widget class="QMenu" name="menuFind_or_Replace">
      <property name="title">
-      <string>Find or Replace</string>
+      <string>查找/替换</string>
      </property>
      <addaction name="actionFind"/>
      <addaction name="actionReplace"/>
     </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
     <addaction name="menuFind_or_Replace"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
-     <string>Settings</string>
+     <string>设置</string>
     </property>
     <widget class="QMenu" name="menuDraw_Tools">
      <property name="title">
-      <string>Draw Tools</string>
+      <string>绘图工具</string>
      </property>
      <widget class="QMenu" name="menuLine">
       <property name="title">
-       <string>Line</string>
+       <string>线</string>
       </property>
       <addaction name="actionArc"/>
-      <addaction name="actionStraight_Line"/>
      </widget>
      <addaction name="menuLine"/>
      <addaction name="actionCircle"/>
@@ -129,25 +98,24 @@
     <addaction name="actionPen_Thickness"/>
     <addaction name="actionPen_Color"/>
     <addaction name="actionBackground_Color"/>
-    <addaction name="actionClues_Color"/>
-    <addaction name="actionClues_Thickness"/>
+    <addaction name="actionAccent_Color"/>
     <addaction name="actionProperty_And_History"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
-     <string>Tools</string>
+     <string>工具</string>
     </property>
     <widget class="QMenu" name="menuNodes_Edges_Details">
      <property name="title">
-      <string>Nodes and Edges Details</string>
+      <string>结点与边详情</string>
      </property>
      <widget class="QMenu" name="menuNode_s_Degree">
       <property name="title">
-       <string>Node's Degree</string>
+       <string>结点的度</string>
       </property>
       <widget class="QMenu" name="menuDigraph_s_Degrees">
        <property name="title">
-        <string>Digraph's Degrees</string>
+        <string>有向图的度</string>
        </property>
        <addaction name="actionOut_degree"/>
        <addaction name="actionIn_degree"/>
@@ -162,18 +130,18 @@
     </widget>
     <widget class="QMenu" name="menuPathway_and_Loop">
      <property name="title">
-      <string>Pathway and Loop</string>
+      <string>通路和回路</string>
      </property>
      <widget class="QMenu" name="menuPathway">
       <property name="title">
-       <string>Pathway</string>
+       <string> 通路</string>
       </property>
       <addaction name="actionEasy_Pathway"/>
       <addaction name="actionComplicated_Pathway"/>
      </widget>
      <widget class="QMenu" name="menuLoop">
       <property name="title">
-       <string>Loop</string>
+       <string> 回路</string>
       </property>
       <addaction name="actionEasy_Loop"/>
       <addaction name="actionComplicated_Loop"/>
@@ -183,24 +151,24 @@
     </widget>
     <widget class="QMenu" name="menuGraph_Matrix">
      <property name="title">
-      <string>Graph Matrix</string>
+      <string>图的矩阵</string>
      </property>
      <addaction name="actionIncidence_Matrix"/>
      <addaction name="actionAdjacent_Matrix"/>
     </widget>
     <widget class="QMenu" name="menuSpecial_Graph">
      <property name="title">
-      <string>Special Graph</string>
+      <string>特殊图</string>
      </property>
      <widget class="QMenu" name="menuEuler_Graph">
       <property name="title">
-       <string>Euler Graph</string>
+       <string>欧拉图</string>
       </property>
       <addaction name="actionFind_Euler_Loop"/>
      </widget>
      <widget class="QMenu" name="menuHamiltonian_Graph">
       <property name="title">
-       <string>Hamiltonian Graph</string>
+       <string>哈密顿图</string>
       </property>
       <addaction name="actionFind_Hamiltonian_Loop"/>
      </widget>
@@ -210,7 +178,7 @@
     </widget>
     <widget class="QMenu" name="menuShortest_Path_and_Critical_Path">
      <property name="title">
-      <string>Shortest Path and Critical Path</string>
+      <string>最短路径和关键路径</string>
      </property>
      <addaction name="actionShortest_Path"/>
      <addaction name="actionCritical_Path"/>
@@ -224,25 +192,18 @@
    </widget>
    <widget class="QMenu" name="menuMode">
     <property name="title">
-     <string>Mode</string>
+     <string>模式</string>
     </property>
-    <widget class="QMenu" name="menuGraph_Mode">
-     <property name="title">
-      <string>Graph Mode</string>
-     </property>
-     <addaction name="actionDigraph_Mode"/>
-     <addaction name="actionRedigraph_Mode"/>
-    </widget>
-    <addaction name="menuGraph_Mode"/>
-    <addaction name="actionTree_Mode"/>
+    <addaction name="actionRedigraph_Mode"/>
+    <addaction name="actionDigraph_Mode"/>
    </widget>
    <widget class="QMenu" name="menuWinodws">
     <property name="title">
-     <string>Winodws</string>
+     <string> 窗口</string>
     </property>
     <widget class="QMenu" name="menuLanguage">
      <property name="title">
-      <string>Language</string>
+      <string> 语言</string>
      </property>
      <addaction name="actionSetEnglish"/>
      <addaction name="actionSetChinese"/>
@@ -255,7 +216,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string> 帮助</string>
     </property>
     <addaction name="actionConnect_Author"/>
     <addaction name="actionWelcome"/>
@@ -272,7 +233,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="general_utility_toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>  常规功能</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -290,12 +251,11 @@
    <addaction name="actionPen_Color"/>
    <addaction name="actionPen_Thickness"/>
    <addaction name="actionBackground_Color"/>
-   <addaction name="actionClues_Color"/>
-   <addaction name="actionClues_Thickness"/>
+   <addaction name="actionAccent_Color"/>
   </widget>
   <widget class="QToolBar" name="graphical_toolBar">
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string> 绘图工具</string>
    </property>
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
@@ -304,7 +264,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionArc"/>
-   <addaction name="actionStraight_Line"/>
    <addaction name="actionCircle"/>
    <addaction name="actionRectangle"/>
    <addaction name="actionAdd_Annotation"/>
@@ -352,7 +311,7 @@
        </property>
        <widget class="QWidget" name="HistoryTab">
         <attribute name="title">
-         <string>History</string>
+         <string>历史记录</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -375,7 +334,7 @@
        </widget>
        <widget class="QWidget" name="DetailsTab">
         <attribute name="title">
-         <string>Graph Details</string>
+         <string>绘图详情</string>
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
@@ -407,9 +366,12 @@
      <normaloff>:/icons/images/128.bmp</normaloff>:/icons/images/128.bmp</iconset>
    </property>
    <property name="text">
-    <string>New File</string>
+    <string>新建文件</string>
    </property>
    <property name="toolTip">
+    <string>新建文件</string>
+   </property>
+   <property name="statusTip">
     <string>新建文件</string>
    </property>
    <property name="shortcut">
@@ -422,9 +384,12 @@
      <normaloff>:/icons/images/132.bmp</normaloff>:/icons/images/132.bmp</iconset>
    </property>
    <property name="text">
-    <string>Open File</string>
+    <string>打开文件</string>
    </property>
    <property name="toolTip">
+    <string>打开文件</string>
+   </property>
+   <property name="statusTip">
     <string>打开文件</string>
    </property>
    <property name="shortcut">
@@ -437,9 +402,12 @@
      <normaloff>:/icons/images/SaveFile.png</normaloff>:/icons/images/SaveFile.png</iconset>
    </property>
    <property name="text">
-    <string>Save</string>
+    <string>保存</string>
    </property>
    <property name="toolTip">
+    <string>保存文件</string>
+   </property>
+   <property name="statusTip">
     <string>保存文件</string>
    </property>
    <property name="shortcut">
@@ -448,26 +416,35 @@
   </action>
   <action name="actionSave_As">
    <property name="text">
-    <string>Save As</string>
+    <string>另存为</string>
    </property>
    <property name="toolTip">
+    <string>另存为</string>
+   </property>
+   <property name="statusTip">
     <string>另存为</string>
    </property>
   </action>
   <action name="actionSave_All">
    <property name="text">
-    <string>Save All</string>
+    <string>保存全部</string>
    </property>
    <property name="toolTip">
     <string>保存全部</string>
    </property>
+   <property name="statusTip">
+    <string>保存所有</string>
+   </property>
   </action>
   <action name="actionImport_Data">
    <property name="text">
-    <string>Import Data</string>
+    <string>导入数据</string>
    </property>
    <property name="toolTip">
     <string>导入数据</string>
+   </property>
+   <property name="statusTip">
+    <string> 导出图数据</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
@@ -475,10 +452,13 @@
   </action>
   <action name="actionOutput_Data">
    <property name="text">
-    <string>Output Data</string>
+    <string>导出数据</string>
    </property>
    <property name="toolTip">
     <string>导出数据</string>
+   </property>
+   <property name="statusTip">
+    <string>导入图数据</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
@@ -486,9 +466,12 @@
   </action>
   <action name="actionSave_Image">
    <property name="text">
-    <string>Save Image</string>
+    <string>保存为图片</string>
    </property>
    <property name="toolTip">
+    <string>保存为图片</string>
+   </property>
+   <property name="statusTip">
     <string>保存为图片</string>
    </property>
   </action>
@@ -498,10 +481,13 @@
      <normaloff>:/icons/images/108.bmp</normaloff>:/icons/images/108.bmp</iconset>
    </property>
    <property name="text">
-    <string>Close</string>
+    <string>关闭文件</string>
    </property>
    <property name="toolTip">
     <string>关闭文件</string>
+   </property>
+   <property name="statusTip">
+    <string>关闭当前窗口</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -510,10 +496,13 @@
      <normaloff>:/icons/images/DELETE.BMP</normaloff>:/icons/images/DELETE.BMP</iconset>
    </property>
    <property name="text">
-    <string>Quit</string>
+    <string>退出应用</string>
    </property>
    <property name="toolTip">
     <string>退出应用</string>
+   </property>
+   <property name="statusTip">
+    <string>退出应用程序</string>
    </property>
   </action>
   <action name="actionUndo">
@@ -522,7 +511,7 @@
      <normaloff>:/icons/images/undo.png</normaloff>:/icons/images/undo.png</iconset>
    </property>
    <property name="text">
-    <string>Undo</string>
+    <string>撤销</string>
    </property>
    <property name="toolTip">
     <string>撤销</string>
@@ -537,7 +526,7 @@
      <normaloff>:/icons/images/redo.png</normaloff>:/icons/images/redo.png</iconset>
    </property>
    <property name="text">
-    <string>Redo</string>
+    <string>重做</string>
    </property>
    <property name="toolTip">
     <string>重做</string>
@@ -546,46 +535,13 @@
     <string>Ctrl+Y</string>
    </property>
   </action>
-  <action name="actionCut">
-   <property name="text">
-    <string>Cut</string>
-   </property>
-   <property name="toolTip">
-    <string>剪贴</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+X</string>
-   </property>
-  </action>
-  <action name="actionCopy">
-   <property name="text">
-    <string>Copy</string>
-   </property>
-   <property name="toolTip">
-    <string>复制</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
-  <action name="actionPaste">
-   <property name="text">
-    <string>Paste</string>
-   </property>
-   <property name="toolTip">
-    <string>粘贴</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+V</string>
-   </property>
-  </action>
   <action name="actionDelete">
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/DELETE.BMP</normaloff>:/icons/images/DELETE.BMP</iconset>
    </property>
    <property name="text">
-    <string>Delete</string>
+    <string>删除</string>
    </property>
    <property name="toolTip">
     <string>删除</string>
@@ -596,7 +552,7 @@
   </action>
   <action name="actionFind">
    <property name="text">
-    <string>Find</string>
+    <string>查找</string>
    </property>
    <property name="toolTip">
     <string>查找</string>
@@ -607,7 +563,7 @@
   </action>
   <action name="actionReplace">
    <property name="text">
-    <string>Replace</string>
+    <string>替换</string>
    </property>
    <property name="toolTip">
     <string>替换</string>
@@ -618,7 +574,7 @@
   </action>
   <action name="actionNode_s_Name">
    <property name="text">
-    <string>Node's Name</string>
+    <string>结点名称</string>
    </property>
    <property name="toolTip">
     <string>结点名称</string>
@@ -626,7 +582,7 @@
   </action>
   <action name="actionNode_s_Coordinates">
    <property name="text">
-    <string>Node's Coordinates</string>
+    <string>结点坐标</string>
    </property>
    <property name="toolTip">
     <string>结点坐标</string>
@@ -634,7 +590,7 @@
   </action>
   <action name="actionEdge_s_Weight">
    <property name="text">
-    <string>Edge's Weight</string>
+    <string>边的权重</string>
    </property>
    <property name="toolTip">
     <string>边的权重</string>
@@ -642,7 +598,7 @@
   </action>
   <action name="actionRedigraph_s_Degrees">
    <property name="text">
-    <string>Redigraph's Degrees</string>
+    <string>结点度</string>
    </property>
    <property name="toolTip">
     <string>结点度</string>
@@ -650,7 +606,7 @@
   </action>
   <action name="actionOut_degree">
    <property name="text">
-    <string>Out-degree</string>
+    <string>出度</string>
    </property>
    <property name="toolTip">
     <string>出度</string>
@@ -658,7 +614,7 @@
   </action>
   <action name="actionIn_degree">
    <property name="text">
-    <string>In-degree</string>
+    <string>入度</string>
    </property>
    <property name="toolTip">
     <string>入度</string>
@@ -666,7 +622,7 @@
   </action>
   <action name="actionEasy_Pathway">
    <property name="text">
-    <string>Easy Pathway</string>
+    <string>简单通路</string>
    </property>
    <property name="toolTip">
     <string>简单通路</string>
@@ -674,7 +630,7 @@
   </action>
   <action name="actionComplicated_Pathway">
    <property name="text">
-    <string>Complicated Pathway</string>
+    <string>复杂通路</string>
    </property>
    <property name="toolTip">
     <string>复杂通路</string>
@@ -682,7 +638,7 @@
   </action>
   <action name="actionEasy_Loop">
    <property name="text">
-    <string>Easy Loop</string>
+    <string>简单回路</string>
    </property>
    <property name="toolTip">
     <string>简单回路</string>
@@ -690,7 +646,7 @@
   </action>
   <action name="actionComplicated_Loop">
    <property name="text">
-    <string>Complicated Loop</string>
+    <string>复杂回路</string>
    </property>
    <property name="toolTip">
     <string>复杂回路</string>
@@ -698,7 +654,7 @@
   </action>
   <action name="actionIncidence_Matrix">
    <property name="text">
-    <string>Incidence Matrix</string>
+    <string>关联矩阵</string>
    </property>
    <property name="toolTip">
     <string>关联矩阵</string>
@@ -706,7 +662,7 @@
   </action>
   <action name="actionAdjacent_Matrix">
    <property name="text">
-    <string>Adjacent Matrix</string>
+    <string>邻接矩阵</string>
    </property>
    <property name="toolTip">
     <string>邻接矩阵</string>
@@ -714,7 +670,7 @@
   </action>
   <action name="actionBigraph">
    <property name="text">
-    <string>Bigraph</string>
+    <string>二部图</string>
    </property>
    <property name="toolTip">
     <string>二部图</string>
@@ -722,7 +678,7 @@
   </action>
   <action name="actionShortest_Path">
    <property name="text">
-    <string>Shortest Path</string>
+    <string>最短路径</string>
    </property>
    <property name="toolTip">
     <string>最短路径</string>
@@ -730,12 +686,15 @@
   </action>
   <action name="actionCritical_Path">
    <property name="text">
-    <string>Critical Path</string>
+    <string>关键路径</string>
+   </property>
+   <property name="toolTip">
+    <string>关键路径</string>
    </property>
   </action>
   <action name="actionFind_Euler_Loop">
    <property name="text">
-    <string>Find Euler Loop</string>
+    <string>寻找欧拉回路</string>
    </property>
    <property name="toolTip">
     <string>寻找欧拉回路</string>
@@ -743,7 +702,7 @@
   </action>
   <action name="actionFind_Hamiltonian_Loop">
    <property name="text">
-    <string>Find Hamiltonian Loop</string>
+    <string>寻找哈密顿回路</string>
    </property>
    <property name="toolTip">
     <string>寻找哈密顿回路</string>
@@ -751,7 +710,7 @@
   </action>
   <action name="actionGraph_Coloring_Problem">
    <property name="text">
-    <string>Graph Coloring Problem</string>
+    <string>着色问题</string>
    </property>
    <property name="toolTip">
     <string>着色问题</string>
@@ -762,7 +721,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Digraph Mode</string>
+    <string>有向图模式</string>
    </property>
    <property name="toolTip">
     <string>有向图模式</string>
@@ -776,7 +735,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Redigraph Mode</string>
+    <string>无向图模式</string>
    </property>
    <property name="toolTip">
     <string>无向图模式</string>
@@ -785,23 +744,9 @@
     <string>F2</string>
    </property>
   </action>
-  <action name="actionTree_Mode">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Tree Mode</string>
-   </property>
-   <property name="toolTip">
-    <string>树模式</string>
-   </property>
-   <property name="shortcut">
-    <string>F3</string>
-   </property>
-  </action>
   <action name="actionMinimise">
    <property name="text">
-    <string>Minimise</string>
+    <string>窗口最小化</string>
    </property>
    <property name="toolTip">
     <string>窗口最小化</string>
@@ -809,7 +754,7 @@
   </action>
   <action name="actionMaximize">
    <property name="text">
-    <string>Maximize</string>
+    <string>窗口最大化</string>
    </property>
    <property name="toolTip">
     <string>窗口最大化</string>
@@ -817,7 +762,7 @@
   </action>
   <action name="actionMini_Mode">
    <property name="text">
-    <string>Mini-Mode</string>
+    <string>迷你模式</string>
    </property>
    <property name="toolTip">
     <string>迷你模式</string>
@@ -828,7 +773,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Hide ToolBar</string>
+    <string>隐藏工具栏</string>
    </property>
    <property name="toolTip">
     <string>隐藏工具栏</string>
@@ -836,7 +781,7 @@
   </action>
   <action name="actionConnect_Author">
    <property name="text">
-    <string>Connect Author</string>
+    <string>联系作者</string>
    </property>
    <property name="toolTip">
     <string>联系作者</string>
@@ -844,7 +789,7 @@
   </action>
   <action name="actionWelcome">
    <property name="text">
-    <string>Welcome</string>
+    <string>欢迎</string>
    </property>
    <property name="toolTip">
     <string>欢迎</string>
@@ -852,7 +797,7 @@
   </action>
   <action name="actionHelp_Document">
    <property name="text">
-    <string>Help Document</string>
+    <string>帮助文档</string>
    </property>
    <property name="toolTip">
     <string>帮助文档</string>
@@ -860,7 +805,7 @@
   </action>
   <action name="actionFlie_List">
    <property name="text">
-    <string>Flie List</string>
+    <string>最近文件</string>
    </property>
    <property name="toolTip">
     <string>最近文件</string>
@@ -872,9 +817,12 @@
      <normaloff>:/icons/images/penStyle.png</normaloff>:/icons/images/penStyle.png</iconset>
    </property>
    <property name="text">
-    <string>Pen Thickness</string>
+    <string>画笔粗细与样式</string>
    </property>
    <property name="toolTip">
+    <string>画笔粗细与样式</string>
+   </property>
+   <property name="statusTip">
     <string>画笔粗细与样式</string>
    </property>
   </action>
@@ -884,9 +832,12 @@
      <normaloff>:/icons/images/penColor.png</normaloff>:/icons/images/penColor.png</iconset>
    </property>
    <property name="text">
-    <string>Pen Color</string>
+    <string>画笔颜色</string>
    </property>
    <property name="toolTip">
+    <string>画笔颜色</string>
+   </property>
+   <property name="statusTip">
     <string>画笔颜色</string>
    </property>
   </action>
@@ -896,7 +847,7 @@
      <normaloff>:/icons/images/backgroundColor.png</normaloff>:/icons/images/backgroundColor.png</iconset>
    </property>
    <property name="text">
-    <string>Background Color</string>
+    <string>背景色</string>
    </property>
    <property name="toolTip">
     <string>背景色</string>
@@ -905,49 +856,31 @@
   <action name="actionArc">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/icons/images/ARC.BMP</normaloff>:/icons/images/ARC.BMP</iconset>
+     <normaloff>:/icons/images/favicon.ico</normaloff>:/icons/images/favicon.ico</iconset>
    </property>
    <property name="text">
-    <string>Arc</string>
+    <string>曲线</string>
    </property>
    <property name="toolTip">
-    <string>弧线</string>
+    <string>曲线</string>
    </property>
-  </action>
-  <action name="actionStraight_Line">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/icons/images/LINE.BMP</normaloff>:/icons/images/LINE.BMP</iconset>
-   </property>
-   <property name="text">
-    <string>Straight Line</string>
-   </property>
-   <property name="toolTip">
-    <string>直线</string>
+   <property name="statusTip">
+    <string>曲线</string>
    </property>
   </action>
   <action name="actionCircle">
    <property name="icon">
     <iconset resource="res.qrc">
-     <normaloff>:/icons/images/ELLIPSE.BMP</normaloff>:/icons/images/ELLIPSE.BMP</iconset>
+     <normaloff>:/icons/images/dot_72px_1154609_easyicon.net.ico</normaloff>:/icons/images/dot_72px_1154609_easyicon.net.ico</iconset>
    </property>
    <property name="text">
-    <string>Circle</string>
+    <string>结点</string>
    </property>
    <property name="toolTip">
-    <string>椭圆</string>
+    <string>结点</string>
    </property>
-  </action>
-  <action name="actionRectangle">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/icons/images/RECTANGL.BMP</normaloff>:/icons/images/RECTANGL.BMP</iconset>
-   </property>
-   <property name="text">
-    <string>Rectangle</string>
-   </property>
-   <property name="toolTip">
-    <string>矩形</string>
+   <property name="statusTip">
+    <string>结点</string>
    </property>
   </action>
   <action name="actionSetEnglish">
@@ -963,44 +896,26 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Chinese</string>
+    <string>中文</string>
+   </property>
+   <property name="toolTip">
+    <string>中文</string>
    </property>
   </action>
   <action name="actionAdd_Annotation">
    <property name="icon">
-    <iconset>
-     <normalon>:/icons/images/800.bmp</normalon>
-    </iconset>
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/text_128px_1258351_easyicon.net.ico</normaloff>
+     <normalon>:/icons/images/800.bmp</normalon>:/icons/images/text_128px_1258351_easyicon.net.ico</iconset>
    </property>
    <property name="text">
-    <string>Add Annotation</string>
+    <string>添加注释</string>
    </property>
    <property name="toolTip">
     <string>添加注释</string>
    </property>
-  </action>
-  <action name="actionClues_Color">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/icons/images/rt_penColor.png</normaloff>:/icons/images/rt_penColor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Clues Color</string>
-   </property>
-   <property name="toolTip">
-    <string>提示颜色</string>
-   </property>
-  </action>
-  <action name="actionClues_Thickness">
-   <property name="icon">
-    <iconset resource="res.qrc">
-     <normaloff>:/icons/images/rt_penStyle.png</normaloff>:/icons/images/rt_penStyle.png</iconset>
-   </property>
-   <property name="text">
-    <string>Clues Thickness</string>
-   </property>
-   <property name="toolTip">
-    <string>提示粗细与样式</string>
+   <property name="statusTip">
+    <string>文本</string>
    </property>
   </action>
   <action name="actionProperty_And_History">
@@ -1008,7 +923,37 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Property And History</string>
+    <string>属性与历史记录</string>
+   </property>
+   <property name="toolTip">
+    <string>属性与历史记录</string>
+   </property>
+  </action>
+  <action name="actionRectangle">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/Rectangular_marquee_tool_128px_1185795_easyicon.net.ico</normaloff>:/icons/images/Rectangular_marquee_tool_128px_1185795_easyicon.net.ico</iconset>
+   </property>
+   <property name="text">
+    <string>矩形</string>
+   </property>
+   <property name="toolTip">
+    <string>矩形</string>
+   </property>
+   <property name="statusTip">
+    <string>矩形框</string>
+   </property>
+  </action>
+  <action name="actionAccent_Color">
+   <property name="icon">
+    <iconset resource="res.qrc">
+     <normaloff>:/icons/images/rt_penColor.png</normaloff>:/icons/images/rt_penColor.png</iconset>
+   </property>
+   <property name="text">
+    <string>选中色</string>
+   </property>
+   <property name="toolTip">
+    <string>强调色</string>
    </property>
   </action>
  </widget>

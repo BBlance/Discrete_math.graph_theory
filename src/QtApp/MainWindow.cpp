@@ -56,3 +56,13 @@ void MainWindow::on_actionUndo_triggered()
 {
 
 }
+
+void MainWindow::on_actionDelete_triggered()
+{
+
+}
+
+void MainWindow::on_actionAdd_Annotation_triggered()
+{
+
+}

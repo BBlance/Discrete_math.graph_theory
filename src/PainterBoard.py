@@ -1,5 +1,5 @@
 import sys
-from PySide2.QtCore import Signal, QPoint, QSize, QRect, QLine, Qt, QByteArray, QBuffer, QIODevice
+from PySide2.QtCore import Signal, QPoint, QSize, QRect, QLine, Qt
 from PySide2.QtGui import QKeyEvent, QPixmap, QColor, QPen, QPainter, QBrush
 from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 from src.Graph import Graph, Vertex

@@ -50,6 +50,10 @@ private slots:
 
     void on_actionSave_Image_triggered();
 
+    void on_actionDelete_triggered();
+
+    void on_actionAdd_Annotation_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
