@@ -1,11 +1,8 @@
 from enum import unique, Enum
 from math import sqrt
-
 from PySide2.QtCore import QPointF, Qt
-from PySide2.QtGui import QPen, QColor, QFocusEvent
-from PySide2.QtWidgets import QAbstractGraphicsShapeItem
-
-from PointItem import BezierPointItemList
+from PySide2.QtGui import QPen, QColor, QFocusEvent, QKeyEvent
+from PySide2.QtWidgets import QAbstractGraphicsShapeItem, QGraphicsSceneMouseEvent, QGraphicsItem
 
 
 @unique
@@ -19,9 +16,13 @@ class GraphicsType(Enum):
 class BezierGraphicsItem(QAbstractGraphicsShapeItem):
     def __init__(self, center: QPointF):
         super(BezierGraphicsItem, self).__init__()
+        self.setCursor(Qt.OpenHandCursor)
+        self.setZValue(-1)
+        self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
         self._m_radius = float(0)
-        self._m_center = center
-        self._m_text = QPointF(center.x(), center.y() - 15)
+        self._m_centerPos = center
+        self._m_textPos = QPointF(center.x() - 7, center.y() - 30)
         self._m_pointList = BezierPointItemList()
 
         self._m_pen_isSelected = QPen()
@@ -42,30 +43,34 @@ class BezierGraphicsItem(QAbstractGraphicsShapeItem):
 
         self.setPen(self._m_pen_noSelected)
 
-    def getCenter(self):
-        return self._m_center
+    @property
+    def center(self):
+        return self._m_centerPos
 
     def setCenter(self, p: QPointF):
-        self._m_center = p
+        self._m_centerPos = p
 
-    # def getTextPos(self):
-    #     return self._m_text
+    @property
+    def textPos(self):
+        self._m_textPos = QPointF(self._m_centerPos.x() - 7, self._m_centerPos.y() - 30)
+        return self._m_textPos
+
     #
     # def setTextPos(self):
     #     self._m_text = QPointF(self._m_center.x(), self._m_center.y() + 10)
 
-    def getMaxLength(self):
-        vec = []
-        for temp in self._m_pointList:
-            dis = sqrt(pow(self._m_center.x() - temp.x(), 2) + pow(self._m_center.y() - temp.y(), 2))
-            vec.append(dis)
-
-        ret = float(0)
-        for temp in vec:
-            if temp > ret:
-                ret = temp
-
-        self._m_radius = ret
+    # def maxLength(self):
+    #     vec = []
+    #     for temp in self._m_pointList:
+    #         dis = sqrt(pow(self._m_centerPos.x() - temp.x(), 2) + pow(self._m_centerPos.y() - temp.y(), 2))
+    #         vec.append(dis)
+    #
+    #     ret = float(0)
+    #     for temp in vec:
+    #         if temp > ret:
+    #             ret = temp
+    #
+    #     self._m_radius = ret
 
     def set_noSelectedPenColor(self, color="gray"):
         self._m_pen_noSelectedColor = QColor(color)
@@ -96,3 +101,6 @@ class BezierGraphicsItem(QAbstractGraphicsShapeItem):
 
     def focusOutEvent(self, event: QFocusEvent):
         self.setPen(self._m_pen_noSelected)
+
+
+from PointItem import BezierPointItemList

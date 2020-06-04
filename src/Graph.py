@@ -1,153 +1,139 @@
 import sys
 from PySide2.QtCore import QPoint
-from pythonds.graphs import PriorityQueue
+from numpy import zeros, identity, mat, array
+from pandas import value_counts
 
 
 class Graph:
-    #
     def __init__(self):
-        self.vertDict = {}
-        self.numVertices = 0
-        self.rt_Vertex = Vertex(0)
+        self.__vertDict = {}
+        self.__numVertices = 0
+        self.__numEdges = 0
+        self.__mode = True
+        self.__edgeDict = {}
+        self.__time = 0
 
     #  向图中添加一个顶点实例
     def addVertex(self, key, point=QPoint()):
         x, y = point.x(), point.y()
-        self.numVertices = self.numVertices + 1
+        self.__numVertices = self.__numVertices + 1
         newVertex = Vertex(key, x, y)
-        self.rt_Vertex = newVertex
-        self.vertDict[key] = newVertex
+        self.__vertDict[key] = newVertex
         return newVertex
 
     #  在图中找到名为vertKey的顶点
-    def getVertex(self, n=-1, point=QPoint()):
-        if n != -1:
-            if n in self.vertDict:
-                return self.vertDict[n]
-            else:
-                return None
+    def vertex(self, n):
+        if n in self.__vertDict:
+            return self.__vertDict[n]
         else:
-            if self.get_VertexKey(point) in self.vertDict:
-                return self.vertDict[self.get_VertexKey(point)]
-            else:
-                return None
+            return None
 
-    #  获取总顶点数
-    def getTotalVertex(self):
-        return self.numVertices
+    def edgeNumber(self):
+        return self.__numEdges
 
-    def getNewVertex(self):
-        return self.rt_Vertex
+    def edges(self):
+        return self.__edgeDict
+
+    def edge(self, fromVert, toVert):
+        edgeList = []
+        for edge in self.__edgeDict.values():
+            if fromVert == edge.fromVert().id() and toVert == edge.toVert().id():
+                edgeList.append(edge)
+        return edgeList
+
+    def mode(self):
+        return self.__mode
+
+    def setMode(self, mode):
+        self.__mode = mode
 
     def __contains__(self, n):
-        return n in self.vertDict
+        return n in self.__vertDict
 
     #  向图中添加一条有向边，用于连接顶点fromVert和toVert
     def addEdge(self, fromVert, toVert, cost=0):
 
-        if fromVert not in self.vertDict:
+        if fromVert not in self.__vertDict:
             nv = self.addVertex(fromVert)
 
-        if toVert not in self.vertDict:
+        if toVert not in self.__vertDict:
             nv = self.addVertex(toVert)
 
-        self.vertDict[fromVert].addNeighbor(self.vertDict[toVert], cost)
+        if self.__mode:
+            self.__vertDict[fromVert].addNeighbor(self.__vertDict[toVert], cost)
+
+        else:
+            self.__vertDict[fromVert].addNeighbor(self.__vertDict[toVert], cost)
+            if fromVert != toVert:
+                self.__vertDict[toVert].addNeighbor(self.__vertDict[fromVert], cost)
+        newEdge = Edge(self.__numEdges, self.__vertDict[fromVert], self.__vertDict[toVert],
+                       cost, self.__mode)
+        self.__edgeDict[self.__numEdges] = newEdge
+        self.__numEdges = self.__numEdges + 1
+
+        return newEdge
 
     #  以列表的形式返回途中的所有顶点
-    def getVertices(self):
-        return self.vertDict.keys()
+    def vertices(self):
+        return self.__vertDict.keys()
 
     #  根据坐标获取顶点名称
-    def get_VertexKey(self, point):
-        x, y = point.x(), point.y()
-        for vertices in self.vertDict.values():
-            x2, y2 = vertices.getCoordinates()
+    def vertexKey(self, point):
+        x, y = point.__x(), point.__y()
+        for vertices in self.__vertDict.values():
+            x2, y2 = vertices.coordinates()
             if x2 == x and y2 == y:
-                return vertices.getId()
+                return vertices.__id()
         return False
 
     #  判断坐标是否存在
     def IsContainsPoint(self, point):
-        x, y = point.x(), point.y()
-        for vertices in self.vertDict.values():
-            x2, y2 = vertices.getCoordinates()
+        x, y = point.__x(), point.__y()
+        for vertices in self.__vertDict.values():
+            x2, y2 = vertices.coordinates()
             if x2 == x and y2 == y:
                 return True
         return False
 
     #  根据ID获取坐标
-    def getIdToCoordinates(self, id):
-        for vertices in self.vertDict.values():
-            if id == vertices.getId():
-                return vertices.getCoordinates()
+    def idToCoordinates(self, id):
+        for vertices in self.__vertDict.values():
+            if id == vertices.__id():
+                return vertices.coordinates()
         return False
 
-    def copyGraph(self):
-        return self.vertDict
-
     def removeVert(self, id):
-        if id in self.vertDict.keys():
-            self.vertDict.pop(id)
-            for v in self.vertDict.values():
+        if id in self.__vertDict.keys():
+            self.__vertDict.pop(id)
+            for v in self.__vertDict.values():
                 v.removeConnection(id)
             return True
         else:
             return False
 
     def __iter__(self):
-        return iter(self.vertDict.values())
+        return iter(self.__vertDict.values())
 
-    def getTotalEdge(self):
-        for v in self.vertDict.values():
-            for w in v.getConnections():
-                print(v.getId(), '->', w.getId())
-
-    #  判断是否有边，有则返回边数
-    def IsEmptyEdge(self, edge_num=0):
-
-        for v in self.vertDict.values():
-            for w in v.getConnections():
-                edge_num = edge_num + 1
-        return edge_num
-
-    # 判断边是否存在
-    def IsContainsEdge(self, line):
-        fromVert, toVert = self.get_VertexKey(line.p1()), self.get_VertexKey(line.p2())
-        for v in self.vertDict.values():
-            for w in v.getConnections():
-                if v.getId() == fromVert and w.getId() == toVert:
-                    return True
-
-        for v in self.vertDict.values():
-            for w in v.getConnections():
-                if v.getId() == toVert and w.getId() == fromVert:
-                    return True
-        return False
-
-    # 打印所有的边的详细信息
-    # def PrintDetails(self):
-    #     dict={}
-    #     for vertices in self.vertDict.values():
-    #         for vert in vertices.getConnections():
-    #             print("{ %s-%s -> %s-%s }" % (
-    #                 dict[str(vertices.getId())vert.getId())]=vert.getWeight()
-    #                 vertices.getId(), vertices.getCoordinates(), vert.getId(), vert.getCoordinates()))
-
-
+    def totalEdge(self):
+        for v in self.__vertDict.values():
+            for w in v.connections():
+                print(v.id(), '->', w.id())
 
     #  清空所有数据
-    def ClearAllDetails(self):
-        self.vertDict = {}
-        self.numVertices = 0
+    def clearAllDetails(self):
+        self.__vertDict = {}
+        self.__edgeDict = {}
+        self.__numEdges = 0
+        self.__numVertices = 0
 
-    def getStandardData(self):
+    def standardData(self):
         standardData = {}
-        for vertices in self.vertDict.values():
+        for vertices in self.__vertDict.values():
             listDict = []
-            vertices.getCoordinates()
-            for vert in vertices.getConnections():
-                listDict.append(vert.getId())
-            standardData[vertices.getId()] = {vertices.getCoordinates(): listDict}
+            vertices.coordinates()
+            for vert in vertices.connections():
+                listDict.append(vert.__id())
+            standardData[vertices.__id()] = {vertices.coordinates(): listDict}
         return standardData
 
     def setDataFromFile(self, standardData):
@@ -165,211 +151,323 @@ class Graph:
             for connection in connectionsTo:
                 self.addEdge(vertices, connection)
 
-    def dijkstra(self, aGraph, start):
-        currentVerts = PriorityQueue()
-        pq = PriorityQueue()
-        start.setDistance(0)
-        pq.buildHeap([(v.getDistance(), v) for v in aGraph])
-        while not pq.isEmpty():
-            currentVert = pq.delMin()
-            for nextVert in currentVert.getConnections():
-                newDist = currentVert.getDistance() + currentVert.getWeight(nextVert)
-            if newDist < nextVert.getDistance():
-                nextVert.setDistance(newDist)
-                nextVert.setPred(currentVert)
-                pq.decreaseKey(nextVert, newDist)
-                currentVerts = currentVert
-                # print(currentVert)
+    # 关联矩阵函数
+    def incidenceMatrix(self):
+        matrix = zeros((self.__numVertices, self.__numEdges))
+        if self.__mode:
+            for item in self.__vertDict.values():
+                item: Vertex
+                for num, edge in self.__edgeDict.items():
+                    if item.id() == edge[0].id():
+                        matrix[item.id()][num] = 1
+                    if item.id() == edge[1].id():
+                        matrix[item.id()][num] = -1
+        else:
+            for item in self.__vertDict.values():
+                item: Vertex
+                for num, edge in self.__edgeDict.items():
+                    if item.id() == edge[0].id() or item.id() == edge[1].id():
+                        if item.id() == edge[0].id() and item.id() == edge[1].id():
+                            matrix[item.id()][num] = 2
+                        else:
+                            if item.id() == edge[0].id() or item.id() == edge[1].id():
+                                matrix[item.id()][num] = 1
+        return mat(matrix)
 
-        print(currentVerts)
+    # 邻接矩阵
+    def adjacentMatrix(self):
+        matrix = zeros((len(self.__vertDict), len(self.__vertDict)))
 
+        for item in self.__vertDict.values():
+            item: Vertex
+            num = value_counts(item.connections())
+            for x in num.index:
+                matrix[item.id()][x.id()] = num[x]
+        return mat(matrix)
 
-#
-# class PriorityQueue:
-#     def __init__(self):
-#         self.heapArray = [(0, 0)]
-#         self.currentSize = 0
-#
-#     def buildHeap(self, alist):
-#         self.currentSize = len(alist)
-#         self.heapArray = [(0, 0)]
-#         for i in alist:
-#             self.heapArray.append(i)
-#         i = len(alist) // 2
-#         while (i > 0):
-#             self.percDown(i)
-#             i = i - 1
-#
-#     def percDown(self, i):
-#         while (i * 2) <= self.currentSize:
-#             mc = self.minChild(i)
-#             if self.heapArray[i][0] > self.heapArray[mc][0]:
-#                 tmp = self.heapArray[i]
-#                 self.heapArray[i] = self.heapArray[mc]
-#                 self.heapArray[mc] = tmp
-#             i = mc
-#
-#     def minChild(self, i):
-#         if i * 2 > self.currentSize:
-#             return -1
-#         else:
-#             if i * 2 + 1 > self.currentSize:
-#                 return i * 2
-#             else:
-#                 if self.heapArray[i * 2][0] < self.heapArray[i * 2 + 1][0]:
-#                     return i * 2
-#                 else:
-#                     return i * 2 + 1
-#
-#     def percUp(self, i):
-#         while i // 2 > 0:
-#             if self.heapArray[i][0] < self.heapArray[i // 2][0]:
-#                 tmp = self.heapArray[i // 2]
-#                 self.heapArray[i // 2] = self.heapArray[i]
-#                 self.heapArray[i] = tmp
-#             i = i // 2
-#
-#     def add(self, k):
-#         self.heapArray.append(k)
-#         self.currentSize = self.currentSize + 1
-#         self.percUp(self.currentSize)
-#
-#     def delMin(self):
-#         retval = self.heapArray[1][1]
-#         self.heapArray[1] = self.heapArray[self.currentSize]
-#         self.currentSize = self.currentSize - 1
-#         self.heapArray.pop()
-#         self.percDown(1)
-#         return retval
-#
-#     def isEmpty(self):
-#         if self.currentSize == 0:
-#             return True
-#         else:
-#             return False
-#
-#     def decreaseKey(self, val, amt):
-#         # this is a little wierd, but we need to find the heap thing to decrease by
-#         # looking at its value
-#         done = False
-#         i = 1
-#         myKey = 0
-#         while not done and i <= self.currentSize:
-#             if self.heapArray[i][1] == val:
-#                 done = True
-#                 myKey = i
-#             else:
-#                 i = i + 1
-#         if myKey > 0:
-#             self.heapArray[myKey] = (amt, self.heapArray[myKey][1])
-#             self.percUp(myKey)
-#
-#     def __contains__(self, vtx):
-#         for pair in self.heapArray:
-#             if pair[1] == vtx:
-#                 return True
-#         return False
+    #  可达矩阵
+    def reachableMatrix(self):
+        AMatrix = self.adjacentMatrix()
+        IMatrix = identity(len(AMatrix))
+        newMatrix = AMatrix + IMatrix
+        oldMatrix = newMatrix
+        flag = 0
+        step = 1
+        while flag == 0:
+            oldMatrix = newMatrix
+            newMatrix = oldMatrix * (AMatrix + IMatrix)
+            for i in range(0, len(newMatrix)):
+                for j in range(0, len(newMatrix)):
+                    if newMatrix[i, j] >= 1:
+                        newMatrix[i, j] = 1
+            step += 1
+            if (oldMatrix == newMatrix).all():
+                flag = 1
+
+        return newMatrix, step
+
+    #  连通性判断
+    def connectivity(self):
+        pass
+
+    #  图的度的计算
+    def degrees(self):
+        degreesDict = {}
+        inDegreeDict = {}
+        outDegreeDict = {}
+        matrix = array(self.incidenceMatrix())
+        for x in range(self.__numVertices):
+            value = value_counts(matrix[x]).drop(0)
+            if self.__mode:
+                if -1 in value.index:
+                    inDegreeDict[x] = value[-1]
+                else:
+                    inDegreeDict[x] = 0
+
+                if 1 in value.index:
+                    outDegreeDict[x] = value[1]
+                else:
+                    outDegreeDict[x] = 0
+
+            else:
+                if 1 in value.index:
+                    degreesDict[x] = value[1]
+                else:
+                    degreesDict[x] = 0
+
+        if self.__mode:
+            return outDegreeDict, inDegreeDict
+        else:
+            return degreesDict
+
+    def pathAndLoop(self, step):
+        martix = self.adjacentMatrix()
+        return pow(martix, step)
+
+    # def DFS(self):
+    #     for vert in self:
+    #         vert.setColor('white')
+    #         vert.setPred(-1)
+    #     for vert in self:
+    #         if vert.color() == 'white':
+    #             self.DFSVisit(vert)
+    #
+    # def DFSVisit(self, startVert):
+    #     startVert.setColor('gray')
+    #     self.__time += 1
+    #     startVert.setDiscovery(self.__time)
+    #     for nextVert in startVert.connections():
+    #         if nextVert.color() == 'white':
+    #             nextVert.setPred(startVert)
+    #             self.DFSVisit(nextVert)
+    #     startVert.setColor('black')
+    #     self.__time += 1
+    #     startVert.setFinish(self.__time)
+
+    def findPath(self, start, end, pathway=[]):
+        pathway = pathway + [self.__vertDict[start]]
+        if start == end:
+            return pathway
+        for node in self.__vertDict[start].connections():
+            if node not in pathway:
+                edges = self.edge(pathway[len(pathway) - 1].id(), node.id())
+                pathway.append(edges[0])
+                newPath = self.findPath(node.id(), end, pathway)
+                if newPath:
+                    return newPath
+        return None
+
+    def findAllPath(self, start, end, pathway=[]):  # 只有结点
+        pathway = pathway + [self.__vertDict[start]]
+        if start == end:
+            return [pathway]
+        pathways = []
+        for node in self.__vertDict[start].connections():
+            if node not in pathway:
+                # print(pathway[len(pathway) - 1], node.id())
+                # print(self.edge(pathway[len(pathway) - 1].id(), node.id()))
+                if type(pathway[len(pathway) - 1]) is Vertex:
+                    edges=self.edge(pathway[len(pathway) - 1].id(), node.id())
+                    if len(edges)==1:
+                        pathway.append(self.edge(pathway[len(pathway) - 1].id(), node.id()))
+                        print(edges[0].id())
+                    else:
+                        for edge in self.edge(pathway[len(pathway) - 1].id(), node.id()):
+                            pass
+                newPaths = self.findAllPath(node.id(), end, pathway)
+                for newPath in newPaths:
+                    pathways.append(newPath)
+        return pathways
+
+    # def findAllPathWithEdge(self, start, end, pathway=[]):
+    #     if start == end:
+    #         return [pathway]
+    #     pathways = self.findAllPath(self, start, end)
+    #
+    #     for x in range(len(pathways)):
+    #         for y in range(len(pathways[x])):
+
+    # def findShortestPath(self):
 
 
 #  Vertex类表示图中的每一个顶点
 class Vertex:
     #  初始化ID，以及字典connectedTo
-    def __init__(self, key, x=0, y=0):
-        self.id = key
-        self.x = x
-        self.y = y
-        self.connectedTo = {}
-        self.color = 'white'
-        self.dist = sys.maxsize
-        self.disc = 0
-        self.fin = 0
-        self.pred = None
+    def __init__(self, key, weight=0, x=0, y=0):
+        self.__id = key
+        self.__weight = weight
+        self.__x = x
+        self.__y = y
+        self.__connectedTo = []
+        self.__color = 'white'
+        self.__dist = sys.maxsize
+        self.__disc = 0
+        self.__fin = 0
+        self.__predecessor = None
 
     #  添加从一个顶点到另一个顶点的连接， 由connectedTo来表示
     def addNeighbor(self, nbr, weight=0):
-        self.connectedTo[nbr] = weight
+        self.__connectedTo.append((nbr, weight))
 
     # 返回邻接表中所有的顶点
     def __str__(self):
-        return str(self.id) + ':(connectedTo:' + str(
-            [x.id for x in self.connectedTo]) + "color:" + self.color + " disc: " + str(self.disc) + " fin:" + str(
-            self.fin) + " dist:" + str(self.dist) + ") pred:\n\t[" + str(self.pred) + "]\n"
+        return "v" + str(self.__id) + ':(connectedTo:' + str(
+            ["v" + str(x.__id) for x in self.connections()]) + " color:" + self.__color + " disc: " + str(
+            self.__disc) + " fin:" + str(
+            self.__fin) + " dist:" + str(self.__dist) + ") pred:[" + str(self.__predecessor) + "]\t"
 
     def setColor(self, color):
-        self.color = color
+        self.__color = color
 
     def setDistance(self, distance):
-        self.dist = distance
+        self.__dist = distance
 
     def setPred(self, pred):
-        self.pred = pred
+        self.__predecessor = pred
 
     def setDiscovery(self, dtime):
-        self.disc = dtime
+        self.__disc = dtime
 
     def setFinish(self, ftime):
-        self.fin = ftime
+        self.__fin = ftime
 
-    def getFinish(self):
-        return self.fin
+    def finish(self):
+        return self.__fin
 
-    def getDiscovery(self):
-        return self.disc
+    def discovery(self):
+        return self.__disc
 
-    def getDistance(self):
-        return self.dist
+    def distance(self):
+        return self.__dist
 
-    def getPred(self):
-        return self.pred
+    def pred(self):
+        return self.__predecessor
 
-    def getColor(self):
-        return self.color
+    def color(self):
+        return self.__color
 
-    #  返回当前顶点到以参数传入顶点之间边的权重
-    def getConnections(self):
-        return self.connectedTo.keys()
+    def connections(self):
+        vertList = []
+        for connections in self.__connectedTo:
+            vertList.append(connections[0])
+        return vertList
 
-    def getId(self):
-        return self.id
+    def id(self):
+        return self.__id
 
-    def getCoordinates(self):
-        return self.x, self.y
+    def coordinates(self):
+        return self.__x, self.__y
 
-    def getWeight(self, nbr):
-        return self.connectedTo[nbr]
+    def weight(self, nbr):
+        for connection in self.__connectedTo:
+            connection: tuple
+            if connection[0] == nbr:
+                return connection[1]
+        return None
 
-    def removeConnection(self, id):
-        for x in list(self.connectedTo.keys()):
-            if x.getId() == id:
-                del self.connectedTo[x]
+    def vertexWeight(self):
+        return self.__weight
 
+
+# Edge类表示图中的每一条边
+class Edge:
+    def __init__(self, id, fromVert, toVert, weight, mode=True):
+        self.__id = id
+        self.__fromVert = fromVert
+        self.__toVert = toVert
+        self.__edge = (fromVert, toVert)
+        self.__weight = weight
+        self.__mode = mode
+
+    def __str__(self):
+        x = " -> " if self.__mode else " - "
+        return "e" + str(self.__id) + ":" + "v" + str(self.__fromVert.id()) + x + "v" + str(
+            self.__toVert.id()) + "\tweight:" + str(self.__weight)
+
+    def id(self):
+        return self.__id
+
+    def weight(self):
+        return self.__weight
+
+    def edge(self):
+        return self.__edge
+
+    def fromVert(self):
+        return self.__fromVert
+
+    def toVert(self):
+        return self.__toVert
 
 
 if __name__ == '__main__':
     g = Graph()
 
-    for i in range(6):
+    for i in range(4):
         g.addVertex(i)
 
-    g.addEdge(0, 1, 5)
-    g.addEdge(0, 5, 2)
-    g.addEdge(1, 2, 4)
-    g.addEdge(2, 3, 9)
-    g.addEdge(3, 4, 7)
-    g.addEdge(3, 5, 3)
-    g.addEdge(4, 0, 1)
-    g.addEdge(5, 4, 8)
-    g.addEdge(5, 2, 1)
+    # g.addEdge(0, 1, 5)
+    # g.addEdge(0, 5, 2)
+    # g.addEdge(1, 2, 4)
+    # g.addEdge(2, 3, 9)
+    # g.addEdge(3, 4, 7)
+    # g.addEdge(3, 5, 3)
+    # g.addEdge(4, 0, 1)
+    # g.addEdge(5, 4, 8)
+    # g.addEdge(5, 2, 1)
 
-    g.PrintDetails()
+    # g.addEdge(0, 1, 2)
+    # g.addEdge(3, 0, 0)
+    # g.addEdge(1, 3, 0)
+    # g.addEdge(3, 1, 0)
+    # g.addEdge(1, 2, 0)
 
-    print(g.IsEmptyEdge())
+    g.addEdge(0, 0, 5)
+    g.addEdge(0, 1, 1)
+    g.addEdge(0, 1, 3)
+    g.addEdge(0, 2, 2)
+    g.addEdge(1, 2, 8)
+    g.addEdge(2, 3, 7)
+    g.addEdge(3, 2, 6)
 
-    g.removeVert(5)
+    # paths = g.findAllPath(0, 2)
+    # for path in paths:
+    #     for vert in path:
+    #         print(vert.id(), end="\t")
+    #     print()
+    paths = g.findAllPath(0, 2)
 
-    print()
-    #
-    g.PrintDetails()
-    print(g.IsEmptyEdge())
+    for path in paths:
+        for vert in path:
+            if type(vert) is Edge:
+                print("e" + str(vert.id()), end="\t")
+            elif type(vert) is Vertex:
+                print("v" + str(vert.id()), end="\t")
+        print()
+    # edges = g.edge(0, 5)
+    # for x in edges:
+    #     print(x.id(), x.weight())
 
-
+    # for vert in g:
+    #     for v in vert.connections():
+    #         print(vert.weight(v))

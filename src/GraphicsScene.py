@@ -1,17 +1,28 @@
+import typing
 from PySide2.QtCore import Signal, QPointF, Qt
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsSceneMouseEvent
 
-from BezierItem import BezierPath
+from BezierEdge import BezierEdge
+from PointItem import BezierPointItem
 
 
 class GraphicsScene(QGraphicsScene):
-    itemMoveSignal = Signal(BezierPath, QPointF)
+    itemMoveSignal = Signal(BezierEdge, QPointF)
 
     def __init__(self):
         super(GraphicsScene, self).__init__()
 
         self.m_Item = None
         self.m_oldPos = QPointF()
+
+    def items(self, order: Qt.SortOrder = ...) -> typing.List:
+        items = QGraphicsScene.items(self, order=Qt.SortOrder.DescendingOrder)
+        itemList=[]
+        for item in items:
+            className=str(type(item))
+            if not className.find("PointItem")>=0:
+                itemList.append(item)
+        return itemList
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         mousePos = QPointF(event.buttonDownScenePos(Qt.LeftButton).x(), event.buttonDownScenePos(Qt.LeftButton).y())

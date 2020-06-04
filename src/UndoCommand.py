@@ -3,7 +3,7 @@ from random import random
 from PySide2.QtCore import QPointF
 from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
 
-from BezierItem import BezierPath
+from BezierEdge import BezierEdge
 
 
 class AddCommand(QUndoCommand):
@@ -11,7 +11,7 @@ class AddCommand(QUndoCommand):
         super(AddCommand, self).__init__()
 
         self.scene = scene
-        self.shape = BezierPath(QPointF(0, 0), QPointF(100, 100))
+        self.shape = BezierEdge(QPointF(0, 0), QPointF(100, 100))
         self.m_initPos = QPointF(random.randint(1, 10), random.randint(1, 10))
         self.setText("添加曲线")
 
@@ -26,7 +26,7 @@ class AddCommand(QUndoCommand):
 
 
 class MoveCommand(QUndoCommand):
-    def __init__(self, item: BezierPath, oldPos: QPointF):
+    def __init__(self, item: BezierEdge, oldPos: QPointF):
         super(MoveCommand, self).__init__()
         self.shape = item
         self.m_oldPos = oldPos

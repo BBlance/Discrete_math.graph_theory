@@ -124,7 +124,7 @@
       <addaction name="actionRedigraph_s_Degrees"/>
      </widget>
      <addaction name="actionNode_s_Name"/>
-     <addaction name="actionNode_s_Coordinates"/>
+     <addaction name="actionEdge_Name"/>
      <addaction name="actionEdge_s_Weight"/>
      <addaction name="menuNode_s_Degree"/>
     </widget>
@@ -153,8 +153,9 @@
      <property name="title">
       <string>图的矩阵</string>
      </property>
-     <addaction name="actionIncidence_Matrix"/>
-     <addaction name="actionAdjacent_Matrix"/>
+     <addaction name="actionIncidence_Matrix_Undigraph"/>
+     <addaction name="actionAdjacent_Matrix_Digraph"/>
+     <addaction name="actionReachable_Matrix"/>
     </widget>
     <widget class="QMenu" name="menuSpecial_Graph">
      <property name="title">
@@ -165,6 +166,7 @@
        <string>欧拉图</string>
       </property>
       <addaction name="actionFind_Euler_Loop"/>
+      <addaction name="actionEuler_PathWay"/>
      </widget>
      <widget class="QMenu" name="menuHamiltonian_Graph">
       <property name="title">
@@ -580,14 +582,6 @@
     <string>结点名称</string>
    </property>
   </action>
-  <action name="actionNode_s_Coordinates">
-   <property name="text">
-    <string>结点坐标</string>
-   </property>
-   <property name="toolTip">
-    <string>结点坐标</string>
-   </property>
-  </action>
   <action name="actionEdge_s_Weight">
    <property name="text">
     <string>边的权重</string>
@@ -652,20 +646,12 @@
     <string>复杂回路</string>
    </property>
   </action>
-  <action name="actionIncidence_Matrix">
+  <action name="actionIncidence_Matrix_Undigraph">
    <property name="text">
     <string>关联矩阵</string>
    </property>
    <property name="toolTip">
     <string>关联矩阵</string>
-   </property>
-  </action>
-  <action name="actionAdjacent_Matrix">
-   <property name="text">
-    <string>邻接矩阵</string>
-   </property>
-   <property name="toolTip">
-    <string>邻接矩阵</string>
    </property>
   </action>
   <action name="actionBigraph">
@@ -694,7 +680,7 @@
   </action>
   <action name="actionFind_Euler_Loop">
    <property name="text">
-    <string>寻找欧拉回路</string>
+    <string>欧拉回路</string>
    </property>
    <property name="toolTip">
     <string>寻找欧拉回路</string>
@@ -954,6 +940,26 @@
    </property>
    <property name="toolTip">
     <string>强调色</string>
+   </property>
+  </action>
+  <action name="actionAdjacent_Matrix_Digraph">
+   <property name="text">
+    <string>邻接矩阵</string>
+   </property>
+  </action>
+  <action name="actionReachable_Matrix">
+   <property name="text">
+    <string>可达矩阵</string>
+   </property>
+  </action>
+  <action name="actionEdge_Name">
+   <property name="text">
+    <string>边名称</string>
+   </property>
+  </action>
+  <action name="actionEuler_PathWay">
+   <property name="text">
+    <string>欧拉通路</string>
    </property>
   </action>
  </widget>

@@ -64,9 +64,9 @@ class PainterBoard(QWidget):
         self.brush = QBrush()  # 填充颜色
 
     def lockLineToPoint(self, event):  # 锁定坐标函数
-        if self.graph.getTotalVertex():
-            for k, vertices in self.graph.vertDict.items():
-                x, y = vertices.getCoordinates()
+        if self.graph.totalVertex():
+            for k, vertices in self.graph.__vertDict.items():
+                x, y = vertices.coordinates()
                 value = QPoint(x, y)
                 distance = event - value
                 if distance.manhattanLength() <= 60:  # 当所在位置于附近点小于等于50个单位时，自动将坐标调整到最近的点
@@ -131,10 +131,10 @@ class PainterBoard(QWidget):
 
             self.begin_point = event.pos()  # 鼠标点击起始点
 
-            if self.graph.getTotalVertex():
+            if self.graph.totalVertex():
                 self.begin_point = self.lockLineToPoint(event.pos())
             if not self.graph.IsContainsPoint(self.begin_point):
-                self.graph.addVertex(self.graph.getTotalVertex(), self.begin_point)
+                self.graph.addVertex(self.graph.totalVertex(), self.begin_point)
 
                 self.__painter = QPainter(self.__whiteboard)
                 self.__painter.setPen(self.__pen)
@@ -146,7 +146,7 @@ class PainterBoard(QWidget):
             self.end_point = self.begin_point
             self.update()  # 3
 
-        rt_vert = self.graph.getVertex(point=self.lockLineToPoint(event.pos()))
+        rt_vert = self.graph.vertex(point=self.lockLineToPoint(event.pos()))
 
         self.mouseClicked.emit(rt_vert)
         super().mousePressEvent(event)
@@ -177,10 +177,10 @@ class PainterBoard(QWidget):
             if self.distence.manhattanLength() > 60:
 
                 if not self.graph.IsContainsPoint(self.end_point):
-                    self.graph.addVertex(self.graph.getTotalVertex(), self.end_point)
+                    self.graph.addVertex(self.graph.totalVertex(), self.end_point)
 
-                fromVert = self.graph.get_VertexKey(self.begin_point)
-                toVert = self.graph.get_VertexKey(self.end_point)
+                fromVert = self.graph.vertexKey(self.begin_point)
+                toVert = self.graph.vertexKey(self.end_point)
 
                 if not self.graph.IsEmptyEdge():
                     self.graph.addEdge(fromVert, toVert)
@@ -202,7 +202,7 @@ class PainterBoard(QWidget):
             self.update()
             self.__IsEmpty = False
 
-        rt_vert = self.graph.getVertex(point=self.lockLineToPoint(event.pos()))
+        rt_vert = self.graph.vertex(point=self.lockLineToPoint(event.pos()))
         self.mouseReleased.emit(rt_vert)
         super().mouseReleaseEvent(event)
 
@@ -283,7 +283,7 @@ class PainterBoard(QWidget):
             return
 
     def getContentAsGraph(self):
-        return self.graph.getStandardData()
+        return self.graph.standardData()
 
 
 if __name__ == '__main__':

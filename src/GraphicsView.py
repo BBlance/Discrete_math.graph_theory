@@ -1,21 +1,42 @@
 import sys
 
-from PySide2.QtWidgets import QGraphicsView
-from PySide2.QtCore import Signal, QPoint, Qt
-from PySide2.QtGui import QMouseEvent, QPainter, QColor
+from PySide2.QtWidgets import QGraphicsView, QGraphicsScene
+from PySide2.QtCore import Signal, QPoint, Qt, QRectF
+from PySide2.QtGui import QMouseEvent, QPainter, QColor, QLinearGradient, QKeyEvent
+
+from BezierEdge import BezierEdge
+from BezierNode import BezierNode
 
 
 class GraphicsView(QGraphicsView):
     mouseMove = Signal(QPoint)
     mouseClicked = Signal(QPoint)
 
-    def __init__(self, parent=None):
+    def __init__(self, parent, scene: QGraphicsScene):
         super().__init__(parent)
-        self._backgroundColor = Qt.white
         self.setRenderHints(QPainter.Antialiasing)
         self.setViewportUpdateMode(QGraphicsView.FullViewportUpdate)
+        self.setCacheMode(QGraphicsView.CacheBackground)
+        self.setTransformationAnchor(QGraphicsView.AnchorUnderMouse)
 
-        self.setBackgroundBrush(QColor(self._backgroundColor))
+        gradient = QLinearGradient(self.rect().topLeft(), self.rect().bottomRight())
+        gradient.setColorAt(0, Qt.white)
+        gradient.setColorAt(1, Qt.lightGray)
+
+        self.setBackgroundBrush(gradient)
+        self.setScene(scene)
+
+    def zoomIn(self):  # 放大场景
+        self.scaleView(1.2)
+
+    def zoomOut(self):  # 缩小场景
+        self.scaleView(1 / 1.2)
+
+    def scaleView(self, scaleFactor):
+        factor = self.transform().scale(scaleFactor, scaleFactor).mapRect(QRectF(0, 0, 1, 1)).width()
+        if 0.07 > factor > 100:
+            return
+        self.scale(scaleFactor, scaleFactor)
 
     def mouseMoveEvent(self, event: QMouseEvent):
         point = event.pos()
@@ -27,3 +48,27 @@ class GraphicsView(QGraphicsView):
             point = event.pos()
             self.mouseClicked.emit(point)
         super().mousePressEvent(event)
+
+    def keyPressEvent(self, event: QKeyEvent):
+        if event.key() == Qt.Key_Plus:
+            self.zoomIn()
+        elif event.key() == Qt.Key_Minus:
+            self.zoomOut()
+        else:
+            super().keyPressEvent(event)
+
+    # def drawBackground(self, painter: QPainter, rect: QRectF):
+    #     sceneRect = self.sceneRect()
+    #     rightShadow = QRectF(sceneRect.right(), sceneRect.top() + 5, 5, sceneRect.height())
+    #     bottomShadow = QRectF(sceneRect.left() + 5, sceneRect.bottom(), sceneRect.width(), 5)
+    #     if rightShadow.intersects(rect) and rightShadow.contains(rect):
+    #         painter.fillRect(rightShadow, Qt.darkGray)
+    #     if bottomShadow.intersects(rect) and bottomShadow.contains(rect):
+    #         painter.fillRect(bottomShadow, Qt.darkGray)
+    #
+    #     gradient = QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
+    #     gradient.setColorAt(0, Qt.white)
+    #     gradient.setColorAt(1, Qt.lightGray)
+    #     painter.fillRect(rect.intersected(sceneRect), gradient)
+    #     painter.setBrush(Qt.NoBrush)
+    #     painter.drawRect(sceneRect)

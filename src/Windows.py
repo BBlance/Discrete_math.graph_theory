@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 import os
 import sys, random
-from PySide2.QtCore import Slot, Qt, QPointF, QPoint, QRectF
+from PySide2.QtCore import Slot, Qt, QRectF
 
-from PySide2.QtGui import QBrush, QPolygonF, QPen, QFont, QTransform, QPainterPath, QColor, QPixmap, QPalette
+from PySide2.QtGui import QBrush
 
-from PySide2.QtWidgets import (QApplication, QMainWindow, QColorDialog,
-                               QInputDialog, QLabel, QMessageBox, QMenu, QFileDialog,
-                               QActionGroup, QScrollArea, QHBoxLayout, QUndoStack, QUndoView, QGraphicsItem,
-                               QGraphicsScene, QGraphicsView, QGraphicsTextItem)
+from PySide2.QtWidgets import QApplication, QMainWindow, QColorDialog, \
+    QInputDialog, QLabel, QMessageBox, QFileDialog, QActionGroup, QUndoStack, QGraphicsItem, QGraphicsView, QFontDialog
 
-from BezierItem import BezierPath, BezierPoint, BezierText
+from BezierEdge import BezierEdge
+from BezierNode import BezierNode
+from BezierText import BezierText
 from GraphicsScene import GraphicsScene
 from GraphicsView import GraphicsView
+from PointItem import ItemType
 from UndoCommand import AddCommand, MoveCommand
 from ui_MainWindow import Ui_MainWindow
 from ThicknessDialog import ThicknessDialog
@@ -31,11 +32,14 @@ class MainWindow(QMainWindow):
         self.__buildStatusBar()  # 构造状态栏
         self.__iniGraphicsSystem()  # 初始化 graphics View系统
         self.__buildUndoCommand()  # 初始化撤销重做系统
+        self.__initModeMenu()
 
         self.__ItemId = 1  # 绘图项自定义数据的key
         self.__ItemDesc = 2  # 绘图项自定义数据的key
 
         self.__seqNum = 0  # 每个图形项设置一个序号
+        self.__nodeNum = 0  # 结点的序号
+        self.__edgeNum = 0  # 边的序号
         self.__backZ = 0  # 后置序号
         self.__frontZ = 0  # 前置序号
 
@@ -57,14 +61,13 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.addPermanentWidget(self.__labItemInfo)
 
     def __iniGraphicsSystem(self):  ##初始化 Graphics View系统
-        self.view = GraphicsView(self)  # 创建图形视图组件
-        self.setCentralWidget(self.view)
 
         self.scene = GraphicsScene()  # 创建QGraphicsScene
         self.scene.setSceneRect(QRectF(-300, -200, 600, 200))
         self.scene.itemMoveSignal.connect(self.do_shapeMoved)
 
-        self.view.setScene(self.scene)  # 与view关联
+        self.view = GraphicsView(self, self.scene)  # 创建图形视图组件
+        self.setCentralWidget(self.view)
 
         self.view.setCursor(Qt.CrossCursor)  # 设置鼠标
         self.view.setMouseTracking(True)
@@ -90,13 +93,24 @@ class MainWindow(QMainWindow):
         item.setFlag(QGraphicsItem.ItemIsFocusable)
         item.setFlag(QGraphicsItem.ItemIsMovable)
         item.setFlag(QGraphicsItem.ItemIsSelectable)
-
-        self.__frontZ = 1 + self.__frontZ
-        item.setZValue(self.__frontZ)  # 叠放次序
+        if type(item) is BezierNode:
+            item: BezierNode
+        elif type(item) is BezierEdge:
+            item: BezierEdge
+        else:
+            item: BezierText
         item.setPos(-150 + random.randint(1, 200), -200 + random.randint(1, 200))
 
-        self.__seqNum = 1 + self.__seqNum
-        item.setData(self.__ItemId, self.__seqNum)  # 图件编号
+        if type(item) is BezierNode:
+            self.__nodeNum = 1 + self.__nodeNum
+            item.setData(self.__ItemId, self.__nodeNum)
+            item.textCp.setPlainText(str(self.__nodeNum))
+        elif type(item) is BezierEdge:
+            self.__edgeNum = 1 + self.__edgeNum
+            item.setData(self.__ItemId, self.__edgeNum)
+        else:
+            self.__seqNum = 1 + self.__seqNum
+            item.setData(self.__ItemId, self.__seqNum)  # 图件编号
         item.setData(self.__ItemDesc, desc)  # 图件描述
 
         self.scene.addItem(item)
@@ -104,32 +118,26 @@ class MainWindow(QMainWindow):
         item.setSelected(True)
 
     def __setBrushColor(self, item):  ##设置填充颜色
-        color = item.brush().color()
+        color = item.brush().__color()
         color = QColorDialog.getColor(color, self, "选择填充颜色")
         if color.isValid():
             item.setBrush(QBrush(color))
 
     def __initFileMenu(self):
-
-        # 信号与槽的关联
-        #  self.ui.actionNew.triggered.connect()
         self.ui.actionOpen.triggered.connect(self.do_open_file)
         self.ui.actionSave.triggered.connect(self.do_save_file)
         self.ui.actionQuit.triggered.connect(self.close)
 
     def __initEditMenu(self):
         self.ui.actionProperty_And_History.setChecked(True)
-
         self.ui.actionUndo = self.undoStack.createRedoAction(self, "redo")
         self.ui.actionRedo = self.undoStack.createRedoAction(self, "Redo")
         self.addAction(self.ui.actionRedo)
         self.addAction(self.ui.actionUndo)
-        pass
 
     def __initModeMenu(self):
         self.modeMenuGroup = QActionGroup(self)
         self.modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
-        self.modeMenuGroup.addAction(self.ui.actionTree_Mode)
         self.modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
         self.ui.actionDigraph_Mode.setChecked(True)
 
@@ -166,17 +174,18 @@ class MainWindow(QMainWindow):
     #  ==========由connectSlotsByName()自动连接的槽函数============
     @Slot()
     def on_actionArc_triggered(self):  # 添加曲线
-        item = BezierPath(QPointF(0, 0), QPointF(100, 100))
+        item = BezierEdge()
+        item.setGraphMode(self.ui.actionDigraph_Mode.isChecked())
         self.__setItemProperties(item, "曲线")
 
     @Slot()
     def on_actionCircle_triggered(self):  # 添加原点
-        item = BezierPoint()
+        item = BezierNode()
         self.__setItemProperties(item, "结点")
 
     @Slot()
     def on_actionRectangle_triggered(self):  # 添加矩形
-        self.view.setDrawGraphStyle(3)
+        print(self.scene.items())
 
     @Slot()
     def on_actionAdd_Annotation_triggered(self):
@@ -241,12 +250,37 @@ class MainWindow(QMainWindow):
         cnt = len(items)
         for i in range(cnt):
             item = items[i]
+            if str(type(item)).find("BezierNode") >= 0:
+                item: BezierNode
+                for edge in item.bezierEdges:
+                    for node, itemType in edge.items():
+                        if itemType == ItemType.SourceType:
+                            node.setSourceNode(None)
+                        elif itemType == ItemType.DestType:
+                            node.setDestNode(None)
+            elif str(type(item)).find("BezierEdge") >= 0:
+                item: BezierEdge
+                sourceNode: BezierNode = item.sourceNode
+                destNode: BezierNode = item.destNode
+                if sourceNode:
+                    sourceNodeList = sourceNode.bezierEdges
+                    for sourceEdge in sourceNodeList:
+                        for edge in sourceEdge.keys():
+                            if item is edge:
+                                sourceNodeList.remove(sourceEdge)
+                if destNode:
+                    destNodeList = destNode.bezierEdges
+                    for destEdge in destNodeList:
+                        for edge in destEdge.keys():
+                            if item is edge:
+                                destNodeList.remove(destEdge)
+
             self.scene.removeItem(item)  # 删除绘图项
 
     #  =============自定义槽函数===============================
     def do_mouseMove(self, point):  ##鼠标移动
         ##鼠标移动事件，point是 GraphicsView的坐标,物理坐标
-        self.__labViewCord.setText("View 坐标：%d,%d" % (point.x(), point.y()))
+        self.__labViewCord.setText("View 坐标：%d,%d" % (point.__x(), point.__y()))
         pt = self.view.mapToScene(point)  # 转换到Scene坐标
         self.__labSceneCord.setText("Scene 坐标：%.0f,%.0f" % (pt.x(), pt.y()))
 
@@ -269,20 +303,20 @@ class MainWindow(QMainWindow):
         className = str(type(item))  # 将类名称转换为字符串
         ##      print(className)
 
-        if (className.find("QGraphicsRectItem") >= 0):  # 矩形框
+        if className.find("QGraphicsRectItem") >= 0:  # 矩形框
             self.__setBrushColor(item)
-        elif (className.find("QGraphicsEllipseItem") >= 0):  # 椭圆和圆都是 QGraphicsEllipseItem
+        elif className.find("QGraphicsEllipseItem") >= 0:  # 椭圆和圆都是 QGraphicsEllipseItem
             self.__setBrushColor(item)
-        elif (className.find("QGraphicsPolygonItem") >= 0):  # 梯形和三角形
+        elif className.find("QGraphicsPolygonItem") >= 0:  # 梯形和三角形
             self.__setBrushColor(item)
-        elif (className.find("QGraphicsLineItem") >= 0):  # 直线，设置线条颜色
+        elif className.find("QGraphicsLineItem") >= 0:  # 直线，设置线条颜色
             pen = item.pen()
-            color = item.pen().color()
+            color = item.pen().__color()
             color = QColorDialog.getColor(color, self, "选择线条颜色")
             if color.isValid():
                 pen.setColor(color)
                 item.setPen(pen)
-        elif (className.find("QGraphicsTextItem") >= 0):  # 文字，设置字体
+        elif className.find("QGraphicsTextItem") >= 0:  # 文字，设置字体
             font = item.font()
             font, OK = QFontDialog.getFont(font)
             if OK:
