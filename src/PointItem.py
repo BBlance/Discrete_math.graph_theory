@@ -38,8 +38,7 @@ class BezierPointItem(QAbstractGraphicsShapeItem):
         self.setPos(self.__m_point)
 
         self.setFlags(QGraphicsItem.ItemIsMovable |
-                      QGraphicsItem.ItemIsFocusable |
-                      QGraphicsItem.ItemIsSelectable)
+                      QGraphicsItem.ItemIsFocusable )
 
         if pointType == PointType.Center:
             self.setCursor(Qt.OpenHandCursor)

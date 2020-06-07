@@ -66,3 +66,18 @@ void MainWindow::on_actionAdd_Annotation_triggered()
 {
 
 }
+
+void MainWindow::on_actionRedigraph_s_Degrees_triggered()
+{
+
+}
+
+void MainWindow::on_actionDigraph_Mode_triggered(bool checked)
+{
+
+}
+
+void MainWindow::on_actionRedigraph_Mode_triggered(bool checked)
+{
+
+}

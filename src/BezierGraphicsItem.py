@@ -16,7 +16,7 @@ class GraphicsType(Enum):
 class BezierGraphicsItem(QAbstractGraphicsShapeItem):
     def __init__(self, center: QPointF):
         super(BezierGraphicsItem, self).__init__()
-        self.setCursor(Qt.OpenHandCursor)
+        self.setCursor(Qt.ArrowCursor)
         self.setZValue(-1)
         self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
         self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)

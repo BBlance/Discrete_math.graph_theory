@@ -36,6 +36,10 @@ class Graph:
 
     def edge(self, fromVert, toVert):
         edgeList = []
+        if type(fromVert) is Vertex:
+            fromVert = fromVert.id()
+        if type(toVert) is Vertex:
+            toVert = toVert.id()
         for edge in self.__edgeDict.values():
             if fromVert == edge.fromVert().id() and toVert == edge.toVert().id():
                 edgeList.append(edge)
@@ -61,11 +65,18 @@ class Graph:
 
         if self.__mode:
             self.__vertDict[fromVert].addNeighbor(self.__vertDict[toVert], cost)
+            self.__vertDict[fromVert].addEdge(Edge(self.__numEdges, self.__vertDict[fromVert], self.__vertDict[toVert],
+                                                   cost, self.__mode), cost)
 
         else:
             self.__vertDict[fromVert].addNeighbor(self.__vertDict[toVert], cost)
+            self.__vertDict[fromVert].addEdge(Edge(self.__numEdges, self.__vertDict[fromVert], self.__vertDict[toVert],
+                                                   cost, self.__mode), cost)
             if fromVert != toVert:
                 self.__vertDict[toVert].addNeighbor(self.__vertDict[fromVert], cost)
+                self.__vertDict[toVert].addEdge(
+                    Edge(self.__numEdges, self.__vertDict[toVert], self.__vertDict[fromVert],
+                         cost, self.__mode), cost)
         newEdge = Edge(self.__numEdges, self.__vertDict[fromVert], self.__vertDict[toVert],
                        cost, self.__mode)
         self.__edgeDict[self.__numEdges] = newEdge
@@ -102,22 +113,8 @@ class Graph:
                 return vertices.coordinates()
         return False
 
-    def removeVert(self, id):
-        if id in self.__vertDict.keys():
-            self.__vertDict.pop(id)
-            for v in self.__vertDict.values():
-                v.removeConnection(id)
-            return True
-        else:
-            return False
-
     def __iter__(self):
         return iter(self.__vertDict.values())
-
-    def totalEdge(self):
-        for v in self.__vertDict.values():
-            for w in v.connections():
-                print(v.id(), '->', w.id())
 
     #  清空所有数据
     def clearAllDetails(self):
@@ -125,31 +122,6 @@ class Graph:
         self.__edgeDict = {}
         self.__numEdges = 0
         self.__numVertices = 0
-
-    def standardData(self):
-        standardData = {}
-        for vertices in self.__vertDict.values():
-            listDict = []
-            vertices.coordinates()
-            for vert in vertices.connections():
-                listDict.append(vert.__id())
-            standardData[vertices.__id()] = {vertices.coordinates(): listDict}
-        return standardData
-
-    def setDataFromFile(self, standardData):
-        vertexToCoordinates = {}
-        vertexToConnectionsTo = {}
-        for vertices, midData in standardData.items():
-            for coordinates, connectionsTo in midData.items():
-                vertexToCoordinates[vertices] = coordinates
-                vertexToConnectionsTo[vertices] = connectionsTo
-        for vertices, coordinates in vertexToCoordinates.items():
-            point = QPoint(coordinates[0], coordinates[1])
-            self.addVertex(vertices, point)
-
-        for vertices, connectionsTo in vertexToConnectionsTo.items():
-            for connection in connectionsTo:
-                self.addEdge(vertices, connection)
 
     # 关联矩阵函数
     def incidenceMatrix(self):
@@ -180,7 +152,7 @@ class Graph:
 
         for item in self.__vertDict.values():
             item: Vertex
-            num = value_counts(item.connections())
+            num = value_counts(item.vertConnections())
             for x in num.index:
                 matrix[item.id()][x.id()] = num[x]
         return mat(matrix)
@@ -208,6 +180,7 @@ class Graph:
 
     #  连通性判断
     def connectivity(self):
+
         pass
 
     #  图的度的计算
@@ -244,31 +217,11 @@ class Graph:
         martix = self.adjacentMatrix()
         return pow(martix, step)
 
-    # def DFS(self):
-    #     for vert in self:
-    #         vert.setColor('white')
-    #         vert.setPred(-1)
-    #     for vert in self:
-    #         if vert.color() == 'white':
-    #             self.DFSVisit(vert)
-    #
-    # def DFSVisit(self, startVert):
-    #     startVert.setColor('gray')
-    #     self.__time += 1
-    #     startVert.setDiscovery(self.__time)
-    #     for nextVert in startVert.connections():
-    #         if nextVert.color() == 'white':
-    #             nextVert.setPred(startVert)
-    #             self.DFSVisit(nextVert)
-    #     startVert.setColor('black')
-    #     self.__time += 1
-    #     startVert.setFinish(self.__time)
-
     def findPath(self, start, end, pathway=[]):
         pathway = pathway + [self.__vertDict[start]]
         if start == end:
             return pathway
-        for node in self.__vertDict[start].connections():
+        for node in self.__vertDict[start].vertConnections():
             if node not in pathway:
                 edges = self.edge(pathway[len(pathway) - 1].id(), node.id())
                 pathway.append(edges[0])
@@ -277,38 +230,59 @@ class Graph:
                     return newPath
         return None
 
-    def findAllPath(self, start, end, pathway=[]):  # 只有结点
+    def findAllPathWithoutEdge(self, start, end, pathway=[]):  # 只有结点
         pathway = pathway + [self.__vertDict[start]]
+
         if start == end:
             return [pathway]
         pathways = []
-        for node in self.__vertDict[start].connections():
+        for node in self.__vertDict[start].vertConnections():
             if node not in pathway:
-                # print(pathway[len(pathway) - 1], node.id())
-                # print(self.edge(pathway[len(pathway) - 1].id(), node.id()))
-                if type(pathway[len(pathway) - 1]) is Vertex:
-                    edges=self.edge(pathway[len(pathway) - 1].id(), node.id())
-                    if len(edges)==1:
-                        pathway.append(self.edge(pathway[len(pathway) - 1].id(), node.id()))
-                        print(edges[0].id())
-                    else:
-                        for edge in self.edge(pathway[len(pathway) - 1].id(), node.id()):
-                            pass
-                newPaths = self.findAllPath(node.id(), end, pathway)
+
+                newPaths = self.findAllPathWithoutEdge(node.id(), end, pathway)
                 for newPath in newPaths:
                     pathways.append(newPath)
         return pathways
 
-    # def findAllPathWithEdge(self, start, end, pathway=[]):
+    def findPathWay(self, start, end, pathway=[]):
+        pathway = pathway + [self.__vertDict[start]]
+        if start == end:
+            return [pathway]
+        pathways = []
+        for edge in self.__vertDict[start].edgeConnections():
+
+            if edge not in pathway:
+                if edge.toVert() not in pathway:
+                    pathway = pathway + [edge]
+                    newPaths = self.findPathWay(edge.toVert().id(), end, pathway)
+                    for newPath in newPaths:
+                        pathways.append(newPath)
+        return pathways
+
+    # def pathway(self, start, end):
     #     if start == end:
-    #         return [pathway]
-    #     pathways = self.findAllPath(self, start, end)
-    #
-    #     for x in range(len(pathways)):
-    #         for y in range(len(pathways[x])):
+    #         return []
+    #     pathway=[self.__vertDict[start]]
+    #     for edge in self.__vertDict[start].edgeConnections():
+    #         if edge.toVert() not in pathway:
+    #             if
 
-    # def findShortestPath(self):
+    def findAllPathWithEdge(self, start, end, pathway=[]):
+        pathways = self.findPathWay(start, end, pathway)
+        for pathway in pathways:
+            for y in range(len(pathway)):
+                if y>=len(pathway):
+                    break
+                if type(pathway[y]) is Edge:
+                    z = y
+                    while type(pathway[z]) is Edge:
+                        z = z + 1
+                    if len(pathway[y:z]) != 1:
+                        del pathway[y:z-1]
 
+        return pathways
+
+    # def isEulerGraph(self):
 
 #  Vertex类表示图中的每一个顶点
 class Vertex:
@@ -319,6 +293,7 @@ class Vertex:
         self.__x = x
         self.__y = y
         self.__connectedTo = []
+        self.__edges = {}
         self.__color = 'white'
         self.__dist = sys.maxsize
         self.__disc = 0
@@ -329,12 +304,16 @@ class Vertex:
     def addNeighbor(self, nbr, weight=0):
         self.__connectedTo.append((nbr, weight))
 
+    def addEdge(self, edge, weight):
+        self.__edges[edge] = weight
+
     # 返回邻接表中所有的顶点
     def __str__(self):
-        return "v" + str(self.__id) + ':(connectedTo:' + str(
-            ["v" + str(x.__id) for x in self.connections()]) + " color:" + self.__color + " disc: " + str(
+        return "v" + str(self.__id) + ':(vertConnectedTo:' + str(
+            ["v" + str(x.__id) for x in self.vertConnections()]) + ' (edgeConnectedTo:' + str(
+            ["e" + str(x.id()) for x in self.edgeConnections()]) + " color:" + self.__color + " disc: " + str(
             self.__disc) + " fin:" + str(
-            self.__fin) + " dist:" + str(self.__dist) + ") pred:[" + str(self.__predecessor) + "]\t"
+            self.__fin) + " dist:" + str(self.__dist) + ") pred:[" + str(self.__predecessor) + "]"
 
     def setColor(self, color):
         self.__color = color
@@ -366,11 +345,14 @@ class Vertex:
     def color(self):
         return self.__color
 
-    def connections(self):
+    def vertConnections(self):
         vertList = []
         for connections in self.__connectedTo:
             vertList.append(connections[0])
         return vertList
+
+    def edgeConnections(self):
+        return self.__edges.keys()
 
     def id(self):
         return self.__id
@@ -381,6 +363,7 @@ class Vertex:
     def weight(self, nbr):
         for connection in self.__connectedTo:
             connection: tuple
+            print(connection)
             if connection[0] == nbr:
                 return connection[1]
         return None
@@ -403,6 +386,9 @@ class Edge:
         x = " -> " if self.__mode else " - "
         return "e" + str(self.__id) + ":" + "v" + str(self.__fromVert.id()) + x + "v" + str(
             self.__toVert.id()) + "\tweight:" + str(self.__weight)
+
+    def __contains__(self, item):
+        return item in self.__edge
 
     def id(self):
         return self.__id
@@ -455,7 +441,10 @@ if __name__ == '__main__':
     #     for vert in path:
     #         print(vert.id(), end="\t")
     #     print()
-    paths = g.findAllPath(0, 2)
+    paths = g.findAllPathWithEdge(0, 2)
+    # path = value_counts(paths)
+    #
+    # print(path.index[0])
 
     for path in paths:
         for vert in path:
@@ -463,11 +452,13 @@ if __name__ == '__main__':
                 print("e" + str(vert.id()), end="\t")
             elif type(vert) is Vertex:
                 print("v" + str(vert.id()), end="\t")
+
         print()
+    print()
+
     # edges = g.edge(0, 5)
     # for x in edges:
     #     print(x.id(), x.weight())
 
     # for vert in g:
-    #     for v in vert.connections():
-    #         print(vert.weight(v))
+    #     print(vert)

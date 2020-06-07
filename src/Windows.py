@@ -11,6 +11,7 @@ from PySide2.QtWidgets import QApplication, QMainWindow, QColorDialog, \
 from BezierEdge import BezierEdge
 from BezierNode import BezierNode
 from BezierText import BezierText
+from Graph import Graph
 from GraphicsScene import GraphicsScene
 from GraphicsView import GraphicsView
 from PointItem import ItemType
@@ -34,14 +35,21 @@ class MainWindow(QMainWindow):
         self.__buildUndoCommand()  # 初始化撤销重做系统
         self.__initModeMenu()
 
-        self.__ItemId = 1  # 绘图项自定义数据的key
-        self.__ItemDesc = 2  # 绘图项自定义数据的key
+        self.__ItemId = 0  # 绘图项自定义数据的key
+
+        self.__ItemDesc = 1  # 绘图项自定义数据的key
+
+        self.__NodeId = 2
+        self.__EdgeId = 3
 
         self.__seqNum = 0  # 每个图形项设置一个序号
         self.__nodeNum = 0  # 结点的序号
         self.__edgeNum = 0  # 边的序号
         self.__backZ = 0  # 后置序号
         self.__frontZ = 0  # 前置序号
+
+        self.__graph = Graph()
+        self.__graphDetailTab = self.ui.graphDetails
 
     ##  ==============自定义功能函数============
     def __buildStatusBar(self):  ##构造状态栏
@@ -102,15 +110,16 @@ class MainWindow(QMainWindow):
         item.setPos(-150 + random.randint(1, 200), -200 + random.randint(1, 200))
 
         if type(item) is BezierNode:
+            item.setData(self.__NodeId, self.__nodeNum)
+            item.textCp.setPlainText("V" + str(self.__nodeNum))
             self.__nodeNum = 1 + self.__nodeNum
-            item.setData(self.__ItemId, self.__nodeNum)
-            item.textCp.setPlainText(str(self.__nodeNum))
         elif type(item) is BezierEdge:
+            item.setData(self.__EdgeId, self.__edgeNum)
+            item.textCp.setPlainText("e" + str(self.__edgeNum))
             self.__edgeNum = 1 + self.__edgeNum
-            item.setData(self.__ItemId, self.__edgeNum)
-        else:
-            self.__seqNum = 1 + self.__seqNum
-            item.setData(self.__ItemId, self.__seqNum)  # 图件编号
+
+        self.__seqNum = 1 + self.__seqNum
+        item.setData(self.__ItemId, self.__seqNum)  # 图件编号
         item.setData(self.__ItemDesc, desc)  # 图件描述
 
         self.scene.addItem(item)
@@ -143,25 +152,25 @@ class MainWindow(QMainWindow):
 
     # ==============event处理函数==========================
 
-    def closeEvent(self, event):  # 退出函数
-
-        msgBox = QMessageBox()
-        msgBox.setWindowTitle('关闭')
-        msgBox.setText("是否保存")
-        msgBox.setIcon(QMessageBox.Question)
-        btn_Do_notSave = msgBox.addButton('不保存', QMessageBox.AcceptRole)
-        btn_cancel = msgBox.addButton('取消', QMessageBox.RejectRole)
-        btn_save = msgBox.addButton('保存', QMessageBox.AcceptRole)
-        msgBox.setDefaultButton(btn_save)
-        msgBox.exec_()
-
-        if msgBox.clickedButton() == btn_Do_notSave:
-            event.accept()
-        elif msgBox.clickedButton() == btn_cancel:
-            event.ignore()
-        elif msgBox.clickedButton() == btn_save:
-            self.do_save_file()
-            event.accept()
+    # def closeEvent(self, event):  # 退出函数
+    #
+    #     msgBox = QMessageBox()
+    #     msgBox.setWindowTitle('关闭')
+    #     msgBox.setText("是否保存")
+    #     msgBox.setIcon(QMessageBox.Question)
+    #     btn_Do_notSave = msgBox.addButton('不保存', QMessageBox.AcceptRole)
+    #     btn_cancel = msgBox.addButton('取消', QMessageBox.RejectRole)
+    #     btn_save = msgBox.addButton('保存', QMessageBox.AcceptRole)
+    #     msgBox.setDefaultButton(btn_save)
+    #     msgBox.exec_()
+    #
+    #     if msgBox.clickedButton() == btn_Do_notSave:
+    #         event.accept()
+    #     elif msgBox.clickedButton() == btn_cancel:
+    #         event.ignore()
+    #     elif msgBox.clickedButton() == btn_save:
+    #         self.do_save_file()
+    #         event.accept()
 
     # def contextMenuEvent(self, event):  # 右键菜单功能
     #     rightMouseMenu = QMenu(self)
@@ -185,7 +194,14 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_actionRectangle_triggered(self):  # 添加矩形
-        print(self.scene.items())
+        # for item in self.scene.items():
+        #     if type(item) is BezierNode:
+        #         print(item.data(2))
+        #     elif type(item) is BezierEdge:
+        #         print(item.data(3))
+        # self.do_connectGraph()
+        # print(self.scene.selectedItems())
+        pass
 
     @Slot()
     def on_actionAdd_Annotation_triggered(self):
@@ -194,6 +210,28 @@ class MainWindow(QMainWindow):
             return
         item = BezierText(strText)
         self.__setItemProperties(item, "文字")
+
+    @Slot()
+    def on_actionRedigraph_s_Degrees_triggered(self):
+        items = []
+        if len(self.scene.selectedItems()):
+            items = self.scene.selectedItems()
+        elif len(self.scene.items()):
+            items = self.scene.items()
+        else:
+            QMessageBox.warning(self, "警告", "图中没有元素")
+            return
+        copyItem = []
+        for item in items:
+            if str(type(item)).find("BezierNode") >= 0:
+                copyItem.append(item)
+
+        if len(copyItem) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
+
+        self.do_connectGraph()
+
 
     # @Slot()
     # def on_actionUndo_triggered(self):  # 撤销
@@ -277,10 +315,96 @@ class MainWindow(QMainWindow):
 
             self.scene.removeItem(item)  # 删除绘图项
 
+    @Slot(bool)
+    def on_actionDigraph_Mode_triggered(self, checked: bool):
+        items = self.scene.items()
+        if len(items) != 0:
+            dlgTitle = "警告！！"
+            strInfo = "更换模式会清楚画板所有元素！是否要更换模式"
+            result = QMessageBox.question(self, dlgTitle, strInfo, QMessageBox.Yes | QMessageBox.No,
+                                          QMessageBox.NoButton)
+            if result == QMessageBox.Yes:
+                self.__edgeNum = 0
+                self.__nodeNum = 0
+                self.__seqNum = 0
+                cnt = len(items)
+                for i in range(cnt):
+                    item = items[i]
+                    if str(type(item)).find("BezierNode") >= 0:
+                        item: BezierNode
+                        for edge in item.bezierEdges:
+                            for node, itemType in edge.items():
+                                if itemType == ItemType.SourceType:
+                                    node.setSourceNode(None)
+                                elif itemType == ItemType.DestType:
+                                    node.setDestNode(None)
+                    elif str(type(item)).find("BezierEdge") >= 0:
+                        item: BezierEdge
+                        sourceNode: BezierNode = item.sourceNode
+                        destNode: BezierNode = item.destNode
+                        if sourceNode:
+                            sourceNodeList = sourceNode.bezierEdges
+                            for sourceEdge in sourceNodeList:
+                                for edge in sourceEdge.keys():
+                                    if item is edge:
+                                        sourceNodeList.remove(sourceEdge)
+                        if destNode:
+                            destNodeList = destNode.bezierEdges
+                            for destEdge in destNodeList:
+                                for edge in destEdge.keys():
+                                    if item is edge:
+                                        destNodeList.remove(destEdge)
+
+                    self.scene.removeItem(item)  # 删除绘图项
+                self.ui.actionDigraph_Mode.setChecked(checked)
+
+    @Slot(bool)
+    def on_actionRedigraph_Mode_triggered(self, checked: bool):
+        items = self.scene.items()
+        if len(items) != 0:
+            dlgTitle = "警告！！"
+            strInfo = "更换模式会清楚画板所有元素！是否要更换模式"
+            result = QMessageBox.question(self, dlgTitle, strInfo, QMessageBox.Yes | QMessageBox.No,
+                                          QMessageBox.NoButton)
+            if result == QMessageBox.Yes:
+                self.__edgeNum = 0
+                self.__nodeNum = 0
+                self.__seqNum = 0
+                cnt = len(items)
+                for i in range(cnt):
+                    item = items[i]
+                    if str(type(item)).find("BezierNode") >= 0:
+                        item: BezierNode
+                        for edge in item.bezierEdges:
+                            for node, itemType in edge.items():
+                                if itemType == ItemType.SourceType:
+                                    node.setSourceNode(None)
+                                elif itemType == ItemType.DestType:
+                                    node.setDestNode(None)
+                    elif str(type(item)).find("BezierEdge") >= 0:
+                        item: BezierEdge
+                        sourceNode: BezierNode = item.sourceNode
+                        destNode: BezierNode = item.destNode
+                        if sourceNode:
+                            sourceNodeList = sourceNode.bezierEdges
+                            for sourceEdge in sourceNodeList:
+                                for edge in sourceEdge.keys():
+                                    if item is edge:
+                                        sourceNodeList.remove(sourceEdge)
+                        if destNode:
+                            destNodeList = destNode.bezierEdges
+                            for destEdge in destNodeList:
+                                for edge in destEdge.keys():
+                                    if item is edge:
+                                        destNodeList.remove(destEdge)
+
+                    self.scene.removeItem(item)  # 删除绘图项
+                self.ui.actionDigraph_Mode.setChecked(checked)
+
     #  =============自定义槽函数===============================
     def do_mouseMove(self, point):  ##鼠标移动
         ##鼠标移动事件，point是 GraphicsView的坐标,物理坐标
-        self.__labViewCord.setText("View 坐标：%d,%d" % (point.__x(), point.__y()))
+        self.__labViewCord.setText("View 坐标：%d,%d" % (point.x(), point.y()))
         pt = self.view.mapToScene(point)  # 转换到Scene坐标
         self.__labSceneCord.setText("Scene 坐标：%.0f,%.0f" % (pt.x(), pt.y()))
 
@@ -357,6 +481,42 @@ class MainWindow(QMainWindow):
     def do_shapeMoved(self, item, pos):
         move = MoveCommand(item, pos)
         self.undoStack.push(move)
+
+    def do_connectGraph(self):
+        self.__graph.setMode(self.ui.actionDigraph_Mode.isChecked())
+        items = self.scene.items()
+        nodeList = []
+        edgeList = []
+        for item in items:
+            if type(item) is BezierNode:
+                nodeList.append(item)
+            elif type(item) is BezierEdge:
+                edgeList.append(item)
+        for node in nodeList:
+            self.__graph.addVertex(node.data(self.__NodeId))
+
+        badEdgeList = []
+        for i in range(len(edgeList)):
+            for edge in edgeList:
+                edge: BezierEdge
+                if edge.data(self.__EdgeId) == i:
+                    if edge.sourceNode and edge.destNode:
+                        self.__graph.addEdge(edge.sourceNode.data(self.__NodeId), edge.destNode.data(self.__NodeId),
+                                             edge.weight())
+                    else:
+                        badEdgeList.append(edge)
+
+        if len(badEdgeList) != 0:
+            string = ""
+            for x in range(len(badEdgeList)):
+                demo = "、"
+                if x == len(badEdgeList) - 1:
+                    demo = ""
+                string = f'{string}e{badEdgeList[x].data(self.__EdgeId)}{demo}'
+            QMessageBox.warning(self, "连接故障！", "警告，" + string + "的连接不完整")
+
+        for g in self.__graph:
+            print(g)
 
 
 ##  ============窗体测试程序 ================================

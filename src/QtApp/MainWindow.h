@@ -54,6 +54,14 @@ private slots:
 
     void on_actionAdd_Annotation_triggered();
 
+    void on_actionRedigraph_s_Degrees_triggered();
+
+    void on_actionDigraph_Mode_triggered();
+
+    void on_actionDigraph_Mode_triggered(bool checked);
+
+    void on_actionRedigraph_Mode_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
 };

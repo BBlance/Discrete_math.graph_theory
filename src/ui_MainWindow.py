@@ -185,6 +185,8 @@ class Ui_MainWindow(object):
         self.actionReachable_Matrix.setObjectName(u"actionReachable_Matrix")
         self.actionEdge_Name = QAction(MainWindow)
         self.actionEdge_Name.setObjectName(u"actionEdge_Name")
+        self.actionEuler_PathWay = QAction(MainWindow)
+        self.actionEuler_PathWay.setObjectName(u"actionEuler_PathWay")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.verticalLayout_4 = QVBoxLayout(self.centralwidget)
@@ -269,6 +271,18 @@ class Ui_MainWindow(object):
         self.propertyTab.setObjectName(u"propertyTab")
         self.propertyTab.setMaximumSize(QSize(16777215, 16777215))
         self.propertyTab.setTabPosition(QTabWidget.South)
+        self.DetailsTab = QWidget()
+        self.DetailsTab.setObjectName(u"DetailsTab")
+        self.verticalLayout_3 = QVBoxLayout(self.DetailsTab)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.graphDetails = QListView(self.DetailsTab)
+        self.graphDetails.setObjectName(u"graphDetails")
+        self.graphDetails.setMinimumSize(QSize(0, 0))
+        self.graphDetails.setMaximumSize(QSize(16777215, 16777215))
+
+        self.verticalLayout_3.addWidget(self.graphDetails)
+
+        self.propertyTab.addTab(self.DetailsTab, "")
         self.HistoryTab = QWidget()
         self.HistoryTab.setObjectName(u"HistoryTab")
         self.verticalLayout = QVBoxLayout(self.HistoryTab)
@@ -281,18 +295,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.undoView)
 
         self.propertyTab.addTab(self.HistoryTab, "")
-        self.DetailsTab = QWidget()
-        self.DetailsTab.setObjectName(u"DetailsTab")
-        self.verticalLayout_3 = QVBoxLayout(self.DetailsTab)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.GraphDetails = QListView(self.DetailsTab)
-        self.GraphDetails.setObjectName(u"GraphDetails")
-        self.GraphDetails.setMinimumSize(QSize(0, 0))
-        self.GraphDetails.setMaximumSize(QSize(16777215, 16777215))
-
-        self.verticalLayout_3.addWidget(self.GraphDetails)
-
-        self.propertyTab.addTab(self.DetailsTab, "")
 
         self.verticalLayout_2.addWidget(self.propertyTab)
 
@@ -366,6 +368,7 @@ class Ui_MainWindow(object):
         self.menuSpecial_Graph.addAction(self.menuEuler_Graph.menuAction())
         self.menuSpecial_Graph.addAction(self.menuHamiltonian_Graph.menuAction())
         self.menuEuler_Graph.addAction(self.actionFind_Euler_Loop)
+        self.menuEuler_Graph.addAction(self.actionEuler_PathWay)
         self.menuHamiltonian_Graph.addAction(self.actionFind_Hamiltonian_Loop)
         self.menuShortest_Path_and_Critical_Path.addAction(self.actionShortest_Path)
         self.menuShortest_Path_and_Critical_Path.addAction(self.actionCritical_Path)
@@ -583,7 +586,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.actionCritical_Path.setToolTip(QCoreApplication.translate("MainWindow", u"\u5173\u952e\u8def\u5f84", None))
 #endif // QT_CONFIG(tooltip)
-        self.actionFind_Euler_Loop.setText(QCoreApplication.translate("MainWindow", u"\u5bfb\u627e\u6b27\u62c9\u56de\u8def", None))
+        self.actionFind_Euler_Loop.setText(QCoreApplication.translate("MainWindow", u"\u6b27\u62c9\u56de\u8def", None))
 #if QT_CONFIG(tooltip)
         self.actionFind_Euler_Loop.setToolTip(QCoreApplication.translate("MainWindow", u"\u5bfb\u627e\u6b27\u62c9\u56de\u8def", None))
 #endif // QT_CONFIG(tooltip)
@@ -703,6 +706,7 @@ class Ui_MainWindow(object):
         self.actionAdjacent_Matrix_Digraph.setText(QCoreApplication.translate("MainWindow", u"\u90bb\u63a5\u77e9\u9635", None))
         self.actionReachable_Matrix.setText(QCoreApplication.translate("MainWindow", u"\u53ef\u8fbe\u77e9\u9635", None))
         self.actionEdge_Name.setText(QCoreApplication.translate("MainWindow", u"\u8fb9\u540d\u79f0", None))
+        self.actionEuler_PathWay.setText(QCoreApplication.translate("MainWindow", u"\u6b27\u62c9\u901a\u8def", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u" \u6587\u4ef6", None))
         self.menuRecent_File.setTitle(QCoreApplication.translate("MainWindow", u" \u6700\u8fd1\u6253\u5f00\u7684\u6587\u4ef6", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"\u7f16\u8f91", None))
@@ -728,7 +732,7 @@ class Ui_MainWindow(object):
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u" \u5e2e\u52a9", None))
         self.general_utility_toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"  \u5e38\u89c4\u529f\u80fd", None))
         self.graphical_toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u" \u7ed8\u56fe\u5de5\u5177", None))
-        self.propertyTab.setTabText(self.propertyTab.indexOf(self.HistoryTab), QCoreApplication.translate("MainWindow", u"\u5386\u53f2\u8bb0\u5f55", None))
         self.propertyTab.setTabText(self.propertyTab.indexOf(self.DetailsTab), QCoreApplication.translate("MainWindow", u"\u7ed8\u56fe\u8be6\u60c5", None))
+        self.propertyTab.setTabText(self.propertyTab.indexOf(self.HistoryTab), QCoreApplication.translate("MainWindow", u"\u5386\u53f2\u8bb0\u5f55", None))
     # retranslateUi
 

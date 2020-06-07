@@ -6,7 +6,7 @@ import typing
 from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QStyle, QGraphicsSceneMouseEvent, QGraphicsItem, \
     QGraphicsSceneContextMenuEvent, QMenu, QAction, QWidgetAction
 from PySide2.QtCore import QPointF, QRectF, Qt, qAbs, QPoint
-from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QColor, QPen, QRadialGradient, QCursor
+from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QColor, QPen, QRadialGradient, QCursor, QFocusEvent
 
 from BezierGraphicsItem import BezierGraphicsItem
 
@@ -17,7 +17,6 @@ class BezierNode(BezierGraphicsItem):
 
     def __init__(self, center=QPointF(0, 0)):
         super(BezierNode, self).__init__(center)
-
         self.textCp = BezierTextItem(self, self._m_textPos, PointType.Text, ItemType.PointType)
 
     ##  ==============自定义功能函数========================
@@ -32,7 +31,7 @@ class BezierNode(BezierGraphicsItem):
 
     @property
     def textPos(self):
-        self._m_textPos = QPointF(self._m_centerPos.x() -7, self._m_centerPos.y()-30)
+        self._m_textPos = QPointF(self._m_centerPos.x() - 7, self._m_centerPos.y() - 30)
         return self._m_textPos
 
     def digraphDegrees(self, mode: bool):  # 结点的度
@@ -147,11 +146,9 @@ class BezierNode(BezierGraphicsItem):
         painter.setBrush(Qt.darkGray)
         painter.drawEllipse(-7, -7, 20, 20)
 
-        # path = QPainterPath()
-
         gradient = QRadialGradient(self._m_centerPos.x(), self._m_centerPos.y(), 10)
 
-        if option.state and QStyle.State_Sunken:
+        if self.isSelected():
             gradient.setCenter(3, 3)
             gradient.setFocalPoint(3, 3)
             gradient.setColorAt(1, QColor(Qt.yellow).lighter(120))
@@ -164,11 +161,11 @@ class BezierNode(BezierGraphicsItem):
         painter.setPen(QPen(Qt.black, 0))
         painter.drawEllipse(-10, -10, 20, 20)
 
-        if self.isSelected():
-            painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
-            rect = self.boundingRect()
-            painter.setBrush(Qt.NoBrush)
-            painter.drawRect(rect)
+        # if self.isSelected():
+        #     painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
+        #     rect = self.boundingRect()
+        #     painter.setBrush(Qt.NoBrush)
+        #     painter.drawRect(rect)
 
     def boundingRect(self) -> QRectF:
         adjust = 2
