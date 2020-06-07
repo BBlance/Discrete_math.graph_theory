@@ -34,6 +34,8 @@ class MainWindow(QMainWindow):
         self.__iniGraphicsSystem()  # 初始化 graphics View系统
         self.__buildUndoCommand()  # 初始化撤销重做系统
         self.__initModeMenu()
+        self.__initToolMenu()
+        self.__actionConnection()
 
         self.__ItemId = 0  # 绘图项自定义数据的key
 
@@ -41,15 +43,16 @@ class MainWindow(QMainWindow):
 
         self.__NodeId = 2
         self.__EdgeId = 3
+        self.__TextId = 4
 
         self.__seqNum = 0  # 每个图形项设置一个序号
         self.__nodeNum = 0  # 结点的序号
         self.__edgeNum = 0  # 边的序号
+        self.__textNum = 0
         self.__backZ = 0  # 后置序号
         self.__frontZ = 0  # 前置序号
 
         self.__graph = Graph()
-        self.__graphDetailTab = self.ui.graphDetails
 
     ##  ==============自定义功能函数============
     def __buildStatusBar(self):  ##构造状态栏
@@ -72,7 +75,9 @@ class MainWindow(QMainWindow):
 
         self.scene = GraphicsScene()  # 创建QGraphicsScene
         self.scene.setSceneRect(QRectF(-300, -200, 600, 200))
-        self.scene.itemMoveSignal.connect(self.do_shapeMoved)
+        self.scene.edgeMoveSignal.connect(self.do_shapeMoved)
+        self.scene.nodeMoveSignal.connect(self.do_shapeMoved)
+        self.scene.textMoveSignal.connect(self.do_shapeMoved)
 
         self.view = GraphicsView(self, self.scene)  # 创建图形视图组件
         self.setCentralWidget(self.view)
@@ -82,10 +87,14 @@ class MainWindow(QMainWindow):
         self.view.setDragMode(QGraphicsView.RubberBandDrag)
 
         ##  4个信号与槽函数的关联
-        self.view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
-        self.view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+
         # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)  # 鼠标双击
         # self.view.keyPress.connect(self.do_keyPress)  # 左键按下
+
+    def __actionConnection(self):
+        self.view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
+        self.view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+        # self.ui.actionDelete.triggered.connect(self.do_deleteItem)
 
     def __buildUndoCommand(self):
         self.undoStack = QUndoStack()
@@ -101,12 +110,12 @@ class MainWindow(QMainWindow):
         item.setFlag(QGraphicsItem.ItemIsFocusable)
         item.setFlag(QGraphicsItem.ItemIsMovable)
         item.setFlag(QGraphicsItem.ItemIsSelectable)
-        if type(item) is BezierNode:
-            item: BezierNode
-        elif type(item) is BezierEdge:
-            item: BezierEdge
-        else:
-            item: BezierText
+        # if type(item) is BezierNode:
+        #     item: BezierNode
+        # elif type(item) is BezierEdge:
+        #     item: BezierEdge
+        # elif type(item) is BezierText:
+        #     item: BezierText
         item.setPos(-150 + random.randint(1, 200), -200 + random.randint(1, 200))
 
         if type(item) is BezierNode:
@@ -117,6 +126,9 @@ class MainWindow(QMainWindow):
             item.setData(self.__EdgeId, self.__edgeNum)
             item.textCp.setPlainText("e" + str(self.__edgeNum))
             self.__edgeNum = 1 + self.__edgeNum
+        elif type(item) is BezierText:
+            item.setData(self.__TextId, self.__textNum)
+            self.__textNum = 1 + self.__textNum
 
         self.__seqNum = 1 + self.__seqNum
         item.setData(self.__ItemId, self.__seqNum)  # 图件编号
@@ -145,10 +157,17 @@ class MainWindow(QMainWindow):
         self.addAction(self.ui.actionUndo)
 
     def __initModeMenu(self):
-        self.modeMenuGroup = QActionGroup(self)
-        self.modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
-        self.modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
-        self.ui.actionDigraph_Mode.setChecked(True)
+        modeMenuGroup = QActionGroup(self)
+        modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
+        modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
+        self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
+
+    def __initToolMenu(self):
+        pass
+        # modeMenuGroup = QActionGroup(self)
+        # modeMenuGroup.addAction(self.ui.actionRedigraph_s_Degrees)
+        # modeMenuGroup.addAction(self.ui.menuDigraph_s_Degrees)
+        # self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
 
     # ==============event处理函数==========================
 
@@ -185,12 +204,14 @@ class MainWindow(QMainWindow):
     def on_actionArc_triggered(self):  # 添加曲线
         item = BezierEdge()
         item.setGraphMode(self.ui.actionDigraph_Mode.isChecked())
-        self.__setItemProperties(item, "曲线")
+        self.__setItemProperties(item, "边")
+        self.do_addItem(item)
 
     @Slot()
     def on_actionCircle_triggered(self):  # 添加原点
         item = BezierNode()
-        self.__setItemProperties(item, "结点")
+        self.__setItemProperties(item, "顶点")
+        self.do_addItem(item)
 
     @Slot()
     def on_actionRectangle_triggered(self):  # 添加矩形
@@ -209,11 +230,12 @@ class MainWindow(QMainWindow):
         if not OK:
             return
         item = BezierText(strText)
-        self.__setItemProperties(item, "文字")
+        self.__setItemProperties(item, "注释")
+        self.do_addItem(item)
 
     @Slot()
-    def on_actionRedigraph_s_Degrees_triggered(self):
-        items = []
+    def on_actionRedigraph_s_Degrees_triggered(self):  # 无向图的度
+        # items = []
         if len(self.scene.selectedItems()):
             items = self.scene.selectedItems()
         elif len(self.scene.items()):
@@ -230,12 +252,22 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "警告", "图中没有结点")
             return
 
-        self.do_connectGraph()
+        if self.do_connectGraph():
+            degrees = self.__graph.degrees()
+            print(degrees)
 
+            self.__graph.clearAllData()
+
+    @Slot()
+    def on_actionOut_degree_triggered(self):  # 有向图的出度
+        pass
+
+    @Slot()
+    def on_actionIn_degree_triggered(self):  ## 有向图的入度
+        pass
 
     # @Slot()
     # def on_actionUndo_triggered(self):  # 撤销
-    #
     #     self.command.undo()
     #
     # @Slot()
@@ -284,39 +316,11 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def on_actionDelete_triggered(self):
-        items = self.scene.selectedItems()
-        cnt = len(items)
-        for i in range(cnt):
-            item = items[i]
-            if str(type(item)).find("BezierNode") >= 0:
-                item: BezierNode
-                for edge in item.bezierEdges:
-                    for node, itemType in edge.items():
-                        if itemType == ItemType.SourceType:
-                            node.setSourceNode(None)
-                        elif itemType == ItemType.DestType:
-                            node.setDestNode(None)
-            elif str(type(item)).find("BezierEdge") >= 0:
-                item: BezierEdge
-                sourceNode: BezierNode = item.sourceNode
-                destNode: BezierNode = item.destNode
-                if sourceNode:
-                    sourceNodeList = sourceNode.bezierEdges
-                    for sourceEdge in sourceNodeList:
-                        for edge in sourceEdge.keys():
-                            if item is edge:
-                                sourceNodeList.remove(sourceEdge)
-                if destNode:
-                    destNodeList = destNode.bezierEdges
-                    for destEdge in destNodeList:
-                        for edge in destEdge.keys():
-                            if item is edge:
-                                destNodeList.remove(destEdge)
-
-            self.scene.removeItem(item)  # 删除绘图项
+        self.do_deleteItem()
 
     @Slot(bool)
     def on_actionDigraph_Mode_triggered(self, checked: bool):
+        self.__graph.setMode(checked)
         items = self.scene.items()
         if len(items) != 0:
             dlgTitle = "警告！！"
@@ -356,10 +360,12 @@ class MainWindow(QMainWindow):
                                         destNodeList.remove(destEdge)
 
                     self.scene.removeItem(item)  # 删除绘图项
-                self.ui.actionDigraph_Mode.setChecked(checked)
+        self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
+        self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(bool)
     def on_actionRedigraph_Mode_triggered(self, checked: bool):
+        self.__graph.setMode(checked)
         items = self.scene.items()
         if len(items) != 0:
             dlgTitle = "警告！！"
@@ -399,7 +405,9 @@ class MainWindow(QMainWindow):
                                         destNodeList.remove(destEdge)
 
                     self.scene.removeItem(item)  # 删除绘图项
-                self.ui.actionDigraph_Mode.setChecked(checked)
+
+        self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
+        self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     #  =============自定义槽函数===============================
     def do_mouseMove(self, point):  ##鼠标移动
@@ -415,8 +423,12 @@ class MainWindow(QMainWindow):
             return
         pm = item.mapFromScene(pt)  # 转换为绘图项的局部坐标
         self.__labItemCord.setText("Item 坐标：%.0f,%.0f" % (pm.x(), pm.y()))
-        self.__labItemInfo.setText(str(item.data(self.__ItemDesc))
-                                   + ", ItemId=" + str(item.data(self.__ItemId)))
+        data = f"{item.data(self.__ItemDesc)}, ItemId={item.data(self.__ItemId)}"
+        if type(item) is BezierEdge:
+            data = f"{data},EdgeId=e{item.data(self.__EdgeId)}"
+        elif type(item) is BezierNode:
+            data = f"{data}, NodeId=V{item.data(self.__NodeId)}"
+        self.__labItemInfo.setText(data)
 
     def do_mouseDoubleClick(self, point):  ##鼠标双击
         pt = self.view.mapToScene(point)  # 转换到Scene坐标,QPointF
@@ -474,13 +486,45 @@ class MainWindow(QMainWindow):
 
         return dict_file
 
-    def do_addItem(self):
-        add = AddCommand(self.scene)
+    def do_addItem(self, item):
+        add = AddCommand(self.scene, item)
         self.undoStack.push(add)
 
     def do_shapeMoved(self, item, pos):
         move = MoveCommand(item, pos)
         self.undoStack.push(move)
+
+    def do_deleteItem(self):
+        items = self.scene.selectedItems()
+        cnt = len(items)
+        for i in range(cnt):
+            item = items[i]
+            if str(type(item)).find("BezierNode") >= 0:
+                item: BezierNode
+                for edge in item.bezierEdges:
+                    for node, itemType in edge.items():
+                        if itemType == ItemType.SourceType:
+                            node.setSourceNode(None)
+                        elif itemType == ItemType.DestType:
+                            node.setDestNode(None)
+            elif str(type(item)).find("BezierEdge") >= 0:
+                item: BezierEdge
+                sourceNode: BezierNode = item.sourceNode
+                destNode: BezierNode = item.destNode
+                if sourceNode:
+                    sourceNodeList = sourceNode.bezierEdges
+                    for sourceEdge in sourceNodeList:
+                        for edge in sourceEdge.keys():
+                            if item is edge:
+                                sourceNodeList.remove(sourceEdge)
+                if destNode:
+                    destNodeList = destNode.bezierEdges
+                    for destEdge in destNodeList:
+                        for edge in destEdge.keys():
+                            if item is edge:
+                                destNodeList.remove(destEdge)
+
+            self.scene.removeItem(item)  # 删除绘图项
 
     def do_connectGraph(self):
         self.__graph.setMode(self.ui.actionDigraph_Mode.isChecked())
@@ -514,9 +558,19 @@ class MainWindow(QMainWindow):
                     demo = ""
                 string = f'{string}e{badEdgeList[x].data(self.__EdgeId)}{demo}'
             QMessageBox.warning(self, "连接故障！", "警告，" + string + "的连接不完整")
+            return False
 
         for g in self.__graph:
             print(g)
+
+        return True
+
+    def do_uniqueItems(self, className) -> list:
+        items = []
+        for item in self.scene.items():
+            if type(item) is className:
+                items.append(item)
+        return items
 
 
 ##  ============窗体测试程序 ================================

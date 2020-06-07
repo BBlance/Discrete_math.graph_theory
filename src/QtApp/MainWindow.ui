@@ -92,6 +92,7 @@
      <addaction name="menuLine"/>
      <addaction name="actionCircle"/>
      <addaction name="actionRectangle"/>
+     <addaction name="actionAdd_Annotation"/>
     </widget>
     <addaction name="menuDraw_Tools"/>
     <addaction name="separator"/>
@@ -274,7 +275,7 @@
    <property name="minimumSize">
     <size>
      <width>270</width>
-     <height>178</height>
+     <height>331</height>
     </size>
    </property>
    <property name="maximumSize">
@@ -309,7 +310,7 @@
         <enum>QTabWidget::South</enum>
        </property>
        <property name="currentIndex">
-        <number>0</number>
+        <number>1</number>
        </property>
        <widget class="QWidget" name="DetailsTab">
         <attribute name="title">
@@ -317,7 +318,17 @@
         </attribute>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="QListView" name="graphDetails">
+          <widget class="QLabel" name="label">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>顶点详情</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListView" name="nodeDetails">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -331,6 +342,36 @@
             </size>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="autoFillBackground">
+            <bool>true</bool>
+           </property>
+           <property name="text">
+            <string>边详情</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListView" name="edgeDetails"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="DataDeatils">
+        <attribute name="title">
+         <string>详细数据</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QLabel" name="dataName">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QListView" name="dataDeatils"/>
          </item>
         </layout>
        </widget>
@@ -706,6 +747,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>有向图模式</string>
    </property>
@@ -895,7 +939,7 @@
      <normalon>:/icons/images/800.bmp</normalon>:/icons/images/text_128px_1258351_easyicon.net.ico</iconset>
    </property>
    <property name="text">
-    <string>添加注释</string>
+    <string>注释</string>
    </property>
    <property name="toolTip">
     <string>添加注释</string>

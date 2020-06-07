@@ -117,7 +117,7 @@ class Graph:
         return iter(self.__vertDict.values())
 
     #  清空所有数据
-    def clearAllDetails(self):
+    def clearAllData(self):
         self.__vertDict = {}
         self.__edgeDict = {}
         self.__numEdges = 0
@@ -130,19 +130,19 @@ class Graph:
             for item in self.__vertDict.values():
                 item: Vertex
                 for num, edge in self.__edgeDict.items():
-                    if item.id() == edge[0].id():
+                    if item.id() == edge.fromVert().id():
                         matrix[item.id()][num] = 1
-                    if item.id() == edge[1].id():
+                    if item.id() == edge.toVert().id():
                         matrix[item.id()][num] = -1
         else:
             for item in self.__vertDict.values():
                 item: Vertex
                 for num, edge in self.__edgeDict.items():
-                    if item.id() == edge[0].id() or item.id() == edge[1].id():
-                        if item.id() == edge[0].id() and item.id() == edge[1].id():
+                    if item.id() == edge.fromVert().id() or item.id() == edge.toVert().id():
+                        if item.id() == edge.fromVert().id() and item.id() == edge.toVert().id():
                             matrix[item.id()][num] = 2
                         else:
-                            if item.id() == edge[0].id() or item.id() == edge[1].id():
+                            if item.id() == edge.fromVert().id() or item.id() == edge.toVert().id():
                                 matrix[item.id()][num] = 1
         return mat(matrix)
 
@@ -190,7 +190,7 @@ class Graph:
         outDegreeDict = {}
         matrix = array(self.incidenceMatrix())
         for x in range(self.__numVertices):
-            value = value_counts(matrix[x]).drop(0)
+            value = value_counts(matrix[x])
             if self.__mode:
                 if -1 in value.index:
                     inDegreeDict[x] = value[-1]
@@ -271,18 +271,19 @@ class Graph:
         pathways = self.findPathWay(start, end, pathway)
         for pathway in pathways:
             for y in range(len(pathway)):
-                if y>=len(pathway):
+                if y >= len(pathway):
                     break
                 if type(pathway[y]) is Edge:
                     z = y
                     while type(pathway[z]) is Edge:
                         z = z + 1
                     if len(pathway[y:z]) != 1:
-                        del pathway[y:z-1]
+                        del pathway[y:z - 1]
 
         return pathways
 
     # def isEulerGraph(self):
+
 
 #  Vertex类表示图中的每一个顶点
 class Vertex:
@@ -409,9 +410,12 @@ class Edge:
 if __name__ == '__main__':
     g = Graph()
 
-    for i in range(4):
+    for i in range(2):
         g.addVertex(i)
+    g.setMode(False)
+    g.addEdge(0, 1, 5)
 
+    print(g.degrees())
     # g.addEdge(0, 1, 5)
     # g.addEdge(0, 5, 2)
     # g.addEdge(1, 2, 4)
@@ -428,37 +432,30 @@ if __name__ == '__main__':
     # g.addEdge(3, 1, 0)
     # g.addEdge(1, 2, 0)
 
-    g.addEdge(0, 0, 5)
-    g.addEdge(0, 1, 1)
-    g.addEdge(0, 1, 3)
-    g.addEdge(0, 2, 2)
-    g.addEdge(1, 2, 8)
-    g.addEdge(2, 3, 7)
-    g.addEdge(3, 2, 6)
+    # g.addEdge(0, 0, 5)
+    # g.addEdge(0, 1, 1)
+    # g.addEdge(0, 1, 3)
+    # g.addEdge(0, 2, 2)
+    # g.addEdge(1, 2, 8)
+    # g.addEdge(2, 3, 7)
+    # g.addEdge(3, 2, 6)
 
     # paths = g.findAllPath(0, 2)
     # for path in paths:
     #     for vert in path:
     #         print(vert.id(), end="\t")
     #     print()
-    paths = g.findAllPathWithEdge(0, 2)
+    # paths = g.findAllPathWithEdge(0, 2)
     # path = value_counts(paths)
     #
     # print(path.index[0])
-
-    for path in paths:
-        for vert in path:
-            if type(vert) is Edge:
-                print("e" + str(vert.id()), end="\t")
-            elif type(vert) is Vertex:
-                print("v" + str(vert.id()), end="\t")
-
-        print()
-    print()
-
-    # edges = g.edge(0, 5)
-    # for x in edges:
-    #     print(x.id(), x.weight())
-
-    # for vert in g:
-    #     print(vert)
+    #
+    # for path in paths:
+    #     for vert in path:
+    #         if type(vert) is Edge:
+    #             print("e" + str(vert.id()), end="\t")
+    #         elif type(vert) is Vertex:
+    #             print("v" + str(vert.id()), end="\t")
+    #
+    #     print()
+    # print()

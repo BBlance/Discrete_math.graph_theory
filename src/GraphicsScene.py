@@ -3,11 +3,14 @@ from PySide2.QtCore import Signal, QPointF, Qt
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsSceneMouseEvent
 
 from BezierEdge import BezierEdge
-from PointItem import BezierPointItem
+from BezierNode import BezierNode
+from BezierText import BezierText
 
 
 class GraphicsScene(QGraphicsScene):
-    itemMoveSignal = Signal(BezierEdge, QPointF)
+    edgeMoveSignal = Signal(BezierEdge, QPointF)
+    nodeMoveSignal = Signal(BezierNode, QPointF)
+    textMoveSignal = Signal(BezierText, QPointF)
 
     def __init__(self):
         super(GraphicsScene, self).__init__()
@@ -17,10 +20,10 @@ class GraphicsScene(QGraphicsScene):
 
     def items(self, order: Qt.SortOrder = ...) -> typing.List:
         items = QGraphicsScene.items(self, order=Qt.SortOrder.DescendingOrder)
-        itemList=[]
+        itemList = []
         for item in items:
-            className=str(type(item))
-            if not className.find("PointItem")>=0:
+            className = str(type(item))
+            if not className.find("PointItem") >= 0:
                 itemList.append(item)
         return itemList
 
@@ -40,7 +43,7 @@ class GraphicsScene(QGraphicsScene):
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.m_Item is not None and event.button() == Qt.LeftButton:
             if self.m_oldPos != self.m_Item.pos():
-                self.itemMoveSignal.emit(self.m_Item, self.m_oldPos)
+                self.edgeMoveSignal.emit(self.m_Item, self.m_oldPos)
 
             self.m_Item = None
 

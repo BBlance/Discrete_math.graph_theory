@@ -109,6 +109,7 @@ class Ui_MainWindow(object):
         self.actionDigraph_Mode = QAction(MainWindow)
         self.actionDigraph_Mode.setObjectName(u"actionDigraph_Mode")
         self.actionDigraph_Mode.setCheckable(True)
+        self.actionDigraph_Mode.setChecked(True)
         self.actionRedigraph_Mode = QAction(MainWindow)
         self.actionRedigraph_Mode.setObjectName(u"actionRedigraph_Mode")
         self.actionRedigraph_Mode.setCheckable(True)
@@ -259,7 +260,7 @@ class Ui_MainWindow(object):
         MainWindow.addToolBar(Qt.LeftToolBarArea, self.graphical_toolBar)
         self.dockWidget = QDockWidget(MainWindow)
         self.dockWidget.setObjectName(u"dockWidget")
-        self.dockWidget.setMinimumSize(QSize(270, 178))
+        self.dockWidget.setMinimumSize(QSize(270, 331))
         self.dockWidget.setMaximumSize(QSize(280, 524287))
         self.dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea|Qt.RightDockWidgetArea)
         self.dockWidgetContents = QWidget()
@@ -275,14 +276,46 @@ class Ui_MainWindow(object):
         self.DetailsTab.setObjectName(u"DetailsTab")
         self.verticalLayout_3 = QVBoxLayout(self.DetailsTab)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.graphDetails = QListView(self.DetailsTab)
-        self.graphDetails.setObjectName(u"graphDetails")
-        self.graphDetails.setMinimumSize(QSize(0, 0))
-        self.graphDetails.setMaximumSize(QSize(16777215, 16777215))
+        self.label = QLabel(self.DetailsTab)
+        self.label.setObjectName(u"label")
+        self.label.setAutoFillBackground(True)
 
-        self.verticalLayout_3.addWidget(self.graphDetails)
+        self.verticalLayout_3.addWidget(self.label)
+
+        self.nodeDetails = QListView(self.DetailsTab)
+        self.nodeDetails.setObjectName(u"nodeDetails")
+        self.nodeDetails.setMinimumSize(QSize(0, 0))
+        self.nodeDetails.setMaximumSize(QSize(16777215, 16777215))
+
+        self.verticalLayout_3.addWidget(self.nodeDetails)
+
+        self.label_2 = QLabel(self.DetailsTab)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setAutoFillBackground(True)
+
+        self.verticalLayout_3.addWidget(self.label_2)
+
+        self.edgeDetails = QListView(self.DetailsTab)
+        self.edgeDetails.setObjectName(u"edgeDetails")
+
+        self.verticalLayout_3.addWidget(self.edgeDetails)
 
         self.propertyTab.addTab(self.DetailsTab, "")
+        self.DataDeatils = QWidget()
+        self.DataDeatils.setObjectName(u"DataDeatils")
+        self.verticalLayout_5 = QVBoxLayout(self.DataDeatils)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.dataName = QLabel(self.DataDeatils)
+        self.dataName.setObjectName(u"dataName")
+
+        self.verticalLayout_5.addWidget(self.dataName)
+
+        self.dataDeatils = QListView(self.DataDeatils)
+        self.dataDeatils.setObjectName(u"dataDeatils")
+
+        self.verticalLayout_5.addWidget(self.dataDeatils)
+
+        self.propertyTab.addTab(self.DataDeatils, "")
         self.HistoryTab = QWidget()
         self.HistoryTab.setObjectName(u"HistoryTab")
         self.verticalLayout = QVBoxLayout(self.HistoryTab)
@@ -340,6 +373,7 @@ class Ui_MainWindow(object):
         self.menuDraw_Tools.addAction(self.menuLine.menuAction())
         self.menuDraw_Tools.addAction(self.actionCircle)
         self.menuDraw_Tools.addAction(self.actionRectangle)
+        self.menuDraw_Tools.addAction(self.actionAdd_Annotation)
         self.menuLine.addAction(self.actionArc)
         self.menuTools.addAction(self.menuNodes_Edges_Details.menuAction())
         self.menuTools.addAction(self.menuPathway_and_Loop.menuAction())
@@ -406,7 +440,7 @@ class Ui_MainWindow(object):
         self.actionMinimise.triggered.connect(MainWindow.showMinimized)
         self.actionMaximize.triggered.connect(MainWindow.showMaximized)
 
-        self.propertyTab.setCurrentIndex(0)
+        self.propertyTab.setCurrentIndex(1)
 
 
         QMetaObject.connectSlotsByName(MainWindow)
@@ -681,7 +715,7 @@ class Ui_MainWindow(object):
 #if QT_CONFIG(tooltip)
         self.actionSetChinese.setToolTip(QCoreApplication.translate("MainWindow", u"\u4e2d\u6587", None))
 #endif // QT_CONFIG(tooltip)
-        self.actionAdd_Annotation.setText(QCoreApplication.translate("MainWindow", u"\u6dfb\u52a0\u6ce8\u91ca", None))
+        self.actionAdd_Annotation.setText(QCoreApplication.translate("MainWindow", u"\u6ce8\u91ca", None))
 #if QT_CONFIG(tooltip)
         self.actionAdd_Annotation.setToolTip(QCoreApplication.translate("MainWindow", u"\u6dfb\u52a0\u6ce8\u91ca", None))
 #endif // QT_CONFIG(tooltip)
@@ -732,7 +766,11 @@ class Ui_MainWindow(object):
         self.menuHelp.setTitle(QCoreApplication.translate("MainWindow", u" \u5e2e\u52a9", None))
         self.general_utility_toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u"  \u5e38\u89c4\u529f\u80fd", None))
         self.graphical_toolBar.setWindowTitle(QCoreApplication.translate("MainWindow", u" \u7ed8\u56fe\u5de5\u5177", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u9876\u70b9\u8be6\u60c5", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u8fb9\u8be6\u60c5", None))
         self.propertyTab.setTabText(self.propertyTab.indexOf(self.DetailsTab), QCoreApplication.translate("MainWindow", u"\u7ed8\u56fe\u8be6\u60c5", None))
+        self.dataName.setText("")
+        self.propertyTab.setTabText(self.propertyTab.indexOf(self.DataDeatils), QCoreApplication.translate("MainWindow", u"\u8be6\u7ec6\u6570\u636e", None))
         self.propertyTab.setTabText(self.propertyTab.indexOf(self.HistoryTab), QCoreApplication.translate("MainWindow", u"\u5386\u53f2\u8bb0\u5f55", None))
     # retranslateUi
 
