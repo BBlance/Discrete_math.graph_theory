@@ -62,6 +62,10 @@ private slots:
 
     void on_actionRedigraph_Mode_triggered(bool checked);
 
+    void on_actionOut_degree_triggered();
+
+    void on_actionIn_degree_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

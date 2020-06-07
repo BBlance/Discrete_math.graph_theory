@@ -81,3 +81,13 @@ void MainWindow::on_actionRedigraph_Mode_triggered(bool checked)
 {
 
 }
+
+void MainWindow::on_actionOut_degree_triggered()
+{
+
+}
+
+void MainWindow::on_actionIn_degree_triggered()
+{
+
+}
