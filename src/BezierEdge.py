@@ -1,6 +1,6 @@
 from typing import Optional
-from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QMessageBox, \
-    QGraphicsSceneDragDropEvent
+from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QMessageBox
+
 from PySide2.QtCore import QPointF, QRectF, Qt, QLineF
 from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF, QPen, \
     QPainterPathStroker
@@ -76,6 +76,7 @@ class BezierEdge(BezierGraphicsItem):
 
     def setSourceNode(self, source):
         self.__source = source
+
 
     def setDestNode(self, dest):
         self.__dest = dest
@@ -210,35 +211,6 @@ class BezierEdge(BezierGraphicsItem):
         brush = self.brush()
         painter.setBrush(brush)
         path = QPainterPath()
-
-        # vector = self._sourcePoint - self._destPoint
-        # vector = sqrt(pow(vector.x(), 2) + pow(vector.y(), 2))
-        # if vector <= 25:
-        #
-        #     ret = QRectF(self._m_center.x() - self.getRadius(), self._m_center.y() - self.getRadius(),
-        #                  self.getRadius() * 2, self.getRadius() * 2)
-        #     self.calc_angle()
-        #     path.moveTo(self._startPoint)
-        #
-        #     path.arcTo(ret, self._startAngle, self._sweepLength)
-        #     self.edge1.setVisible(False)
-        #     if self._isDigraph:
-        #         line = QLineF(self._destPoint, self._m_center)
-        #         if self.startLine.angle() > self.endLine.angle():
-        #             line.setPoints(self._m_center, self._destPoint)
-        #             line.translate(line.dx(), line.dy())
-        #
-        #         v = line.normalVector()
-        #         v.setLength(7)
-        #         n = v.normalVector()
-        #         n.setLength(n.length() * 0.5)
-        #         n2 = n.normalVector().normalVector()
-        #         p1 = v.p2()
-        #         p2 = n.p2()
-        #         p3 = n2.p2()
-        #         points = QPolygonF([p1, p2, p3, p1])
-        #         path.addPolygon(points)
-        # else:
         path.moveTo(self.__sourcePoint)
         path.cubicTo(self._edge1, self._edge2, self.__destPoint)
         if self._isDigraph:
@@ -280,15 +252,6 @@ class BezierEdge(BezierGraphicsItem):
             if self.__dest or self.__source:
                 self.adjust()
         super().mouseMoveEvent(event)
-
-
-# def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
-#     if event.button() == Qt.LeftButton:
-#         print(self.Weight())
-
-##  ==========由connectSlotsByName()自动连接的槽函数============
-
-##  =============自定义槽函数===============================
 
 
 from BezierNode import BezierNode

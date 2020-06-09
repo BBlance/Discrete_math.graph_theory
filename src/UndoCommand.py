@@ -5,7 +5,6 @@ from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
 
 from BezierEdge import BezierEdge
 from BezierNode import BezierNode
-from BezierText import BezierText
 from PointItem import ItemType
 
 

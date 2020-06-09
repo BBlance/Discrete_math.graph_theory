@@ -1,6 +1,6 @@
 from enum import unique, Enum
 from math import sqrt
-from PySide2.QtCore import QPointF, Qt
+from PySide2.QtCore import QPointF, Qt, QObject
 from PySide2.QtGui import QPen, QColor, QFocusEvent, QKeyEvent
 from PySide2.QtWidgets import QAbstractGraphicsShapeItem, QGraphicsSceneMouseEvent, QGraphicsItem
 
@@ -13,7 +13,7 @@ class GraphicsType(Enum):
     NoneType = 3
 
 
-class BezierGraphicsItem(QAbstractGraphicsShapeItem):
+class BezierGraphicsItem(QAbstractGraphicsShapeItem, QObject):
     def __init__(self, center: QPointF):
         super(BezierGraphicsItem, self).__init__()
         self.setCursor(Qt.ArrowCursor)

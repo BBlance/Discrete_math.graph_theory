@@ -1,6 +1,3 @@
-string = 2
-strings = "2"
+name = "邻接矩阵"
 
-stringsss=f'{string},{strings}'
-
-print(stringsss)
+print(name is "邻接矩阵")

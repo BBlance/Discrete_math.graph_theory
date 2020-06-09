@@ -26,6 +26,7 @@ class GraphicsView(QGraphicsView):
         self.setBackgroundBrush(gradient)
         self.setScene(scene)
 
+
     def zoomIn(self):  # 放大场景
         self.scaleView(1.2)
 
@@ -54,8 +55,8 @@ class GraphicsView(QGraphicsView):
             self.zoomIn()
         elif event.key() == Qt.Key_Minus:
             self.zoomOut()
-        else:
-            super().keyPressEvent(event)
+
+        super().keyPressEvent(event)
 
     # def drawBackground(self, painter: QPainter, rect: QRectF):
     #     sceneRect = self.sceneRect()

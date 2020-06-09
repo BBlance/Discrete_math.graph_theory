@@ -14,12 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QGraphicsView" name="graphicsView">
-      <property name="renderHints">
-       <set>QPainter::Antialiasing|QPainter::TextAntialiasing</set>
-      </property>
+     <widget class="QTabWidget" name="tabWidget">
+      <widget class="QWidget" name="Page">
+       <attribute name="title">
+        <string>Board 1</string>
+       </attribute>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -272,15 +274,21 @@
    <addaction name="actionAdd_Annotation"/>
   </widget>
   <widget class="QDockWidget" name="dockWidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <property name="minimumSize">
     <size>
      <width>270</width>
-     <height>331</height>
+     <height>427</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
-     <width>280</width>
+     <width>524287</width>
      <height>524287</height>
     </size>
    </property>
@@ -328,20 +336,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="nodeDetails">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-          </widget>
+          <widget class="QTableView" name="nodeDetails"/>
          </item>
          <item>
           <widget class="QLabel" name="label_2">
@@ -354,11 +349,11 @@
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="edgeDetails"/>
+          <widget class="QTableView" name="edgeDetails"/>
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="DataDeatils">
+       <widget class="QWidget" name="DataDetails">
         <attribute name="title">
          <string>详细数据</string>
         </attribute>
@@ -371,7 +366,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QListView" name="dataDeatils"/>
+          <widget class="QTableView" name="dataTableView"/>
          </item>
         </layout>
        </widget>
@@ -952,6 +947,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>属性与历史记录</string>
    </property>
@@ -1013,9 +1011,9 @@
  <connections>
   <connection>
    <sender>actionHide_ToolBar</sender>
-   <signal>triggered()</signal>
+   <signal>triggered(bool)</signal>
    <receiver>general_utility_toolBar</receiver>
-   <slot>hide()</slot>
+   <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1029,9 +1027,9 @@
   </connection>
   <connection>
    <sender>actionHide_ToolBar</sender>
-   <signal>triggered()</signal>
+   <signal>triggered(bool)</signal>
    <receiver>graphical_toolBar</receiver>
-   <slot>hide()</slot>
+   <slot>setHidden(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -1072,6 +1070,22 @@
     <hint type="destinationlabel">
      <x>555</x>
      <y>370</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionProperty_And_History</sender>
+   <signal>triggered(bool)</signal>
+   <receiver>dockWidget</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>967</x>
+     <y>385</y>
     </hint>
    </hints>
   </connection>

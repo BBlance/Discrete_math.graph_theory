@@ -1,23 +1,22 @@
-from math import sqrt
-from random import random, randint
+from random import randint
 from typing import Optional
 
 import typing
 from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QStyle, QGraphicsSceneMouseEvent, QGraphicsItem, \
     QGraphicsSceneContextMenuEvent, QMenu, QAction, QWidgetAction
-from PySide2.QtCore import QPointF, QRectF, Qt, qAbs, QPoint
+from PySide2.QtCore import QPointF, QRectF, Qt, qAbs, QPoint, Signal, QObject
 from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QColor, QPen, QRadialGradient, QCursor, QFocusEvent
 
 from BezierGraphicsItem import BezierGraphicsItem
 
 
 class BezierNode(BezierGraphicsItem):
-    __bezierEdgeList = []
     __newPos = QPointF()
 
     def __init__(self, center=QPointF(0, 0)):
         super(BezierNode, self).__init__(center)
         self.textCp = BezierTextItem(self, self._m_textPos, PointType.Text, ItemType.PointType)
+        self.__bezierEdgeList = []
 
     ##  ==============自定义功能函数========================
 
@@ -53,91 +52,19 @@ class BezierNode(BezierGraphicsItem):
 
     def collidingItem(self):
         for item in self.collidingItems():
-            if str(type(item)).find("BezierPointItem") >= 0:
-                return item
-            elif str(type(item)).find("BezierEdge") >= 0:
+            if str(type(item)).find("BezierEdge") >= 0:
                 return item
         return None
 
     def setBezierEdges(self, item):
-        if type(item) is BezierPointItem:
-            edge = item.parentItem()
-            self.addBezierEdge(edge, item.itemType())
-            if item.itemType() == ItemType.SourceType:
-                edge.setSourceNode(self)
-            if item.itemType() == ItemType.DestType:
-                edge.setDestNode(self)
-        elif type(item) is BezierEdge:
-            if not item.sourceNode:
-                if self.contains(self.mapFromItem(item, item.specialControlPoints()[0])):
-                    self.addBezierEdge(item, ItemType.SourceType)
-                    item.setSourceNode(self)
-            if not item.destNode:
-                if self.contains(self.mapFromItem(item, item.specialControlPoints()[1])):
-                    self.addBezierEdge(item, ItemType.DestType)
-                    item.setDestNode(self)
-
-    # def calculateForces(self):
-    #     if not self.scene() and self.scene().mouseGrabberItem() == self:
-    #         self.__newPos = self.pos()
-    #         return
-    #
-    #     xvel, yvel = 0, 0
-    #     items = self.scene().items()
-    #     for item in items:
-    #         node = item
-    #         if not node:
-    #             continue
-    #         vec = self.mapToItem(node, 0, 0)
-    #         dx, dy = vec.x(), vec.y()
-    #         l = 2.0 * (dx * dx + dy * dy)
-    #         if l > 0:
-    #             xvel = xvel + dx * 150 / l
-    #             yvel = yvel + dy * 150 / l
-    #
-    #     weight = (len(self.__edgeList) + 1) * 10
-    #     for edge in self.__edgeList:
-    #         vec = QPointF()
-    #         if edge.getSourceNode() == self:
-    #             vec = self.mapToItem(edge.getDestNode(), 0, 0)
-    #         else:
-    #             vec = self.mapToItem(edge.getSourceNode(), 0, 0)
-    #
-    #         xvel = xvel - vec.x() / weight
-    #         yvel = yvel - vec.y() / weight
-    #
-    #     if qAbs(xvel) < 0.1 and qAbs(yvel) < 0.1:
-    #         xvel = 0
-    #         yvel = 0
-    #
-    #     sceneRect = self.scene().sceneRect()
-    #     self.__newPos = self.pos() + QPointF(xvel, yvel)
-    #     self.__newPos.setX(min(max(self.newPos.x(), sceneRect.left() + 10), sceneRect.right() - 10))
-    #     self.__newPos.setY(min(max(self.newPos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10))
-    #
-    # def advancePosition(self):
-    #     if self.__newPos == self.pos():
-    #         return False
-    #
-    #     self.setPos(self.__newPos)
-    #     return True
-
-    #
-    # def getEdge(self):
-    #     return self._m_edge
-    #
-    # def setEdge(self, p: QPointF, itemType):
-    #     self._m_edge = p
-
-    # def updateRadius(self):
-    #     ret = QRectF(self._m_center.x() - 18, self._m_center.y() - 18,
-    #                  18 * 2, 18 * 2)
-    #     if ret.contains(self._m_edge):
-    #         if 10 < self._m_radius:
-    #             self._m_radius = sqrt(
-    #                 pow(self._m_center.x() - self._m_edge.x(), 2) + pow(self._m_center.y() - self._m_edge.y(), 2))
-    #         else:
-    #             self._m_radius = 10.606601717798213
+        if not item.sourceNode:
+            if self.contains(self.mapFromItem(item, item.specialControlPoints()[0])):
+                self.__bezierEdgeList.append({item: ItemType.SourceType})
+                item.setSourceNode(self)
+        if not item.destNode:
+            if self.contains(self.mapFromItem(item, item.specialControlPoints()[1])):
+                self.__bezierEdgeList.append({item: ItemType.DestType})
+                item.setDestNode(self)
 
     ##  ==============event处理函数==========================
 
@@ -169,11 +96,7 @@ class BezierNode(BezierGraphicsItem):
 
     def boundingRect(self) -> QRectF:
         adjust = 2
-
         return QRectF(-10 - adjust, -10 - adjust, 23 + adjust, 23 + adjust)
-
-        # return QRectF(self._m_center.x() - self._m_radius, self._m_center.y() - self._m_radius,
-        #               self._m_radius * 2, self._m_radius * 2)
 
     def itemChange(self, change: QGraphicsItem.GraphicsItemChange, value: typing.Any) -> typing.Any:
         if change is QGraphicsItem.ItemPositionHasChanged:
@@ -190,8 +113,10 @@ class BezierNode(BezierGraphicsItem):
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
         if event.buttons() and Qt.LeftButton:
+
             item = self.collidingItem()
-            self.setBezierEdges(item)
+            if item is not None:
+                self.setBezierEdges(item)
         super().mouseMoveEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
@@ -230,5 +155,4 @@ class BezierNode(BezierGraphicsItem):
                     edge.setSpecialControlPoint(newPos, itemType)
 
 
-from BezierEdge import BezierEdge
 from PointItem import BezierPointItem, BezierTextItem, PointType, ItemType

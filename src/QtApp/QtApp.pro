@@ -27,8 +27,8 @@ HEADERS += \
     ThicknessDialog.h
 
 FORMS += \
-    CreateFileDialog.ui \
     MainWindow.ui \
+    ShowMatrix.ui \
     ThicknessDialog.ui
 
 TRANSLATIONS += \

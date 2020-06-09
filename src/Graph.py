@@ -32,7 +32,7 @@ class Graph:
         return self.__numEdges
 
     def edges(self):
-        return self.__edgeDict
+        return self.__edgeDict.keys()
 
     def edge(self, fromVert, toVert):
         edgeList = []
@@ -414,8 +414,10 @@ if __name__ == '__main__':
         g.addVertex(i)
     g.setMode(False)
     g.addEdge(0, 1, 5)
+    g.addEdge(0, 3, 5)
+    
+    print(g.edges())
 
-    print(g.degrees())
     # g.addEdge(0, 1, 5)
     # g.addEdge(0, 5, 2)
     # g.addEdge(1, 2, 4)

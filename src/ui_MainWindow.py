@@ -170,6 +170,7 @@ class Ui_MainWindow(object):
         self.actionProperty_And_History = QAction(MainWindow)
         self.actionProperty_And_History.setObjectName(u"actionProperty_And_History")
         self.actionProperty_And_History.setCheckable(True)
+        self.actionProperty_And_History.setChecked(True)
         self.actionRectangle = QAction(MainWindow)
         self.actionRectangle.setObjectName(u"actionRectangle")
         icon13 = QIcon()
@@ -190,13 +191,15 @@ class Ui_MainWindow(object):
         self.actionEuler_PathWay.setObjectName(u"actionEuler_PathWay")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.verticalLayout_4 = QVBoxLayout(self.centralwidget)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.graphicsView = QGraphicsView(self.centralwidget)
-        self.graphicsView.setObjectName(u"graphicsView")
-        self.graphicsView.setRenderHints(QPainter.Antialiasing|QPainter.TextAntialiasing)
+        self.horizontalLayout = QHBoxLayout(self.centralwidget)
+        self.horizontalLayout.setObjectName(u"horizontalLayout")
+        self.tabWidget = QTabWidget(self.centralwidget)
+        self.tabWidget.setObjectName(u"tabWidget")
+        self.Page = QWidget()
+        self.Page.setObjectName(u"Page")
+        self.tabWidget.addTab(self.Page, "")
 
-        self.verticalLayout_4.addWidget(self.graphicsView)
+        self.horizontalLayout.addWidget(self.tabWidget)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
@@ -260,8 +263,13 @@ class Ui_MainWindow(object):
         MainWindow.addToolBar(Qt.LeftToolBarArea, self.graphical_toolBar)
         self.dockWidget = QDockWidget(MainWindow)
         self.dockWidget.setObjectName(u"dockWidget")
-        self.dockWidget.setMinimumSize(QSize(270, 331))
-        self.dockWidget.setMaximumSize(QSize(280, 524287))
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.dockWidget.sizePolicy().hasHeightForWidth())
+        self.dockWidget.setSizePolicy(sizePolicy)
+        self.dockWidget.setMinimumSize(QSize(270, 427))
+        self.dockWidget.setMaximumSize(QSize(524287, 524287))
         self.dockWidget.setAllowedAreas(Qt.LeftDockWidgetArea|Qt.RightDockWidgetArea)
         self.dockWidgetContents = QWidget()
         self.dockWidgetContents.setObjectName(u"dockWidgetContents")
@@ -282,10 +290,8 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.label)
 
-        self.nodeDetails = QListView(self.DetailsTab)
+        self.nodeDetails = QTableView(self.DetailsTab)
         self.nodeDetails.setObjectName(u"nodeDetails")
-        self.nodeDetails.setMinimumSize(QSize(0, 0))
-        self.nodeDetails.setMaximumSize(QSize(16777215, 16777215))
 
         self.verticalLayout_3.addWidget(self.nodeDetails)
 
@@ -295,27 +301,27 @@ class Ui_MainWindow(object):
 
         self.verticalLayout_3.addWidget(self.label_2)
 
-        self.edgeDetails = QListView(self.DetailsTab)
+        self.edgeDetails = QTableView(self.DetailsTab)
         self.edgeDetails.setObjectName(u"edgeDetails")
 
         self.verticalLayout_3.addWidget(self.edgeDetails)
 
         self.propertyTab.addTab(self.DetailsTab, "")
-        self.DataDeatils = QWidget()
-        self.DataDeatils.setObjectName(u"DataDeatils")
-        self.verticalLayout_5 = QVBoxLayout(self.DataDeatils)
+        self.DataDetails = QWidget()
+        self.DataDetails.setObjectName(u"DataDetails")
+        self.verticalLayout_5 = QVBoxLayout(self.DataDetails)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.dataName = QLabel(self.DataDeatils)
+        self.dataName = QLabel(self.DataDetails)
         self.dataName.setObjectName(u"dataName")
 
         self.verticalLayout_5.addWidget(self.dataName)
 
-        self.dataDeatils = QListView(self.DataDeatils)
-        self.dataDeatils.setObjectName(u"dataDeatils")
+        self.dataTableView = QTableView(self.DataDetails)
+        self.dataTableView.setObjectName(u"dataTableView")
 
-        self.verticalLayout_5.addWidget(self.dataDeatils)
+        self.verticalLayout_5.addWidget(self.dataTableView)
 
-        self.propertyTab.addTab(self.DataDeatils, "")
+        self.propertyTab.addTab(self.DataDetails, "")
         self.HistoryTab = QWidget()
         self.HistoryTab.setObjectName(u"HistoryTab")
         self.verticalLayout = QVBoxLayout(self.HistoryTab)
@@ -435,10 +441,11 @@ class Ui_MainWindow(object):
         self.graphical_toolBar.addAction(self.actionAdd_Annotation)
 
         self.retranslateUi(MainWindow)
-        self.actionHide_ToolBar.triggered.connect(self.general_utility_toolBar.hide)
-        self.actionHide_ToolBar.triggered.connect(self.graphical_toolBar.hide)
+        self.actionHide_ToolBar.triggered.connect(self.general_utility_toolBar.setHidden)
+        self.actionHide_ToolBar.triggered.connect(self.graphical_toolBar.setHidden)
         self.actionMinimise.triggered.connect(MainWindow.showMinimized)
         self.actionMaximize.triggered.connect(MainWindow.showMaximized)
+        self.actionProperty_And_History.triggered.connect(self.dockWidget.setHidden)
 
         self.propertyTab.setCurrentIndex(1)
 
@@ -741,6 +748,7 @@ class Ui_MainWindow(object):
         self.actionReachable_Matrix.setText(QCoreApplication.translate("MainWindow", u"\u53ef\u8fbe\u77e9\u9635", None))
         self.actionEdge_Name.setText(QCoreApplication.translate("MainWindow", u"\u8fb9\u540d\u79f0", None))
         self.actionEuler_PathWay.setText(QCoreApplication.translate("MainWindow", u"\u6b27\u62c9\u901a\u8def", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.Page), QCoreApplication.translate("MainWindow", u"Board 1", None))
         self.menuFile.setTitle(QCoreApplication.translate("MainWindow", u" \u6587\u4ef6", None))
         self.menuRecent_File.setTitle(QCoreApplication.translate("MainWindow", u" \u6700\u8fd1\u6253\u5f00\u7684\u6587\u4ef6", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"\u7f16\u8f91", None))
@@ -770,7 +778,7 @@ class Ui_MainWindow(object):
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u8fb9\u8be6\u60c5", None))
         self.propertyTab.setTabText(self.propertyTab.indexOf(self.DetailsTab), QCoreApplication.translate("MainWindow", u"\u7ed8\u56fe\u8be6\u60c5", None))
         self.dataName.setText("")
-        self.propertyTab.setTabText(self.propertyTab.indexOf(self.DataDeatils), QCoreApplication.translate("MainWindow", u"\u8be6\u7ec6\u6570\u636e", None))
+        self.propertyTab.setTabText(self.propertyTab.indexOf(self.DataDetails), QCoreApplication.translate("MainWindow", u"\u8be6\u7ec6\u6570\u636e", None))
         self.propertyTab.setTabText(self.propertyTab.indexOf(self.HistoryTab), QCoreApplication.translate("MainWindow", u"\u5386\u53f2\u8bb0\u5f55", None))
     # retranslateUi
 
