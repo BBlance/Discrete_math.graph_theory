@@ -66,6 +66,16 @@ private slots:
 
     void on_actionIn_degree_triggered();
 
+    void on_actionAdjacent_Matrix_Digraph_triggered();
+
+    void on_actionReachable_Matrix_triggered();
+
+    void on_actionIncidence_Matrix_Undigraph_triggered();
+
+    void on_actionNew_triggered();
+
+    void on_actionEdge_s_Weight_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

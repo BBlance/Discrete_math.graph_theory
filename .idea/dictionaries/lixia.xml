@@ -2,10 +2,12 @@
   <dictionary name="lixia">
     <words>
       <w>dest</w>
+      <w>detalis</w>
       <w>dtime</w>
       <w>ftime</w>
       <w>pixmap</w>
       <w>pred</w>
+      <w>pyside</w>
       <w>redigraph</w>
       <w>stroker</w>
       <w>undigraph</w>

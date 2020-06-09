@@ -16,6 +16,7 @@ from Graph import Graph
 from GraphicsScene import GraphicsScene
 from GraphicsView import GraphicsView
 from PointItem import ItemType
+from ShowDataWidget import ShowDataWidget
 from ShowMatrixWidget import ShowMatrixWidget
 from UndoCommand import AddCommand, MoveCommand
 from ui_MainWindow import Ui_MainWindow
@@ -27,8 +28,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)  # 调用父类构造函数，创建窗体
-        self.view = None
-        self.scene = None
+        self.scene = GraphicsScene(self)  # 创建QGraphicsScene
+        self.view = GraphicsView(self, self.scene)  # 创建图形视图组件
         self.ui = Ui_MainWindow()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
 
@@ -45,7 +46,6 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.tableWidget)
         self.setAutoFillBackground(True)
-
 
         self.__buildStatusBar()  # 构造状态栏
         self.__buildUndoCommand()  # 初始化撤销重做系统
@@ -103,7 +103,7 @@ class MainWindow(QMainWindow):
         self.scene.itemMoveSignal.connect(self.do_shapeMoved)
         self.scene.itemLock.connect(self.do_nodeLock)
 
-        title = f'Board{self.tableWidget.count()}'
+        title = f'Board_{self.tableWidget.count()}'
         curIndex = self.tableWidget.addTab(self.view, title)
         self.tableWidget.setCurrentIndex(curIndex)
         self.tableWidget.setVisible(True)
@@ -175,7 +175,7 @@ class MainWindow(QMainWindow):
         modeMenuGroup = QActionGroup(self)
         modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
         modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
-        self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
+        #self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
 
     def __initToolMenu(self):
         pass
@@ -317,13 +317,8 @@ class MainWindow(QMainWindow):
         dataModel.setRowCount(rowCount)
 
     def singleItems(self, className) -> list:
-        view: GraphicsView = self.tableWidget.currentWidget()
-        scene = view.scene()
-        items = []
-        for item in scene.uniqueItems():
-            if type(item) is className:
-                items.append(item)
-        return items
+        self.viewAndScene()
+        return self.scene.singleItems(className)
 
     def connectGraph(self):
         self.__graph.setMode(self.ui.actionDigraph_Mode.isChecked())
@@ -452,55 +447,86 @@ class MainWindow(QMainWindow):
         self.__setItemProperties(item, "注释")
         self.do_addItem(item)
 
+    @Slot()  # 边的权重
+    def on_actionEdge_s_Weight_triggered(self):
+        self.viewAndScene()
+        items = self.scene.singleItems(BezierEdge, 1) if len(
+            self.scene.singleItems(BezierEdge, 1)) else self.scene.singleItems(
+            BezierEdge)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
+        if self.connectGraph():
+            EdgeWeight = ShowDataWidget(self, items, name="边的权重")
+            EdgeWeight.show()
+
     @Slot()
     def on_actionRedigraph_s_Degrees_triggered(self):  # 无向图的度
         self.viewAndScene()
-        if len(self.scene.selectedItems()):
-            items = self.scene.selectedItems()
-        elif len(self.scene.uniqueItems()):
-            items = self.scene.uniqueItems()
-        else:
-            QMessageBox.warning(self, "警告", "图中没有元素")
-            return
-        copyItem = []
-        for item in items:
-            if str(type(item)).find("BezierNode") >= 0:
-                copyItem.append(item)
-
-        if len(copyItem) == 0:
+        # if len(self.scene.selectedItems()):
+        #     items = self.scene.selectedItems()
+        # elif len(self.scene.uniqueItems()):
+        #     items = self.scene.uniqueItems()
+        # else:
+        #     QMessageBox.warning(self, "警告", "图中没有元素")
+        #     return
+        # copyItem = []
+        # for item in items:
+        #     if str(type(item)).find("BezierNode") >= 0:
+        #         copyItem.append(item)
+        items = self.scene.singleItems(BezierNode, 1) if len(
+            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
+            BezierNode)
+        if len(items) == 0:
             QMessageBox.warning(self, "警告", "图中没有结点")
             return
 
         if self.connectGraph():
-            degrees = self.__graph.degrees()
-            self.__graph.clearAllData()
+            NodeDegrees = ShowDataWidget(self, items, name="结点度")
+            NodeDegrees.show()
 
     @Slot()
     def on_actionOut_degree_triggered(self):  # 有向图的出度
         self.viewAndScene()
+        items = self.scene.singleItems(BezierNode, 1) if len(
+            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
+            BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
+
+        if self.connectGraph():
+            NodeDegrees = ShowDataWidget(self, items, name="出度")
+            NodeDegrees.show()
         pass
 
     @Slot()
     def on_actionIn_degree_triggered(self):  ## 有向图的入度
         self.viewAndScene()
+        items = self.scene.singleItems(BezierNode, 1) if len(
+            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
+            BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
+
+        if self.connectGraph():
+            NodeDegrees = ShowDataWidget(self, items, name="入度")
+            NodeDegrees.show()
         pass
 
-    @Slot()
+    @Slot()  # 邻接矩阵
     def on_actionAdjacent_Matrix_Digraph_triggered(self):
         self.viewAndScene()
         if self.connectGraph():
             MatrixTable = ShowMatrixWidget(self, self.__graph, "邻接矩阵")
-            MatrixTable.setWindowFlag(Qt.Window, True)
-            MatrixTable.setWindowOpacity(0.9)
             MatrixTable.show()
 
-    @Slot()
+    @Slot()  # 可达矩阵
     def on_actionReachable_Matrix_triggered(self):
         self.viewAndScene()
         if self.connectGraph():
             MatrixTable = ShowMatrixWidget(self, self.__graph, "可达矩阵")
-            MatrixTable.setWindowFlag(Qt.Window, True)
-            MatrixTable.setWindowOpacity(0.9)
             MatrixTable.show()
 
     @Slot()
@@ -523,8 +549,6 @@ class MainWindow(QMainWindow):
                 return
         if self.connectGraph():
             MatrixTable = ShowMatrixWidget(self, self.__graph, "关联矩阵")
-            MatrixTable.setWindowFlag(Qt.Window, True)
-            MatrixTable.setWindowOpacity(0.9)
             MatrixTable.show()
 
     # @Slot()
@@ -624,7 +648,7 @@ class MainWindow(QMainWindow):
                                         destNodeList.remove(destEdge)
 
                     self.scene.removeItem(item)  # 删除绘图项
-        self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
+        #self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
         self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(bool)

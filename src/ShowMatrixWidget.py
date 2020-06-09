@@ -3,7 +3,7 @@ import sys, os  # codecs
 from PySide2.QtWidgets import (QApplication, QWidget, QFileDialog,
                                QToolBar, QVBoxLayout, QFontDialog)
 
-from PySide2.QtCore import QItemSelectionModel
+from PySide2.QtCore import QItemSelectionModel, Qt
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem
 
@@ -14,6 +14,8 @@ class ShowMatrixWidget(QWidget):
 
     def __init__(self, parent=None, graph=None, name=None):
         super().__init__(parent)
+        self.setWindowFlag(Qt.Window, True)
+        self.setWindowOpacity(0.9)
         self.ui = Ui_ShowMatrix()
         self.ui.setupUi(self)
         self.__graph = graph

@@ -91,3 +91,28 @@ void MainWindow::on_actionIn_degree_triggered()
 {
 
 }
+
+void MainWindow::on_actionAdjacent_Matrix_Digraph_triggered()
+{
+
+}
+
+void MainWindow::on_actionReachable_Matrix_triggered()
+{
+
+}
+
+void MainWindow::on_actionIncidence_Matrix_Undigraph_triggered()
+{
+
+}
+
+void MainWindow::on_actionNew_triggered()
+{
+
+}
+
+void MainWindow::on_actionEdge_s_Weight_triggered()
+{
+
+}

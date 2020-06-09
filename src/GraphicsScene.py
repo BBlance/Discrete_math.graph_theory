@@ -17,21 +17,17 @@ class GraphicsScene(QGraphicsScene):
         self.m_Item = None
         self.m_oldPos = QPointF()
 
-    def singleItems(self, className) -> list:
+    def singleItems(self, className, order=0) -> list:
         items = []
-        for item in self.scene.items():
-            if type(item) is className:
-                items.append(item)
+        if order == 0:
+            for item in self.items():
+                if type(item) is className:
+                    items.append(item)
+        elif order == 1:
+            for item in self.selectedItems():
+                if type(item) is className:
+                    items.append(item)
         return items
-
-    # def items(self, order: Qt.SortOrder = ...) -> typing.List:
-    #     items = QGraphicsScene.items(self, order=Qt.SortOrder.DescendingOrder)
-    #     itemList = []
-    #     for item in items:
-    #         className = str(type(item))
-    #         if not className.find("PointItem") >= 0:
-    #             itemList.append(item)
-    #     return itemList
 
     def uniqueItems(self):
         items = QGraphicsScene.items(self, order=Qt.SortOrder.DescendingOrder)
@@ -58,7 +54,7 @@ class GraphicsScene(QGraphicsScene):
 
         if len(itemList) > 0:
             self.m_Item = itemList[0]
-
+            self.itemLock.emit(self.m_Item)
         if self.m_Item is not None and event.button() == Qt.LeftButton:
             self.m_oldPos = self.m_Item.pos()
 
@@ -66,6 +62,7 @@ class GraphicsScene(QGraphicsScene):
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.m_Item is not None and event.button() == Qt.LeftButton:
+            self.itemLock.emit(self.m_Item)
             if self.m_oldPos != self.m_Item.pos():
                 self.itemMoveSignal.emit(self.m_Item, self.m_oldPos)
             self.m_Item = None

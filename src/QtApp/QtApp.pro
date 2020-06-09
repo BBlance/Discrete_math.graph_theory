@@ -27,6 +27,7 @@ HEADERS += \
     ThicknessDialog.h
 
 FORMS += \
+    DataDetails.ui \
     MainWindow.ui \
     ShowMatrix.ui \
     ThicknessDialog.ui
