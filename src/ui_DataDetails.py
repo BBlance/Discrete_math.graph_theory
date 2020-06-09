@@ -20,7 +20,7 @@ class Ui_DataDetails(object):
     def setupUi(self, DataDetails):
         if not DataDetails.objectName():
             DataDetails.setObjectName(u"DataDetails")
-        DataDetails.resize(400, 300)
+        DataDetails.resize(274, 218)
         self.verticalLayout_2 = QVBoxLayout(DataDetails)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout = QVBoxLayout()
