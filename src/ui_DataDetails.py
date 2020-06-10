@@ -20,13 +20,15 @@ class Ui_DataDetails(object):
     def setupUi(self, DataDetails):
         if not DataDetails.objectName():
             DataDetails.setObjectName(u"DataDetails")
-        DataDetails.resize(274, 218)
+        DataDetails.resize(274, 234)
         self.verticalLayout_2 = QVBoxLayout(DataDetails)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout = QVBoxLayout()
-        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.toolWidget = QWidget(DataDetails)
+        self.toolWidget.setObjectName(u"toolWidget")
+        self.horizontalLayout_2 = QHBoxLayout(self.toolWidget)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
 
-        self.verticalLayout_2.addLayout(self.verticalLayout)
+        self.verticalLayout_2.addWidget(self.toolWidget)
 
         self.dataTable = QTableView(DataDetails)
         self.dataTable.setObjectName(u"dataTable")

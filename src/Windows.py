@@ -37,14 +37,12 @@ class MainWindow(QMainWindow):
 
         self.ui.nodeDetails.setEnabled(False)
         self.ui.edgeDetails.setEnabled(False)
-        self.tableWidget = self.ui.tabWidget
 
-        self.tableWidget.setVisible(False)
-        self.tableWidget.clear()
-        self.tableWidget.setTabsClosable(True)
-        self.tableWidget.setDocumentMode(True)
-
-        self.setCentralWidget(self.tableWidget)
+        self.ui.tabWidget.setVisible(False)
+        self.ui.tabWidget.clear()
+        self.ui.tabWidget.setTabsClosable(True)
+        self.ui.tabWidget.setDocumentMode(True)
+        self.setCentralWidget(self.ui.tabWidget)
         self.setAutoFillBackground(True)
 
         self.__buildStatusBar()  # 构造状态栏
@@ -103,10 +101,11 @@ class MainWindow(QMainWindow):
         self.scene.itemMoveSignal.connect(self.do_shapeMoved)
         self.scene.itemLock.connect(self.do_nodeLock)
 
-        title = f'Board_{self.tableWidget.count()}'
-        curIndex = self.tableWidget.addTab(self.view, title)
-        self.tableWidget.setCurrentIndex(curIndex)
-        self.tableWidget.setVisible(True)
+        title = f'Board_{self.ui.tabWidget.count()}'
+        curIndex = self.ui.tabWidget.addTab(self.view, title)
+        self.ui.tabWidget.setCurrentIndex(curIndex)
+        self.ui.tabWidget.setVisible(True)
+        self.ui.tabWidget.update()
 
         ##  4个信号与槽函数的关联
 
@@ -175,7 +174,7 @@ class MainWindow(QMainWindow):
         modeMenuGroup = QActionGroup(self)
         modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
         modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
-        #self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
+        # self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
 
     def __initToolMenu(self):
         pass
@@ -355,14 +354,17 @@ class MainWindow(QMainWindow):
                 string = f'{string}e{badEdgeList[x].data(self.__EdgeId)}{demo}'
             QMessageBox.warning(self, "连接故障！", "警告，" + string + "的连接不完整")
             return False
+        for g in self.__graph:
+            print(g)
         return True
 
     def disconnectGraph(self):
         self.__graph.clearAllData()
 
     def viewAndScene(self):
-        self.view: GraphicsView = self.tableWidget.currentWidget()
-        self.scene = self.view.scene()
+        if self.ui.tabWidget.count():
+            self.view: GraphicsView = self.ui.tabWidget.currentWidget()
+            self.scene = self.view.scene()
 
     # ==============event处理函数==========================
 
@@ -395,17 +397,13 @@ class MainWindow(QMainWindow):
     #     self.action = rightMouseMenu.exec_(self.mapToGlobal(event.pos()))
 
     #  ==========由connectSlotsByName()自动连接的槽函数============
-    @Slot()
+    @Slot()  # 新建画板
     def on_actionNew_triggered(self):
         self.iniGraphicsSystem()
-        # title = f'Board{self.tableWidget.count()}'
-        # curIndex = self.tableWidget.addTab(self.view, title)
-        # self.tableWidget.setCurrentIndex(curIndex)
-        # self.tableWidget.setVisible(True)
 
-    @Slot()
+    @Slot()  # 添加边
     def on_actionArc_triggered(self):  # 添加曲线
-        self.viewAndScene()
+        # self.viewAndScene()
         item = BezierEdge()
         item.setGraphMode(self.ui.actionDigraph_Mode.isChecked())
         self.__setItemProperties(item, "边")
@@ -413,7 +411,7 @@ class MainWindow(QMainWindow):
         self.__updateEdgeView()
         self.__updateNodeView()
 
-    @Slot()
+    @Slot()  # 添加顶点
     def on_actionCircle_triggered(self):  # 添加原点
         self.viewAndScene()
         item = BezierNode()
@@ -422,7 +420,7 @@ class MainWindow(QMainWindow):
         self.__updateNodeView()
         self.__updateEdgeView()
 
-    @Slot()
+    @Slot()  # 添加矩形框
     def on_actionRectangle_triggered(self):  # 添加矩形
         # for item in self.scene.items():
         #     if type(item) is BezierNode:
@@ -437,7 +435,7 @@ class MainWindow(QMainWindow):
 
         pass
 
-    @Slot()
+    @Slot()  # 添加注释
     def on_actionAdd_Annotation_triggered(self):
         self.viewAndScene()
         strText, OK = QInputDialog.getText(self, "输入", "请输入文字")
@@ -460,8 +458,8 @@ class MainWindow(QMainWindow):
             EdgeWeight = ShowDataWidget(self, items, name="边的权重")
             EdgeWeight.show()
 
-    @Slot()
-    def on_actionRedigraph_s_Degrees_triggered(self):  # 无向图的度
+    @Slot()  # 无向图的度
+    def on_actionRedigraph_s_Degrees_triggered(self):
         self.viewAndScene()
         # if len(self.scene.selectedItems()):
         #     items = self.scene.selectedItems()
@@ -485,8 +483,8 @@ class MainWindow(QMainWindow):
             NodeDegrees = ShowDataWidget(self, items, name="结点度")
             NodeDegrees.show()
 
-    @Slot()
-    def on_actionOut_degree_triggered(self):  # 有向图的出度
+    @Slot()  # 有向图的出度
+    def on_actionOut_degree_triggered(self):
         self.viewAndScene()
         items = self.scene.singleItems(BezierNode, 1) if len(
             self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
@@ -500,8 +498,8 @@ class MainWindow(QMainWindow):
             NodeDegrees.show()
         pass
 
-    @Slot()
-    def on_actionIn_degree_triggered(self):  ## 有向图的入度
+    @Slot()  # 有向图的入度
+    def on_actionIn_degree_triggered(self):
         self.viewAndScene()
         items = self.scene.singleItems(BezierNode, 1) if len(
             self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
@@ -514,6 +512,17 @@ class MainWindow(QMainWindow):
             NodeDegrees = ShowDataWidget(self, items, name="入度")
             NodeDegrees.show()
         pass
+
+    @Slot()  # 简单通路
+    def on_actionEasy_Pathway_triggered(self):
+        self.viewAndScene()
+        items = self.scene.uniqueItems()
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有元素")
+            return
+        if self.connectGraph():
+            EdgeWeight = ShowDataWidget(self, items, self.__graph, name="简单通路")
+            EdgeWeight.show()
 
     @Slot()  # 邻接矩阵
     def on_actionAdjacent_Matrix_Digraph_triggered(self):
@@ -529,7 +538,7 @@ class MainWindow(QMainWindow):
             MatrixTable = ShowMatrixWidget(self, self.__graph, "可达矩阵")
             MatrixTable.show()
 
-    @Slot()
+    @Slot()  # 关联矩阵
     def on_actionIncidence_Matrix_Undigraph_triggered(self):
         self.viewAndScene()
         if self.ui.actionDigraph_Mode.isChecked():
@@ -648,7 +657,7 @@ class MainWindow(QMainWindow):
                                         destNodeList.remove(destEdge)
 
                     self.scene.removeItem(item)  # 删除绘图项
-        #self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
+        # self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
         self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(bool)
@@ -697,15 +706,19 @@ class MainWindow(QMainWindow):
         self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
         self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
-    def on_tabWidget_currentChanged(self, index):  # tabWidget当前页面变化
-        hasTabs = self.tabWidget.count() > 0  # 再无页面时
-        self.tabWidget.setVisible(hasTabs)
+    @Slot(int)
+    def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
+        self.viewAndScene()
+        hasTabs = self.ui.tabWidget.count() > 0  # 再无页面时
+        self.ui.tabWidget.setVisible(hasTabs)
 
+    @Slot(int)
     def on_tabWidget_tabCloseRequested(self, index):  # 分页关闭时关闭窗体
         if index < 0:
             return
-        aForm = self.tabWidget.widget(index)
+        aForm = self.ui.tabWidget.widget(index)
         aForm.close()
+        self.ui.tabWidget.tabBar().removeTab(index)
 
     #  =============自定义槽函数===============================
     def do_nodeLock(self, item):
@@ -715,7 +728,7 @@ class MainWindow(QMainWindow):
     def do_mouseMove(self, point):  ##鼠标移动
         ##鼠标移动事件，point是 GraphicsView的坐标,物理坐标
         self.__labViewCord.setText("View 坐标：%d,%d" % (point.x(), point.y()))
-        pt = self.tableWidget.currentWidget().mapToScene(point)  # 转换到Scene坐标
+        pt = self.ui.tabWidget.currentWidget().mapToScene(point)  # 转换到Scene坐标
         self.__labSceneCord.setText("Scene 坐标：%.0f,%.0f" % (pt.x(), pt.y()))
 
     def do_mouseClicked(self, point):  ##鼠标单击

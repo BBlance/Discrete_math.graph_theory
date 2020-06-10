@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>274</width>
-    <height>218</height>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,9 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout"/>
+    <widget class="QWidget" name="toolWidget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+    </widget>
    </item>
    <item>
     <widget class="QTableView" name="dataTable"/>

@@ -76,6 +76,12 @@ private slots:
 
     void on_actionEdge_s_Weight_triggered();
 
+    void on_actionEasy_Pathway_triggered();
+
+    void on_tabWidget_currentChanged(int index);
+
+    void on_tabWidget_tabCloseRequested(int index);
+
 private:
     Ui::MainWindow *ui;
 };

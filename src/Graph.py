@@ -259,14 +259,6 @@ class Graph:
                         pathways.append(newPath)
         return pathways
 
-    # def pathway(self, start, end):
-    #     if start == end:
-    #         return []
-    #     pathway=[self.__vertDict[start]]
-    #     for edge in self.__vertDict[start].edgeConnections():
-    #         if edge.toVert() not in pathway:
-    #             if
-
     def findAllPathWithEdge(self, start, end, pathway=[]):
         pathways = self.findPathWay(start, end, pathway)
         for pathway in pathways:
@@ -412,11 +404,11 @@ if __name__ == '__main__':
 
     for i in range(2):
         g.addVertex(i)
-    g.setMode(False)
-    g.addEdge(0, 1, 5)
-    g.addEdge(0, 3, 5)
-    
-    print(g.edges())
+    # g.setMode(False)
+    # g.addEdge(0, 1, 5)
+    # g.addEdge(0, 3, 5)
+    #
+    # print(g.edges())
 
     # g.addEdge(0, 1, 5)
     # g.addEdge(0, 5, 2)
@@ -434,30 +426,32 @@ if __name__ == '__main__':
     # g.addEdge(3, 1, 0)
     # g.addEdge(1, 2, 0)
 
-    # g.addEdge(0, 0, 5)
-    # g.addEdge(0, 1, 1)
-    # g.addEdge(0, 1, 3)
-    # g.addEdge(0, 2, 2)
-    # g.addEdge(1, 2, 8)
-    # g.addEdge(2, 3, 7)
-    # g.addEdge(3, 2, 6)
+    g.addEdge(0, 0, 5)
+    g.addEdge(0, 1, 1)
+    g.addEdge(0, 1, 3)
+    g.addEdge(0, 2, 2)
+    g.addEdge(1, 2, 8)
+    g.addEdge(2, 3, 7)
+    g.addEdge(3, 2, 6)
 
     # paths = g.findAllPath(0, 2)
     # for path in paths:
     #     for vert in path:
     #         print(vert.id(), end="\t")
     #     print()
-    # paths = g.findAllPathWithEdge(0, 2)
+    paths = g.findAllPathWithEdge(0, 2)
     # path = value_counts(paths)
     #
     # print(path.index[0])
+
+    print(paths)
     #
-    # for path in paths:
-    #     for vert in path:
-    #         if type(vert) is Edge:
-    #             print("e" + str(vert.id()), end="\t")
-    #         elif type(vert) is Vertex:
-    #             print("v" + str(vert.id()), end="\t")
-    #
-    #     print()
-    # print()
+    for path in paths:
+        for vert in path:
+            if type(vert) is Edge:
+                print("e" + str(vert.id()), end="\t")
+            elif type(vert) is Vertex:
+                print("v" + str(vert.id()), end="\t")
+
+        print()
+    print()

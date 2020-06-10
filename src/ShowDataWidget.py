@@ -1,11 +1,14 @@
+import sys
+
 from PySide2.QtWidgets import (QApplication, QWidget, QFileDialog,
                                QToolBar, QVBoxLayout, QFontDialog)
 
-from PySide2.QtCore import QItemSelectionModel, Qt
+from PySide2.QtCore import QItemSelectionModel, Qt, QRegExp
 
-from PySide2.QtGui import QStandardItemModel, QStandardItem
+from PySide2.QtGui import QStandardItemModel, QStandardItem, QRegExpValidator, QCloseEvent
 
-from ui_DataDetails import Ui_DataDetails, QAbstractItemView, QHeaderView, QLabel
+from Graph import Graph
+from ui_DataDetails import Ui_DataDetails, QAbstractItemView, QHeaderView, QLabel, QLineEdit, QPushButton, QMessageBox
 
 
 class ShowDataWidget(QWidget):
@@ -17,13 +20,17 @@ class ShowDataWidget(QWidget):
         self.ui = Ui_DataDetails()
         self.ui.setupUi(self)
         self.parent = parent
-        self.__graph = graph
-        self.layout = self.ui.verticalLayout
+        self.__graph: Graph() = graph
+        self.toolWidget = self.ui.toolWidget
+        self.layout = self.toolWidget.layout()
         self.items = items
         self.rowCount = 0
         self.columnCount = 0
         self.horizontalHeaderList = []
         self.verticalHeaderList = []
+
+        self.toolWidget.setVisible(False)
+
         self.dataDetailView = self.ui.dataTable
         self.dataDetailView.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.dataModel = QStandardItemModel(self.rowCount, self.columnCount, self)
@@ -37,6 +44,7 @@ class ShowDataWidget(QWidget):
         self.dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.dataDetailView.setAlternatingRowColors(True)
+
         if name == '边的权重':
             self.edgeDetails()
             pass
@@ -47,6 +55,7 @@ class ShowDataWidget(QWidget):
             self.nodeDetails(name)
             pass
         elif name == '简单通路':
+            self.__iniToolWidget()
             pass
         elif name == '复杂通路':
             pass
@@ -61,9 +70,6 @@ class ShowDataWidget(QWidget):
         elif name == '哈密顿回路':
             pass
         self.setWindowTitle(name)
-
-        if not graph:
-            parent.disconnectGraph()
 
     def edgeDetails(self):
         self.horizontalHeaderList = ['ID', '权重']
@@ -114,3 +120,80 @@ class ShowDataWidget(QWidget):
             for j in range(self.columnCount):
                 item = QStandardItem(strList[j])
                 self.dataModel.setItem(i, j, item)
+
+    def __iniToolWidget(self):
+
+        self.toolWidget.setVisible(True)
+        self.startLabel = QLabel("始点")
+        self.endLabel = QLabel("终点")
+        self.startNodeEdit = QLineEdit(self)
+        self.endNodeEdit = QLineEdit(self)
+        self.searchBtn = QPushButton("search", self)
+
+        rx = QRegExp(r'^[A-Z][\d+]{5}$')
+        validator1 = QRegExpValidator(rx, self.startNodeEdit)
+        validator2 = QRegExpValidator(rx, self.endNodeEdit)
+
+        self.startNodeEdit.setValidator(validator1)
+        self.endNodeEdit.setValidator(validator2)
+
+        self.startNodeEdit.setInputMask("A999")
+        self.endNodeEdit.setInputMask("A999")
+
+        self.startNodeEdit.setText("V000")
+        self.endNodeEdit.setText("V000")
+
+        self.startNodeEdit.setMinimumWidth(40)
+        self.endNodeEdit.setMinimumWidth(40)
+
+        self.startNodeEdit.setCursor(Qt.IBeamCursor)
+        self.endNodeEdit.setCursor(Qt.IBeamCursor)
+
+        self.searchBtn.clicked.connect(self.do_searchBtn)
+
+        self.layout.addStretch()
+        self.layout.addWidget(self.startLabel)
+        self.layout.addWidget(self.startNodeEdit)
+        self.layout.addStretch()
+        self.layout.addWidget(self.endLabel)
+        self.layout.addWidget(self.endNodeEdit)
+        self.layout.addStretch()
+        self.layout.addWidget(self.searchBtn)
+        self.layout.addStretch()
+
+    def easyPath(self, paths=None):
+        self.rowCount = len(paths)
+        self.dataModel.setRowCount(self.rowCount)
+        self.dataModel.setColumnCount(self.columnCount)
+        self.dataModel.clear()
+        for i in range(self.rowCount):
+            for j in range(len(paths[i])):
+                if str(type(paths[i][j])).find("Edge") >= 0:
+                    item = QStandardItem(f'e{paths[i][j].id()}')
+                    self.dataModel.setItem(i, j, item)
+                elif str(type(paths[i][j])).find("Vertex") >= 0:
+                    item = QStandardItem(f'V{paths[i][j].id()}')
+                    self.dataModel.setItem(i, j, item)
+
+    def do_searchBtn(self):
+        start = int(self.startNodeEdit.text().strip('V'))
+        end = int(self.endNodeEdit.text().strip('V'))
+        paths = self.__graph.findAllPathWithEdge(start, end)
+        if len(paths) == 0:
+            self.dataModel.clear()
+            QMessageBox.information(None, "Sorry", "没有符合条件的通路")
+            return
+        self.easyPath(paths)
+
+    def closeEvent(self, event: QCloseEvent):
+        if self.__graph:
+            self.parent.disconnectGraph()
+
+        super().closeEvent(event)
+
+
+if __name__ == "__main__":  # 用于当前窗体测试
+    app = QApplication(sys.argv)  # 创建GUI应用程序
+    form = ShowDataWidget()  # 创建窗体
+    form.show()
+    sys.exit(app.exec_())

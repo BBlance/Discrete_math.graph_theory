@@ -116,3 +116,18 @@ void MainWindow::on_actionEdge_s_Weight_triggered()
 {
 
 }
+
+void MainWindow::on_actionEasy_Pathway_triggered()
+{
+
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+
+}
+
+void MainWindow::on_tabWidget_tabCloseRequested(int index)
+{
+
+}
