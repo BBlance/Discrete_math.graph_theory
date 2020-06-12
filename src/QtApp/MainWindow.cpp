@@ -131,3 +131,8 @@ void MainWindow::on_tabWidget_tabCloseRequested(int index)
 {
 
 }
+
+void MainWindow::on_actionDigraph_Mode_toggled(bool arg1)
+{
+
+}

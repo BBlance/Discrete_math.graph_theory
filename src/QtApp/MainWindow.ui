@@ -126,8 +126,6 @@
       <addaction name="menuDigraph_s_Degrees"/>
       <addaction name="actionRedigraph_s_Degrees"/>
      </widget>
-     <addaction name="actionNode_s_Name"/>
-     <addaction name="actionEdge_Name"/>
      <addaction name="menuNode_s_Degree"/>
      <addaction name="actionEdge_s_Weight"/>
     </widget>
@@ -141,13 +139,14 @@
       </property>
       <addaction name="actionEasy_Pathway"/>
       <addaction name="actionComplicated_Pathway"/>
+      <addaction name="actionPrimary_Pathway"/>
      </widget>
      <widget class="QMenu" name="menuLoop">
       <property name="title">
        <string> 回路</string>
       </property>
       <addaction name="actionEasy_Loop"/>
-      <addaction name="actionComplicated_Loop"/>
+      <addaction name="actionPrimary_Pathway_2"/>
      </widget>
      <addaction name="menuPathway"/>
      <addaction name="menuLoop"/>
@@ -639,28 +638,12 @@
     <string>简单通路</string>
    </property>
   </action>
-  <action name="actionComplicated_Pathway">
-   <property name="text">
-    <string>复杂通路</string>
-   </property>
-   <property name="toolTip">
-    <string>复杂通路</string>
-   </property>
-  </action>
   <action name="actionEasy_Loop">
    <property name="text">
     <string>简单回路</string>
    </property>
    <property name="toolTip">
     <string>简单回路</string>
-   </property>
-  </action>
-  <action name="actionComplicated_Loop">
-   <property name="text">
-    <string>复杂回路</string>
-   </property>
-   <property name="toolTip">
-    <string>复杂回路</string>
    </property>
   </action>
   <action name="actionIncidence_Matrix_Undigraph">
@@ -975,22 +958,27 @@
     <string>可达矩阵</string>
    </property>
   </action>
-  <action name="actionEdge_Name">
-   <property name="text">
-    <string>边名称</string>
-   </property>
-  </action>
   <action name="actionEuler_PathWay">
    <property name="text">
     <string>欧拉通路</string>
    </property>
   </action>
-  <action name="actionNode_s_Name">
+  <action name="actionPrimary_Pathway">
    <property name="text">
-    <string>结点名称</string>
+    <string>初级通路</string>
+   </property>
+  </action>
+  <action name="actionPrimary_Pathway_2">
+   <property name="text">
+    <string>初级回路</string>
+   </property>
+  </action>
+  <action name="actionComplicated_Pathway">
+   <property name="text">
+    <string>复杂通路</string>
    </property>
    <property name="toolTip">
-    <string>结点名称</string>
+    <string>复杂通路</string>
    </property>
   </action>
  </widget>

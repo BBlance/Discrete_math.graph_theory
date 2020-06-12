@@ -82,6 +82,8 @@ private slots:
 
     void on_tabWidget_tabCloseRequested(int index);
 
+    void on_actionDigraph_Mode_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
 };

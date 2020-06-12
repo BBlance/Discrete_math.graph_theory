@@ -27,7 +27,7 @@ class ShowMatrixWidget(QWidget):
 
         if name == "邻接矩阵":
             self.setWindowTitle(name)
-            data = self.__graph.adjacentMatrix()
+            data = self.__graph.adjacentMatrixWithEdges()
             for node in self.__graph:
                 HorizontalHeaderList.append(f'V{node.id()}')
             VerticalHeaderList = HorizontalHeaderList

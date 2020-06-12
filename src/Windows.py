@@ -86,6 +86,8 @@ class MainWindow(QMainWindow):
 
         self.__labItemInfo = QLabel("ItemInfo: ")
         self.ui.statusbar.addPermanentWidget(self.__labItemInfo)
+        self.__labModeInfo = QLabel("有向图模式")
+        self.ui.statusbar.addPermanentWidget(self.__labModeInfo)
 
     def iniGraphicsSystem(self):  ##初始化 Graphics View系统
 
@@ -264,7 +266,7 @@ class MainWindow(QMainWindow):
         VerticalHeaderList = []
         dataDetailView = None
         if name == "邻接矩阵":
-            data = self.__graph.adjacentMatrix()
+            data = self.__graph.adjacentMatrixWithEdges()
             for node in self.__graph:
                 HorizontalHeaderList.append(f'V{node.id()}')
             VerticalHeaderList = HorizontalHeaderList
@@ -452,10 +454,14 @@ class MainWindow(QMainWindow):
             self.scene.singleItems(BezierEdge, 1)) else self.scene.singleItems(
             BezierEdge)
         if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有结点")
+            QMessageBox.warning(self, "警告", "图中没有边")
             return
         if self.connectGraph():
+            if len(items) == 0:
+                QMessageBox.warning(self, "警告", "图中没有边")
+                return
             EdgeWeight = ShowDataWidget(self, items, name="边的权重")
+            EdgeWeight.edgeDetails()
             EdgeWeight.show()
 
     @Slot()  # 无向图的度
@@ -481,6 +487,7 @@ class MainWindow(QMainWindow):
 
         if self.connectGraph():
             NodeDegrees = ShowDataWidget(self, items, name="结点度")
+            NodeDegrees.nodeDetails()
             NodeDegrees.show()
 
     @Slot()  # 有向图的出度
@@ -495,6 +502,7 @@ class MainWindow(QMainWindow):
 
         if self.connectGraph():
             NodeDegrees = ShowDataWidget(self, items, name="出度")
+            NodeDegrees.nodeDetails("出度")
             NodeDegrees.show()
         pass
 
@@ -510,23 +518,33 @@ class MainWindow(QMainWindow):
 
         if self.connectGraph():
             NodeDegrees = ShowDataWidget(self, items, name="入度")
+            NodeDegrees.nodeDetails("入度")
             NodeDegrees.show()
         pass
 
     @Slot()  # 简单通路
     def on_actionEasy_Pathway_triggered(self):
         self.viewAndScene()
-        items = self.scene.uniqueItems()
+        items = self.scene.singleItems(BezierNode, 1)
         if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有元素")
+            QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
             return
+        elif len(items) != 2:
+            QMessageBox.warning(self, "警告", "选择的起始点数目不符合要求")
+            return
+
         if self.connectGraph():
-            EdgeWeight = ShowDataWidget(self, items, self.__graph, name="简单通路")
-            EdgeWeight.show()
+            PathWay = ShowDataWidget(self, items, self.__graph, name="简单通路")
+            if PathWay.easyPath():
+                PathWay.show()
 
     @Slot()  # 邻接矩阵
     def on_actionAdjacent_Matrix_Digraph_triggered(self):
         self.viewAndScene()
+        items = self.scene.singleItems(BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
         if self.connectGraph():
             MatrixTable = ShowMatrixWidget(self, self.__graph, "邻接矩阵")
             MatrixTable.show()
@@ -534,6 +552,10 @@ class MainWindow(QMainWindow):
     @Slot()  # 可达矩阵
     def on_actionReachable_Matrix_triggered(self):
         self.viewAndScene()
+        items = self.scene.singleItems(BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
         if self.connectGraph():
             MatrixTable = ShowMatrixWidget(self, self.__graph, "可达矩阵")
             MatrixTable.show()
@@ -541,6 +563,10 @@ class MainWindow(QMainWindow):
     @Slot()  # 关联矩阵
     def on_actionIncidence_Matrix_Undigraph_triggered(self):
         self.viewAndScene()
+        items = self.scene.singleItems(BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
         if self.ui.actionDigraph_Mode.isChecked():
             items = self.singleItems(BezierEdge)
             badNodeList = []
@@ -616,7 +642,8 @@ class MainWindow(QMainWindow):
         self.do_deleteItem()
 
     @Slot(bool)
-    def on_actionDigraph_Mode_triggered(self, checked: bool):
+    def on_actionDigraph_Mode_toggled(self, checked: bool):
+        self.__labModeInfo.setText("有向图模式")
         self.__graph.setMode(checked)
         items = self.scene.uniqueItems()
         if len(items) != 0:
@@ -661,7 +688,8 @@ class MainWindow(QMainWindow):
         self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(bool)
-    def on_actionRedigraph_Mode_triggered(self, checked: bool):
+    def on_actionRedigraph_Mode_toggled(self, checked: bool):
+        self.__labModeInfo.setText("无向图模式")
         self.__graph.setMode(checked)
         items = self.scene.uniqueItems()
         if len(items) != 0:
@@ -709,6 +737,8 @@ class MainWindow(QMainWindow):
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
         self.viewAndScene()
+        self.__updateEdgeView()
+        self.__updateNodeView()
         hasTabs = self.ui.tabWidget.count() > 0  # 再无页面时
         self.ui.tabWidget.setVisible(hasTabs)
 

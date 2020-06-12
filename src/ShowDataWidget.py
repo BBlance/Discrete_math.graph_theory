@@ -45,19 +45,17 @@ class ShowDataWidget(QWidget):
         self.dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.dataDetailView.setAlternatingRowColors(True)
 
-        if name == '边的权重':
-            self.edgeDetails()
-            pass
-        elif name == '结点度':
-            self.nodeDetails()
-            pass
-        elif name == '出度' or name == '入度':
-            self.nodeDetails(name)
-            pass
-        elif name == '简单通路':
-            self.__iniToolWidget()
-            pass
-        elif name == '复杂通路':
+
+        # if name == '结点度':
+        #     self.nodeDetails()
+        #     pass
+        # if name == '出度' or name == '入度':
+        #     self.nodeDetails(name)
+        #     pass
+        # elif name == '简单通路':
+        #     if not self.easyPath(self.items):
+
+        if name == '复杂通路':
             pass
         elif name == '最短路径':
             pass
@@ -161,7 +159,14 @@ class ShowDataWidget(QWidget):
         self.layout.addWidget(self.searchBtn)
         self.layout.addStretch()
 
-    def easyPath(self, paths=None):
+    def easyPath(self):
+        startNode = self.items[0].data(2)
+        endNode = self.items[1].data(2)
+        paths = self.__graph.findAllPathWithEdge(startNode, endNode)
+        if len(paths) == 0:
+            self.dataModel.clear()
+            QMessageBox.information(None, "Sorry", "没有符合条件的通路")
+            return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
         self.dataModel.setColumnCount(self.columnCount)
@@ -174,6 +179,8 @@ class ShowDataWidget(QWidget):
                 elif str(type(paths[i][j])).find("Vertex") >= 0:
                     item = QStandardItem(f'V{paths[i][j].id()}')
                     self.dataModel.setItem(i, j, item)
+
+        return True
 
     def do_searchBtn(self):
         start = int(self.startNodeEdit.text().strip('V'))

@@ -29,6 +29,7 @@ class GraphicsScene(QGraphicsScene):
                     items.append(item)
         return items
 
+    #  获取需要的结点和边
     def uniqueItems(self):
         items = QGraphicsScene.items(self, order=Qt.SortOrder.DescendingOrder)
         itemList = []
