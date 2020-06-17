@@ -36,6 +36,9 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
+    <property name="statusTip">
+     <string>文件操作</string>
+    </property>
     <property name="title">
      <string> 文件</string>
     </property>
@@ -62,10 +65,16 @@
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="statusTip">
+     <string>常用的操作</string>
+    </property>
     <property name="title">
      <string>编辑</string>
     </property>
     <widget class="QMenu" name="menuFind_or_Replace">
+     <property name="statusTip">
+      <string>查找和替换图元</string>
+     </property>
      <property name="title">
       <string>查找/替换</string>
      </property>
@@ -78,22 +87,21 @@
     <addaction name="menuFind_or_Replace"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
+    <property name="statusTip">
+     <string>绘图工具和绘图板相关设置</string>
+    </property>
     <property name="title">
      <string>设置</string>
     </property>
     <widget class="QMenu" name="menuDraw_Tools">
+     <property name="statusTip">
+      <string>绘图工具</string>
+     </property>
      <property name="title">
       <string>绘图工具</string>
      </property>
-     <widget class="QMenu" name="menuLine">
-      <property name="title">
-       <string>线</string>
-      </property>
-      <addaction name="actionArc"/>
-     </widget>
-     <addaction name="menuLine"/>
+     <addaction name="actionArc"/>
      <addaction name="actionCircle"/>
-     <addaction name="actionRectangle"/>
      <addaction name="actionAdd_Annotation"/>
     </widget>
     <addaction name="menuDraw_Tools"/>
@@ -108,91 +116,53 @@
     <property name="title">
      <string>工具</string>
     </property>
-    <widget class="QMenu" name="menuNodes_Edges_Details">
-     <property name="title">
-      <string>结点与边详情</string>
+    <widget class="QMenu" name="menuLoop">
+     <property name="statusTip">
+      <string>给定图G=&lt;V,E&gt;（无向图或有向图）, G中顶点与边的交替序列£=v0e1v1e2…envn. 其中1&lt;=i&lt;=n, ei=(vi-1,vi), 则称£为v0到vn的通路。v0和vn分别为通路的起点和终点, n(边的条数)为通路的长度， 当v0=vn时，则称其为回路</string>
      </property>
-     <widget class="QMenu" name="menuNode_s_Degree">
-      <property name="title">
-       <string>结点的度</string>
-      </property>
-      <widget class="QMenu" name="menuDigraph_s_Degrees">
-       <property name="title">
-        <string>有向图的度</string>
-       </property>
-       <addaction name="actionOut_degree"/>
-       <addaction name="actionIn_degree"/>
-      </widget>
-      <addaction name="menuDigraph_s_Degrees"/>
-      <addaction name="actionRedigraph_s_Degrees"/>
-     </widget>
-     <addaction name="menuNode_s_Degree"/>
-     <addaction name="actionEdge_s_Weight"/>
-    </widget>
-    <widget class="QMenu" name="menuPathway_and_Loop">
      <property name="title">
-      <string>通路和回路</string>
+      <string>回路</string>
      </property>
-     <widget class="QMenu" name="menuPathway">
-      <property name="title">
-       <string> 通路</string>
-      </property>
-      <addaction name="actionEasy_Pathway"/>
-      <addaction name="actionComplicated_Pathway"/>
-      <addaction name="actionPrimary_Pathway"/>
-     </widget>
-     <widget class="QMenu" name="menuLoop">
-      <property name="title">
-       <string> 回路</string>
-      </property>
-      <addaction name="actionEasy_Loop"/>
-      <addaction name="actionPrimary_Pathway_2"/>
-     </widget>
-     <addaction name="menuPathway"/>
-     <addaction name="menuLoop"/>
+     <addaction name="actionEasy_Loop"/>
+     <addaction name="actionPrimary_Loop"/>
     </widget>
     <widget class="QMenu" name="menuGraph_Matrix">
      <property name="title">
       <string>图的矩阵</string>
      </property>
+     <widget class="QMenu" name="menu">
+      <property name="title">
+       <string>邻接矩阵</string>
+      </property>
+      <addaction name="actionWeight"/>
+      <addaction name="action_EdgeNum"/>
+     </widget>
      <addaction name="actionIncidence_Matrix_Undigraph"/>
-     <addaction name="actionAdjacent_Matrix_Digraph"/>
+     <addaction name="menu"/>
      <addaction name="actionReachable_Matrix"/>
     </widget>
-    <widget class="QMenu" name="menuSpecial_Graph">
-     <property name="title">
-      <string>特殊图</string>
+    <widget class="QMenu" name="menuPathway">
+     <property name="statusTip">
+      <string>图的通路，定义查看（Shift+F1）</string>
      </property>
-     <widget class="QMenu" name="menuEuler_Graph">
-      <property name="title">
-       <string>欧拉图</string>
-      </property>
-      <addaction name="actionFind_Euler_Loop"/>
-      <addaction name="actionEuler_PathWay"/>
-     </widget>
-     <widget class="QMenu" name="menuHamiltonian_Graph">
-      <property name="title">
-       <string>哈密顿图</string>
-      </property>
-      <addaction name="actionFind_Hamiltonian_Loop"/>
-     </widget>
-     <addaction name="actionBigraph"/>
-     <addaction name="menuEuler_Graph"/>
-     <addaction name="menuHamiltonian_Graph"/>
-    </widget>
-    <widget class="QMenu" name="menuShortest_Path_and_Critical_Path">
-     <property name="title">
-      <string>最短路径和关键路径</string>
+     <property name="whatsThis">
+      <string>给定图G=&lt;V,E&gt;（无向图或有向图）, G中顶点与边的交替序列£=v0e1v1e2…envn. 其中1&lt;=i&lt;=n, ei=(vi-1,vi), 则称£为v0到vn的通路。v0和vn分别为通路的起点和终点, n(边的条数)为通路的长度。</string>
      </property>
-     <addaction name="actionShortest_Path"/>
-     <addaction name="actionCritical_Path"/>
+     <property name="title">
+      <string>通路</string>
+     </property>
+     <addaction name="actionEasy_Pathway"/>
+     <addaction name="actionPrimary_Pathway"/>
     </widget>
-    <addaction name="menuNodes_Edges_Details"/>
-    <addaction name="menuPathway_and_Loop"/>
+    <addaction name="menuPathway"/>
+    <addaction name="menuLoop"/>
     <addaction name="menuGraph_Matrix"/>
-    <addaction name="menuSpecial_Graph"/>
-    <addaction name="menuShortest_Path_and_Critical_Path"/>
-    <addaction name="actionGraph_Coloring_Problem"/>
+    <addaction name="actionShortestPath"/>
+    <addaction name="actionConnectivity"/>
+    <addaction name="actionSupplementgraph"/>
+    <addaction name="actionSub_motGraph"/>
+    <addaction name="actionCompleteGraph"/>
+    <addaction name="actionMultipleOrSimple"/>
    </widget>
    <widget class="QMenu" name="menuMode">
     <property name="title">
@@ -542,6 +512,9 @@
    <property name="toolTip">
     <string>撤销</string>
    </property>
+   <property name="statusTip">
+    <string>退回上一步</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Z</string>
    </property>
@@ -555,6 +528,9 @@
     <string>重做</string>
    </property>
    <property name="toolTip">
+    <string>重做</string>
+   </property>
+   <property name="statusTip">
     <string>重做</string>
    </property>
    <property name="shortcut">
@@ -572,6 +548,9 @@
    <property name="toolTip">
     <string>删除</string>
    </property>
+   <property name="statusTip">
+    <string>删除当前所选图元</string>
+   </property>
    <property name="shortcut">
     <string>Del</string>
    </property>
@@ -583,6 +562,9 @@
    <property name="toolTip">
     <string>查找</string>
    </property>
+   <property name="statusTip">
+    <string>查找图元</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
    </property>
@@ -593,6 +575,9 @@
    </property>
    <property name="toolTip">
     <string>替换</string>
+   </property>
+   <property name="statusTip">
+    <string>替换图元</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -636,6 +621,9 @@
    </property>
    <property name="toolTip">
     <string>简单通路</string>
+   </property>
+   <property name="statusTip">
+    <string>通路中的边互不相同，  则称其为£的简单通路</string>
    </property>
   </action>
   <action name="actionEasy_Loop">
@@ -799,6 +787,9 @@
    <property name="toolTip">
     <string>最近文件</string>
    </property>
+   <property name="statusTip">
+    <string>最近打开的文件</string>
+   </property>
   </action>
   <action name="actionPen_Thickness">
    <property name="icon">
@@ -812,7 +803,7 @@
     <string>画笔粗细与样式</string>
    </property>
    <property name="statusTip">
-    <string>画笔粗细与样式</string>
+    <string>调整画笔粗细与样式</string>
    </property>
   </action>
   <action name="actionPen_Color">
@@ -827,7 +818,7 @@
     <string>画笔颜色</string>
    </property>
    <property name="statusTip">
-    <string>画笔颜色</string>
+    <string>调整画笔的颜色</string>
    </property>
   </action>
   <action name="actionBackground_Color">
@@ -841,6 +832,9 @@
    <property name="toolTip">
     <string>背景色</string>
    </property>
+   <property name="statusTip">
+    <string>调整画板的背景色</string>
+   </property>
   </action>
   <action name="actionArc">
    <property name="icon">
@@ -848,13 +842,13 @@
      <normaloff>:/icons/images/favicon.ico</normaloff>:/icons/images/favicon.ico</iconset>
    </property>
    <property name="text">
-    <string>曲线</string>
+    <string>边</string>
    </property>
    <property name="toolTip">
     <string>曲线</string>
    </property>
    <property name="statusTip">
-    <string>曲线</string>
+    <string>绘图所使用的边</string>
    </property>
   </action>
   <action name="actionCircle">
@@ -863,13 +857,13 @@
      <normaloff>:/icons/images/dot_72px_1154609_easyicon.net.ico</normaloff>:/icons/images/dot_72px_1154609_easyicon.net.ico</iconset>
    </property>
    <property name="text">
-    <string>结点</string>
+    <string>顶点</string>
    </property>
    <property name="toolTip">
     <string>结点</string>
    </property>
    <property name="statusTip">
-    <string>结点</string>
+    <string>绘图所使用的顶点</string>
    </property>
   </action>
   <action name="actionSetEnglish">
@@ -904,7 +898,7 @@
     <string>添加注释</string>
    </property>
    <property name="statusTip">
-    <string>文本</string>
+    <string>向图中添加注释</string>
    </property>
   </action>
   <action name="actionProperty_And_History">
@@ -919,6 +913,9 @@
    </property>
    <property name="toolTip">
     <string>属性与历史记录</string>
+   </property>
+   <property name="statusTip">
+    <string>隐藏或者显示属性栏</string>
    </property>
   </action>
   <action name="actionRectangle">
@@ -947,10 +944,8 @@
    <property name="toolTip">
     <string>强调色</string>
    </property>
-  </action>
-  <action name="actionAdjacent_Matrix_Digraph">
-   <property name="text">
-    <string>邻接矩阵</string>
+   <property name="statusTip">
+    <string>选中图原时的颜色</string>
    </property>
   </action>
   <action name="actionReachable_Matrix">
@@ -968,17 +963,49 @@
     <string>初级通路</string>
    </property>
   </action>
-  <action name="actionPrimary_Pathway_2">
+  <action name="actionPrimary_Loop">
    <property name="text">
     <string>初级回路</string>
    </property>
   </action>
-  <action name="actionComplicated_Pathway">
+  <action name="actionShortestPath">
    <property name="text">
-    <string>复杂通路</string>
+    <string>最短路径</string>
    </property>
-   <property name="toolTip">
-    <string>复杂通路</string>
+  </action>
+  <action name="actionWeight">
+   <property name="text">
+    <string>权重</string>
+   </property>
+  </action>
+  <action name="action_EdgeNum">
+   <property name="text">
+    <string>边数</string>
+   </property>
+  </action>
+  <action name="actionConnectivity">
+   <property name="text">
+    <string>图的连通性</string>
+   </property>
+  </action>
+  <action name="actionSupplementgraph">
+   <property name="text">
+    <string>补图判定</string>
+   </property>
+  </action>
+  <action name="actionSub_motGraph">
+   <property name="text">
+    <string>子母图关系</string>
+   </property>
+  </action>
+  <action name="actionCompleteGraph">
+   <property name="text">
+    <string>完全图判定</string>
+   </property>
+  </action>
+  <action name="actionMultipleOrSimple">
+   <property name="text">
+    <string>简单图多重图判定</string>
    </property>
   </action>
  </widget>

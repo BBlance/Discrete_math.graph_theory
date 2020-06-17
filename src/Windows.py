@@ -685,7 +685,6 @@ class MainWindow(QMainWindow):
 
                     self.scene.removeItem(item)  # 删除绘图项
         # self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
-        self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(bool)
     def on_actionRedigraph_Mode_toggled(self, checked: bool):
@@ -732,7 +731,6 @@ class MainWindow(QMainWindow):
                     self.scene.removeItem(item)  # 删除绘图项
 
         self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
-        self.ui.menuDigraph_s_Degrees.setEnabled(self.ui.actionDigraph_Mode.isChecked())
 
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
