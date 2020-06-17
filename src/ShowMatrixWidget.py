@@ -1,7 +1,4 @@
-import sys, os  # codecs
-
-from PySide2.QtWidgets import (QApplication, QWidget, QFileDialog,
-                               QToolBar, QVBoxLayout, QFontDialog)
+from PySide2.QtWidgets import QWidget
 
 from PySide2.QtCore import QItemSelectionModel, Qt
 
