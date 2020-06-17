@@ -1,9 +1,11 @@
+from random import randint
 from typing import Optional
-from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QMessageBox
+from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QMessageBox, \
+    QGraphicsSceneContextMenuEvent, QMenu, QAction
 
 from PySide2.QtCore import QPointF, QRectF, Qt, QLineF
 from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF, QPen, \
-    QPainterPathStroker
+    QPainterPathStroker, QCursor
 
 from BezierGraphicsItem import BezierGraphicsItem
 
@@ -77,7 +79,6 @@ class BezierEdge(BezierGraphicsItem):
     def setSourceNode(self, source):
         self.__source = source
 
-
     def setDestNode(self, dest):
         self.__dest = dest
 
@@ -101,7 +102,7 @@ class BezierEdge(BezierGraphicsItem):
             if length2 > 20.0:
                 edgeOffset = QPointF(line2.dx() * 10 / length2, line2.dy() * 10 / length2)
                 if self._isDigraph:
-                    self.__destPoint = line2.p1() + edgeOffset * 1.55
+                    self.__destPoint = line2.p1() + edgeOffset * 2.3
                 else:
                     self.__destPoint = line2.p1() + edgeOffset
             else:
@@ -173,7 +174,7 @@ class BezierEdge(BezierGraphicsItem):
     def drawArrow(self):
         line = QLineF(self._edge2, self.__destPoint)
         v = line.unitVector()
-        v.setLength(7)
+        v.setLength(12)
         v.translate(QPointF(line.dx(), line.dy()))
         n = v.normalVector()
         n.setLength(n.length() * 0.5)
@@ -252,6 +253,67 @@ class BezierEdge(BezierGraphicsItem):
             if self.__dest or self.__source:
                 self.adjust()
         super().mouseMoveEvent(event)
+
+    def contextMenuEvent(self, event: QGraphicsSceneContextMenuEvent):
+        menu = QMenu()
+        if self._isDigraph:
+            changeDirection = QAction("更换方向")
+            changeDirection.triggered.connect(self.do_changeDirection)
+            menu.addAction(changeDirection)
+
+        if self.__source:
+            lockOnSourceAction = QAction("解除始点连接")
+            lockOnSourceAction.triggered.connect(lambda: self.do_lockOnNodes(self.__source))
+            menu.addAction(lockOnSourceAction)
+        if self.__dest:
+            lockOnDestAction = QAction("解除终点连接")
+            lockOnDestAction.triggered.connect(lambda: self.do_lockOnNodes(self.__dest))
+            menu.addAction(lockOnDestAction)
+
+        menu.exec_(QCursor.pos())
+
+    def do_lockOnNodes(self, node):
+
+        node: BezierNode
+        intRandom = randint(10, 80)
+
+        if node is self.__source:
+            self.__source = None
+            newPos: QPointF = self.specialControlPoints()[0]
+            newPos.setX(newPos.x() + intRandom)
+            self.setSpecialControlPoint(newPos, ItemType.SourceType)
+            node.removeBezierEdge(edge=self, itemType=ItemType.SourceType)
+        else:
+            self.__dest = None
+            newPos: QPointF = self.specialControlPoints()[1]
+            newPos.setX(newPos.x() + intRandom)
+            self.setSpecialControlPoint(newPos, ItemType.DestType)
+            node.removeBezierEdge(edge=self, itemType=ItemType.DestType)
+
+    def do_changeDirection(self):
+        node = self.__sourcePoint
+        self.__sourcePoint = self.__destPoint
+        self.__destPoint = node
+
+        node = self._edge1
+        self._edge1 = self._edge2
+        self._edge2 = node
+
+        if self.__source:
+            self.__source: BezierNode
+            edges = self.__source.bezierEdges
+            self.__source.removeBezierEdge(self, ItemType.SourceType)
+            self.__source.addBezierEdge(self, ItemType.DestType)
+
+        if self.__dest:
+            self.__dest: BezierNode
+            edges = self.__dest.bezierEdges
+            self.__dest.removeBezierEdge(self, ItemType.DestType)
+            self.__dest.addBezierEdge(self, ItemType.SourceType)
+
+        node = self.__source
+        self.__source = self.__dest
+        self.__dest = node
 
 
 from BezierNode import BezierNode
