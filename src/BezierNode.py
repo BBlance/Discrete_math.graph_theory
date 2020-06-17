@@ -28,6 +28,9 @@ class BezierNode(BezierGraphicsItem):
     def bezierEdges(self):
         return self.__bezierEdgeList
 
+    def removeBezierEdge(self, edge, itemType):
+        self.__bezierEdgeList.remove({edge: itemType})
+
     @property
     def textPos(self):
         self._m_textPos = QPointF(self._m_centerPos.x() - 7, self._m_centerPos.y() - 30)
@@ -154,5 +157,7 @@ class BezierNode(BezierGraphicsItem):
                     newPos.setX(newPos.x() + intRandom)
                     edge.setSpecialControlPoint(newPos, itemType)
 
+        self.__bezierEdgeList.clear()
 
-from PointItem import BezierPointItem, BezierTextItem, PointType, ItemType
+
+from PointItem import BezierTextItem, PointType, ItemType
