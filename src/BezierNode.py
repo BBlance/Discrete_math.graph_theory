@@ -12,10 +12,14 @@ from BezierGraphicsItem import BezierGraphicsItem
 
 class BezierNode(BezierGraphicsItem):
     __newPos = QPointF()
+    _m_weightPos = QPointF(0, 0)
 
     def __init__(self, center=QPointF(0, 0)):
         super(BezierNode, self).__init__(center)
         self.textCp = BezierTextItem(self, self._m_textPos, PointType.Text, ItemType.PointType)
+        self.weightCp = BezierTextItem(self, self.weightPos, PointType.Text, ItemType.PathType)
+        self.weightCp.setPlainText("0")
+        self.weightCp.setVisible(False)
         self.__bezierEdgeList = []
 
     ##  ==============自定义功能函数========================
@@ -32,9 +36,34 @@ class BezierNode(BezierGraphicsItem):
         self.__bezierEdgeList.remove({edge: itemType})
 
     @property
+    def weightPos(self):
+        self._m_weightPos = QPointF(self._m_centerPos.x() - 10, self._m_centerPos.y() + 5)
+        return self._m_weightPos
+
+    @property
     def textPos(self):
         self._m_textPos = QPointF(self._m_centerPos.x() - 7, self._m_centerPos.y() - 30)
         return self._m_textPos
+
+    def weight(self):
+        weight = self.weightCp.toPlainText()
+        if weight.isdigit():
+            return int(weight)
+        elif self.is_Float():
+            return int(float(weight))
+
+        title = "权重设置错误"
+        strInfo = "您的权重有误，请更正为数字！"
+        QMessageBox.warning(None, title, strInfo)
+
+    def is_Float(self):
+        weight = self.weightCp.toPlainText()
+        try:
+            float(weight)
+            return True
+        except ValueError:
+            pass
+        return False
 
     def digraphDegrees(self, mode: bool):  # 结点的度
         if mode:
@@ -151,11 +180,19 @@ class BezierNode(BezierGraphicsItem):
                     newPos: QPointF = edge.specialControlPoints()[0]
                     newPos.setX(newPos.x() + intRandom)
                     edge.setSpecialControlPoint(newPos, itemType)
+                    edge.beginCp.setPoint(newPos)
+                    edge.beginCp.setVisible(True)
                 elif itemType == ItemType.DestType:
                     edge.setDestNode(None)
                     newPos: QPointF = edge.specialControlPoints()[1]
                     newPos.setX(newPos.x() + intRandom)
                     edge.setSpecialControlPoint(newPos, itemType)
+                    edge.endCp.setPoint(newPos)
+                    edge.endCp.setVisible(True)
+
+        self.scene().update()
+
+
 
         self.__bezierEdgeList.clear()
 

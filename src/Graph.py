@@ -33,6 +33,9 @@ class Graph:
     def edgeNumber(self):
         return self.__numEdge
 
+    def nodeNumber(self):
+        return self.__numVertices
+
     def edges(self):
         return self.__edgeDict.values()
 
@@ -162,8 +165,9 @@ class Graph:
                                 matrix[item.id()][num] = 1
         return mat(matrix)
 
-    # 邻接矩阵
+    # 邻接矩阵 边数
     def adjacentMatrixWithEdges(self):
+
         matrix = zeros((len(self.__vertDict), len(self.__vertDict)))
 
         for item in self.__vertDict.values():
@@ -173,13 +177,15 @@ class Graph:
                 matrix[item.id()][x.id()] = num[x]
         return mat(matrix)
 
+    # 邻接矩阵 权重
     def adjacentMatrixWithWeight(self):
+        if self.multipleOrSimple():
+            return False
         matrix = zeros((len(self.__vertDict), len(self.__vertDict)))
         for item in self.__vertDict.values():
             item: Vertex
-            num = value_counts(item.vertConnections())
-            for x in num.index:
-                matrix[item.id()][x.id()] = num[x]
+            for edge in item.edgeConnections():
+                matrix[item.id()][edge.toVert().id()] = edge.weight()
         return mat(matrix)
 
     #  可达矩阵
@@ -206,6 +212,8 @@ class Graph:
     # 简单图与多重图的判定
     # 若为简单图则返回FALSE，多重图则返回平行边
     def multipleOrSimple(self):
+        if not self.__numEdge:
+            return False
         edges = list(self.__edgeDict.values())
         parallelSides = []
 
@@ -214,16 +222,16 @@ class Graph:
                 if self.__mode:
                     if (edges[x].fromVert() == edges[y].fromVert()) and (edges[x].toVert() == edges[y].toVert()):
                         if edges[x] not in parallelSides:
-                            parallelSides.append(edges[x])
+                            parallelSides.append(edges[x].id())
                         if edges[y] not in parallelSides:
-                            parallelSides.append(edges[y])
+                            parallelSides.append(edges[y].id())
                 else:
                     if ((edges[x].fromVert() == edges[y].fromVert()) and (edges[x].toVert() == edges[y].toVert())) or (
                             (edges[x].fromVert() == edges[y].toVert()) and (edges[x].toVert() == edges[y].fromVert())):
                         if edges[x] not in parallelSides:
-                            parallelSides.append(edges[x])
+                            parallelSides.append(edges[x].id())
                         if edges[y] not in parallelSides:
-                            parallelSides.append(edges[y])
+                            parallelSides.append(edges[y].id())
         if not len(parallelSides):
             for edge in edges:
                 if edge.fromVert() == edge.toVert():
@@ -286,7 +294,7 @@ class Graph:
         return False
 
     # 连通性判断
-    # True为连通图，False为非连通图,1为单向连通，2为强连通
+    # True为连通图，False为非连通图,2为单向连通，3为强连通
     def connectivity(self) -> [bool, int]:
         if len(self.__edgeDict) == 0 and len(self.__vertDict) == 1:
             return True
@@ -310,12 +318,12 @@ class Graph:
                         if not len(self.findSimplePathway(self.__vertDict[y].id(), self.__vertDict[x].id())):
                             break
                     else:
-                        return True
+                        return 1
                 else:
                     continue
-                return 1
-            else:
                 return 2
+            else:
+                return 3
         return True
 
     #  图的度的计算
@@ -676,115 +684,11 @@ class Edge:
 
 if __name__ == '__main__':
     g = Graph()
-    s = Graph()
 
-    # g.addEdge(0, 0, 5)
-    # g.addEdge(0, 1, 1)
-    # g.addEdge(1, 0, 3)
-    # g.addEdge(0, 2, 1)
-    # g.addEdge(1, 2, 8)
-    # g.addEdge(2, 3, 7)
-    # g.addEdge(3, 2, 6)
+    g.addEdge(1, 0)
+    g.addEdge(1, 2)
+    g.addEdge(1, 3)
+    g.addEdge(3, 0)
+    g.addEdge(3, 2)
 
-    # g.addEdge(1, 0)
-    # g.addEdge(0, 2)
-    # g.addEdge(3, 1)
-    # g.addEdge(2, 3)
-    # g.addEdge(0, 3)
-
-    # g.addEdge(0, 1)
-    # g.addEdge(2, 0)
-    # g.addEdge(1, 3)
-    # g.addEdge(2, 3)
-    # g.addEdge(2, 1)
-
-    # g.addEdge(1, 0)
-    # g.addEdge(2, 0)
-    # g.addEdge(1, 3)
-    # g.addEdge(2, 3)
-    # g.addEdge(1, 2)
-
-    # g.addEdge(0, 1, 0)
-    # g.addEdge(0, 2, 0)
-    # g.addEdge(0, 3, 0)
-    # g.addEdge(1, 2, 0)
-    # g.addEdge(1, 3, 0)
-    # g.addEdge(2, 3, 0)
-
-    # g.setMode(False)
-    # s.setMode(False)
-
-    # g.addEdge(0, 1, 0)
-    # g.addEdge(1, 0, 0)
-    # g.addEdge(0, 2, 0)
-    # g.addEdge(2, 0, 0)
-    # g.addEdge(1, 2, 0)
-    # g.addEdge(2, 1, 0)
-
-    # s.addVertex(0)
-    #
-    # s.addEdge(2, 1, 1)
-    # s.addEdge(1, 2, 1)
-    # s.addEdge(0, 2, 1)
-    # s.addEdge(2, 0, 1)
-
-    # for path in paths:
-    #     for item in path:
-    #         if type(item) is Edge:
-    #             print(f"e{item.id()}", end='\t')
-    #         if type(item) is Vertex:
-    #             print(f"v{item.id()}", end='\t')
-    #     print()
-    # print()
-    # for path in paths2:
-    #     for item in path:
-    #         if type(item) is Edge:
-    #             print(f"e{item.id()}", end='\t')
-    #         if type(item) is Vertex:
-    #             print(f"v{item.id()}", end='\t')
-    #     print()
-
-    # g.addEdge(0, 1, 1)
-    # g.addEdge(0, 2, 4)
-    # g.addEdge(1, 2, 2)
-    # g.addEdge(1, 4, 5)
-    # g.addEdge(1, 3, 7)
-    # g.addEdge(2, 4, 1)
-    # g.addEdge(3, 4, 3)
-    # g.addEdge(3, 5, 2)
-    # g.addEdge(4, 5, 6)
-
-    # g.addEdge(0, 1, 3)
-    # g.addEdge(0, 2, 10)
-    # g.addEdge(1, 3, 9)
-    # g.addEdge(1, 4, 13)
-    # g.addEdge(2, 4, 12)
-    # g.addEdge(2, 5, 7)
-    # g.addEdge(3, 6, 8)
-    # g.addEdge(3, 7, 4)
-    # g.addEdge(4, 7, 6)
-    # g.addEdge(5, 7, 11)
-    # g.addEdge(6, 8, 2)
-    # g.addEdge(7, 8, 5)
-
-    g.addEdge(0, 1, 1)
-    g.addEdge(0, 2, 2)
-    g.addEdge(0, 3, 3)
-    g.addEdge(1, 3, 0)
-    g.addEdge(1, 4, 3)
-    g.addEdge(2, 3, 2)
-    g.addEdge(2, 6, 4)
-    g.addEdge(2, 5, 4)
-    g.addEdge(3, 4, 4)
-    g.addEdge(4, 5, 1)
-    g.addEdge(5, 7, 1)
-    g.addEdge(6, 7, 6)
-    g.dfs()
-
-    for s in g:
-        print(s.discovery(), end='\t')
-    print()
-    for s in g:
-        print(s.finish(), end='\t')
-
-
+    print(g.connectivity())

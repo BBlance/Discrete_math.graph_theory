@@ -84,6 +84,24 @@ private slots:
 
     void on_actionDigraph_Mode_toggled(bool arg1);
 
+    void on_action_EdgeNum_triggered();
+
+    void on_actionWeight_triggered();
+
+    void on_actionEasy_Loop_triggered();
+
+    void on_actionPrimary_Pathway_triggered();
+
+    void on_actionPrimary_Loop_triggered();
+
+    void on_actionShowNodesWeight_toggled(bool arg1);
+
+    void on_actionConnectivity_triggered();
+
+    void on_actionCompleteGraph_triggered();
+
+    void on_actionMultipleOrSimple_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

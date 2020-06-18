@@ -136,3 +136,48 @@ void MainWindow::on_actionDigraph_Mode_toggled(bool arg1)
 {
 
 }
+
+void MainWindow::on_action_EdgeNum_triggered()
+{
+
+}
+
+void MainWindow::on_actionWeight_triggered()
+{
+
+}
+
+void MainWindow::on_actionEasy_Loop_triggered()
+{
+
+}
+
+void MainWindow::on_actionPrimary_Pathway_triggered()
+{
+
+}
+
+void MainWindow::on_actionPrimary_Loop_triggered()
+{
+
+}
+
+void MainWindow::on_actionShowNodesWeight_toggled(bool arg1)
+{
+
+}
+
+void MainWindow::on_actionConnectivity_triggered()
+{
+
+}
+
+void MainWindow::on_actionCompleteGraph_triggered()
+{
+
+}
+
+void MainWindow::on_actionMultipleOrSimple_triggered()
+{
+
+}

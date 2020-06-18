@@ -55,22 +55,6 @@ class BezierGraphicsItem(QAbstractGraphicsShapeItem, QObject):
         self._m_textPos = QPointF(self._m_centerPos.x() - 7, self._m_centerPos.y() - 30)
         return self._m_textPos
 
-    #
-    # def setTextPos(self):
-    #     self._m_text = QPointF(self._m_center.x(), self._m_center.y() + 10)
-
-    # def maxLength(self):
-    #     vec = []
-    #     for temp in self._m_pointList:
-    #         dis = sqrt(pow(self._m_centerPos.x() - temp.x(), 2) + pow(self._m_centerPos.y() - temp.y(), 2))
-    #         vec.append(dis)
-    #
-    #     ret = float(0)
-    #     for temp in vec:
-    #         if temp > ret:
-    #             ret = temp
-    #
-    #     self._m_radius = ret
 
     def set_noSelectedPenColor(self, color="gray"):
         self._m_pen_noSelectedColor = QColor(color)

@@ -56,6 +56,7 @@ class GraphicsView(QGraphicsView):
         elif event.key() == Qt.Key_Minus:
             self.zoomOut()
 
+
         super().keyPressEvent(event)
 
     # def drawBackground(self, painter: QPainter, rect: QRectF):

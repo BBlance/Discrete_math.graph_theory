@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 import sys, random
-from PySide2.QtCore import Slot, Qt, QRectF, QItemSelectionModel
+from PySide2.QtCore import Slot, Qt, QRectF, QItemSelectionModel, QModelIndex
 
 from PySide2.QtGui import QBrush, QStandardItemModel, QStandardItem
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QColorDialog, \
-    QInputDialog, QLabel, QMessageBox, QFileDialog, QActionGroup, QUndoStack, QGraphicsItem, QGraphicsView, QFontDialog, \
-    QHeaderView, QAbstractItemView
+    QInputDialog, QLabel, QMessageBox, QFileDialog, QActionGroup, QUndoStack, QGraphicsItem, QGraphicsView, \
+    QHeaderView, QAbstractItemView, QFontDialog
 
 from BezierEdge import BezierEdge
 from BezierNode import BezierNode
@@ -25,11 +25,10 @@ from OperatorFile import OperatorData
 
 
 class MainWindow(QMainWindow):
-
     def __init__(self, parent=None):
         super().__init__(parent)  # 调用父类构造函数，创建窗体
-        self.scene = GraphicsScene(self)  # 创建QGraphicsScene
-        self.view = GraphicsView(self, self.scene)  # 创建图形视图组件
+        self.__scene = GraphicsScene(self)  # 创建QGraphicsScene
+        self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
         self.ui = Ui_MainWindow()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
 
@@ -37,6 +36,14 @@ class MainWindow(QMainWindow):
 
         self.ui.nodeDetails.setEnabled(False)
         self.ui.edgeDetails.setEnabled(False)
+
+        self.edgeModel = QStandardItemModel(5, 5, self)
+        self.edgeSelectionModel = QItemSelectionModel(self.edgeModel)
+        self.edgeModel.dataChanged.connect(self.do_updateEdgeWeight)
+
+        self.nodeModel = QStandardItemModel(5, 4, self)
+        self.nodeSelectionModel = QItemSelectionModel(self.nodeModel)
+        self.nodeModel.dataChanged.connect(self.do_updateNodeWeight)
 
         self.ui.tabWidget.setVisible(False)
         self.ui.tabWidget.clear()
@@ -49,6 +56,7 @@ class MainWindow(QMainWindow):
         self.__buildUndoCommand()  # 初始化撤销重做系统
         self.__initModeMenu()
         self.__initToolMenu()
+        self.__lastColumnFlag = Qt.NoItemFlags
 
         self.iniGraphicsSystem()
 
@@ -71,6 +79,24 @@ class MainWindow(QMainWindow):
         self.__graph = Graph()
 
     ##  ==============自定义功能函数============
+
+    def nodeNum(self):
+        return self.__nodeNum
+
+    def edgeNum(self):
+        return self.__edgeNum
+
+    def scene(self):
+        self.viewAndScene()
+        return self.__scene
+
+    def view(self):
+        self.viewAndScene()
+        return self.__view
+
+    def graph(self):
+        return self.__graph
+
     def __buildStatusBar(self):  ##构造状态栏
         self.__labViewCord = QLabel("View 坐标：")
         self.__labViewCord.setMinimumWidth(150)
@@ -91,20 +117,20 @@ class MainWindow(QMainWindow):
 
     def iniGraphicsSystem(self):  ##初始化 Graphics View系统
 
-        self.scene = GraphicsScene(self)  # 创建QGraphicsScene
-        self.view = GraphicsView(self, self.scene)  # 创建图形视图组件
-        self.scene.setSceneRect(QRectF(-300, -200, 600, 200))
-        self.view.setCursor(Qt.CrossCursor)  # 设置鼠标
-        self.view.setMouseTracking(True)
-        self.view.setDragMode(QGraphicsView.RubberBandDrag)
+        self.__scene = GraphicsScene(self)  # 创建QGraphicsScene
+        self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
+        self.__scene.setSceneRect(QRectF(-300, -200, 600, 200))
+        self.__view.setCursor(Qt.CrossCursor)  # 设置鼠标
+        self.__view.setMouseTracking(True)
+        self.__view.setDragMode(QGraphicsView.RubberBandDrag)
 
-        self.view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
-        self.view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
-        self.scene.itemMoveSignal.connect(self.do_shapeMoved)
-        self.scene.itemLock.connect(self.do_nodeLock)
+        self.__view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
+        self.__view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+        self.__scene.itemMoveSignal.connect(self.do_shapeMoved)
+        self.__scene.itemLock.connect(self.do_nodeLock)
 
         title = f'Board_{self.ui.tabWidget.count()}'
-        curIndex = self.ui.tabWidget.addTab(self.view, title)
+        curIndex = self.ui.tabWidget.addTab(self.__view, title)
         self.ui.tabWidget.setCurrentIndex(curIndex)
         self.ui.tabWidget.setVisible(True)
         self.ui.tabWidget.update()
@@ -150,8 +176,8 @@ class MainWindow(QMainWindow):
         item.setData(self.__ItemId, self.__seqNum)  # 图件编号
         item.setData(self.__ItemDesc, desc)  # 图件描述
 
-        self.scene.addItem(item)
-        self.scene.clearSelection()
+        self.__scene.addItem(item)
+        self.__scene.clearSelection()
         item.setSelected(True)
 
     def __setBrushColor(self, item):  ##设置填充颜色
@@ -192,19 +218,19 @@ class MainWindow(QMainWindow):
         else:
             return
         edgeColCount = 5
-        edgeModel = QStandardItemModel(5, edgeColCount, self)
-        edgeSelectionModel = QItemSelectionModel(edgeModel)
-        edgeModel.clear()
-        edgeHeaderList = ['ID', '始点', '终点', '坐标', '权重']
-        edgeModel.setHorizontalHeaderLabels(edgeHeaderList)
 
-        self.ui.edgeDetails.setModel(edgeModel)
-        self.ui.edgeDetails.setSelectionModel(edgeSelectionModel)
+        self.edgeModel.clear()
+        edgeHeaderList = ['ID', '始点', '终点', '坐标', '权重']
+        self.edgeModel.setHorizontalHeaderLabels(edgeHeaderList)
+        self.edgeSelectionModel.currentChanged.connect(self.do_curEdgeChanged)
+
+        self.ui.edgeDetails.setModel(self.edgeModel)
+        self.ui.edgeDetails.setSelectionModel(self.edgeSelectionModel)
         self.ui.edgeDetails.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.ui.edgeDetails.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.edgeDetails.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.edgeDetails.setAlternatingRowColors(True)
-        edgeModel.setRowCount(len(edges))
+        self.edgeModel.setRowCount(len(edges))
         edges.reverse()
         for i in range(len(edges)):
             edge: BezierEdge = edges[i]
@@ -217,7 +243,9 @@ class MainWindow(QMainWindow):
 
             for j in range(edgeColCount):
                 item = QStandardItem(strList[j])
-                edgeModel.setItem(i, j, item)
+                if j != edgeColCount - 1:
+                    item.setFlags(self.__lastColumnFlag)
+                self.edgeModel.setItem(i, j, item)
 
     def __updateNodeView(self):
         nodes = self.singleItems(BezierNode)
@@ -226,9 +254,7 @@ class MainWindow(QMainWindow):
         else:
             return
         nodeColCount = 4
-        nodeModel = QStandardItemModel(5, nodeColCount, self)
-        nodeModel.clear()
-        nodeSelectionModel = QItemSelectionModel(nodeModel)
+        self.nodeModel.clear()
         nodeHeaderList = ['ID', '边数', '坐标', '权重']
         if self.ui.actionDigraph_Mode.isChecked():
             nodeHeaderList.append('出度')
@@ -237,11 +263,11 @@ class MainWindow(QMainWindow):
         else:
             nodeHeaderList.append("度")
             nodeColCount += 1
-        nodeModel.setHorizontalHeaderLabels(nodeHeaderList)
-        nodeModel.setRowCount(len(nodes))
-        # nodeSelectionModel.currentChanged.connect(self.do_curChanged)
-        self.ui.nodeDetails.setModel(nodeModel)
-        self.ui.nodeDetails.setSelectionModel(nodeSelectionModel)
+        self.nodeModel.setHorizontalHeaderLabels(nodeHeaderList)
+        self.nodeModel.setRowCount(len(nodes))
+        self.nodeSelectionModel.currentChanged.connect(self.do_curNodeChanged)
+        self.ui.nodeDetails.setModel(self.nodeModel)
+        self.ui.nodeDetails.setSelectionModel(self.nodeSelectionModel)
         self.ui.nodeDetails.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.ui.nodeDetails.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.nodeDetails.setAlternatingRowColors(True)
@@ -249,7 +275,7 @@ class MainWindow(QMainWindow):
         for i in range(len(nodes)):
             node: BezierNode = nodes[i]
             strList = [f"V{node.data(self.__NodeId)}", str(len(node.bezierEdges)),
-                       f"x:{node.pos().x()},y:{node.pos().y()}", str(node.data(self.__NodeId))]
+                       f"x:{node.pos().x()},y:{node.pos().y()}", str(node.weight())]
             if self.ui.actionDigraph_Mode.isChecked():
                 strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())[1]}')
                 strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())[0]}')
@@ -257,73 +283,17 @@ class MainWindow(QMainWindow):
                 strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())}')
             for j in range(nodeColCount):
                 item = QStandardItem(strList[j])
-                nodeModel.setItem(i, j, item)
-
-    def __updateDataDetail(self, name: str):
-        self.connectGraph()
-        data = None
-        HorizontalHeaderList = []
-        VerticalHeaderList = []
-        dataDetailView = None
-        if name == "邻接矩阵":
-            data = self.__graph.adjacentMatrixWithEdges()
-            for node in self.__graph:
-                HorizontalHeaderList.append(f'V{node.id()}')
-            VerticalHeaderList = HorizontalHeaderList
-            dataDetailView = self.ui.adjacentMatrixDetails
-        elif name == "可达矩阵":
-            temp = self.__graph.reachableMatrix()
-            data = temp[0]
-            step = temp[1]
-            for node in self.__graph:
-                HorizontalHeaderList.append(f'V{node.id()}')
-            VerticalHeaderList = HorizontalHeaderList
-            dataDetailView = self.ui.reachableMatrixDetails
-            self.ui.incidenceLabel.setText(f"可达矩阵，步数{step}")
-        elif name == "关联矩阵":
-            for node in self.__graph:
-                VerticalHeaderList.append(f'V{node.id()}')
-            for edge in self.__graph.edges():
-                HorizontalHeaderList.append(f'e{edge}')
-            data = self.__graph.incidenceMatrix()
-            dataDetailView = self.ui.incidenceMatrixDetails
-
-        dataDetailView.setEditTriggers(QAbstractItemView.NoEditTriggers)
-
-        HorizontalHeaderList.reverse()
-        colCount = data.shape[1]
-        rowCount = data.shape[0]
-        data = data.tolist()
-
-        dataModel = QStandardItemModel(rowCount, colCount, self)
-        dataSelectionModel = QItemSelectionModel(dataModel)
-        dataModel.clear()
-        dataModel.setHorizontalHeaderLabels(HorizontalHeaderList)
-        dataModel.setVerticalHeaderLabels(VerticalHeaderList)
-        dataDetailView.setModel(dataModel)
-        dataDetailView.setSelectionModel(dataSelectionModel)
-        dataDetailView.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
-        dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        dataDetailView.setAlternatingRowColors(True)
-
-        for i in range(rowCount):
-            strList = []
-            for x in data[i]:
-                strList.append(f"{x}")
-            for j in range(colCount):
-                item = QStandardItem(strList[j])
-                dataModel.setItem(i, j, item)
-
-        dataModel.setRowCount(rowCount)
+                if j != 3:
+                    item.setFlags(self.__lastColumnFlag)
+                self.nodeModel.setItem(i, j, item)
 
     def singleItems(self, className) -> list:
         self.viewAndScene()
-        return self.scene.singleItems(className)
+        return self.__scene.singleItems(className)
 
     def connectGraph(self):
         self.__graph.setMode(self.ui.actionDigraph_Mode.isChecked())
-        items = self.scene.uniqueItems()
+        items = self.__scene.uniqueItems()
         nodeList = []
         edgeList = []
         if not len(items):
@@ -356,8 +326,7 @@ class MainWindow(QMainWindow):
                 string = f'{string}e{badEdgeList[x].data(self.__EdgeId)}{demo}'
             QMessageBox.warning(self, "连接故障！", "警告，" + string + "的连接不完整")
             return False
-        for g in self.__graph:
-            print(g)
+
         return True
 
     def disconnectGraph(self):
@@ -365,8 +334,8 @@ class MainWindow(QMainWindow):
 
     def viewAndScene(self):
         if self.ui.tabWidget.count():
-            self.view: GraphicsView = self.ui.tabWidget.currentWidget()
-            self.scene = self.view.scene()
+            self.__view: GraphicsView = self.ui.tabWidget.currentWidget()
+            self.__scene = self.__view.scene()
 
     # ==============event处理函数==========================
 
@@ -424,17 +393,9 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 添加矩形框
     def on_actionRectangle_triggered(self):  # 添加矩形
-        # for item in self.scene.items():
-        #     if type(item) is BezierNode:
-        #         print(item.data(2))
-        #     elif type(item) is BezierEdge:
-        #         print(item.data(3))
-        # self.do_connectGraph()
-        # print(self.scene.selectedItems())
 
         for item in self.singleItems(BezierNode):
             print(item.data(2), item.bezierEdges)
-
         pass
 
     @Slot()  # 添加注释
@@ -447,85 +408,33 @@ class MainWindow(QMainWindow):
         self.__setItemProperties(item, "注释")
         self.do_addItem(item)
 
-    @Slot()  # 边的权重
-    def on_actionEdge_s_Weight_triggered(self):
-        self.viewAndScene()
-        items = self.scene.singleItems(BezierEdge, 1) if len(
-            self.scene.singleItems(BezierEdge, 1)) else self.scene.singleItems(
-            BezierEdge)
-        if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有边")
-            return
-        if self.connectGraph():
-            if len(items) == 0:
-                QMessageBox.warning(self, "警告", "图中没有边")
-                return
-            EdgeWeight = ShowDataWidget(self, items, name="边的权重")
-            EdgeWeight.edgeDetails()
-            EdgeWeight.show()
+    @Slot(bool)
+    def on_actionShowNodesWeight_toggled(self, check: bool):
+        nodes = self.__scene.singleItems(BezierNode)
+        for node in nodes:
+            node: BezierNode
+            node.weightCp.setVisible(check)
 
-    @Slot()  # 无向图的度
-    def on_actionRedigraph_s_Degrees_triggered(self):
-        self.viewAndScene()
-        # if len(self.scene.selectedItems()):
-        #     items = self.scene.selectedItems()
-        # elif len(self.scene.uniqueItems()):
-        #     items = self.scene.uniqueItems()
-        # else:
-        #     QMessageBox.warning(self, "警告", "图中没有元素")
-        #     return
-        # copyItem = []
-        # for item in items:
-        #     if str(type(item)).find("BezierNode") >= 0:
-        #         copyItem.append(item)
-        items = self.scene.singleItems(BezierNode, 1) if len(
-            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
-            BezierNode)
-        if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有结点")
-            return
+        if check:
+            self.ui.actionShowNodesWeight.setText("隐藏顶点权重")
+        else:
+            self.ui.actionShowNodesWeight.setText("显示顶点权重")
 
-        if self.connectGraph():
-            NodeDegrees = ShowDataWidget(self, items, name="结点度")
-            NodeDegrees.nodeDetails()
-            NodeDegrees.show()
-
-    @Slot()  # 有向图的出度
-    def on_actionOut_degree_triggered(self):
-        self.viewAndScene()
-        items = self.scene.singleItems(BezierNode, 1) if len(
-            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
-            BezierNode)
-        if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有结点")
-            return
-
-        if self.connectGraph():
-            NodeDegrees = ShowDataWidget(self, items, name="出度")
-            NodeDegrees.nodeDetails("出度")
-            NodeDegrees.show()
-        pass
-
-    @Slot()  # 有向图的入度
-    def on_actionIn_degree_triggered(self):
-        self.viewAndScene()
-        items = self.scene.singleItems(BezierNode, 1) if len(
-            self.scene.singleItems(BezierNode, 1)) else self.scene.singleItems(
-            BezierNode)
-        if len(items) == 0:
-            QMessageBox.warning(self, "警告", "图中没有结点")
-            return
-
-        if self.connectGraph():
-            NodeDegrees = ShowDataWidget(self, items, name="入度")
-            NodeDegrees.nodeDetails("入度")
-            NodeDegrees.show()
-        pass
+    @Slot(bool)
+    def on_actionShowEdgesWeight_toggled(self, check: bool):
+        edges = self.__scene.singleItems(BezierEdge)
+        for edge in edges:
+            edge: BezierNode
+            edge.weightCp.setVisible(check)
+        if check:
+            self.ui.actionShowEdgesWeight.setText("隐藏边权重")
+        else:
+            self.ui.actionShowEdgesWeight.setText("显示边权重")
 
     @Slot()  # 简单通路
     def on_actionEasy_Pathway_triggered(self):
         self.viewAndScene()
-        items = self.scene.singleItems(BezierNode, 1)
+        items = self.__scene.nodeList
         if len(items) == 0:
             QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
             return
@@ -535,24 +444,88 @@ class MainWindow(QMainWindow):
 
         if self.connectGraph():
             PathWay = ShowDataWidget(self, items, self.__graph, name="简单通路")
+            PathWay.pathSignal.connect(self.do_ShowSelectPath)
             if PathWay.easyPath():
+                PathWay.updateToolWidget()
                 PathWay.show()
 
-    @Slot()  # 邻接矩阵
-    def on_actionAdjacent_Matrix_Digraph_triggered(self):
+    @Slot()  # 简单回路
+    def on_actionEasy_Loop_triggered(self):
         self.viewAndScene()
-        items = self.scene.singleItems(BezierNode)
+        items = self.__scene.nodeList
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
+            return
+
+        if self.connectGraph():
+            LoopWay = ShowDataWidget(self, items, self.__graph, name="简单回路")
+            LoopWay.pathSignal.connect(self.do_ShowSelectPath)
+            if LoopWay.easyLoop():
+                LoopWay.updateToolWidget(mode=1)
+                LoopWay.show()
+
+    @Slot()  # 初级通路
+    def on_actionPrimary_Pathway_triggered(self):
+        items = self.__scene.nodeList
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
+            return
+        elif len(items) != 2:
+            QMessageBox.warning(self, "警告", "选择的起始点数目不符合要求")
+            return
+
+        if self.connectGraph():
+            PathWay = ShowDataWidget(self, items, self.__graph, name="简单通路")
+            PathWay.pathSignal.connect(self.do_ShowSelectPath)
+            if PathWay.primaryPath():
+                PathWay.updateToolWidget(path=1)
+                PathWay.show()
+
+    @Slot()  # 初级回路
+    def on_actionPrimary_Loop_triggered(self):
+        self.viewAndScene()
+        items = self.__scene.nodeList
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
+            return
+
+        if self.connectGraph():
+            LoopWay = ShowDataWidget(self, items, self.__graph, name="简单回路")
+            LoopWay.pathSignal.connect(self.do_ShowSelectPath)
+            if LoopWay.primaryLoop():
+                LoopWay.updateToolWidget(mode=1, path=1)
+                LoopWay.show()
+
+    @Slot()  # 邻接矩阵 边数
+    def on_action_EdgeNum_triggered(self):
+        self.viewAndScene()
+        items = self.__scene.singleItems(BezierNode)
         if len(items) == 0:
             QMessageBox.warning(self, "警告", "图中没有结点")
             return
         if self.connectGraph():
-            MatrixTable = ShowMatrixWidget(self, self.__graph, "邻接矩阵")
+            MatrixTable = ShowMatrixWidget(self, self.__graph, "邻接矩阵", 0)
             MatrixTable.show()
+
+    @Slot()  # 邻接矩阵 权重
+    def on_actionWeight_triggered(self):
+        self.viewAndScene()
+        items = self.__scene.singleItems(BezierNode)
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "图中没有结点")
+            return
+        if self.connectGraph():
+            if not self.__graph.multipleOrSimple():
+                MatrixTable = ShowMatrixWidget(self, self.__graph, "邻接矩阵", 1)
+                MatrixTable.show()
+            else:
+                QMessageBox.information(self, "Sorry", "这个图不是简单图")
+                self.disconnectGraph()
 
     @Slot()  # 可达矩阵
     def on_actionReachable_Matrix_triggered(self):
         self.viewAndScene()
-        items = self.scene.singleItems(BezierNode)
+        items = self.__scene.singleItems(BezierNode)
         if len(items) == 0:
             QMessageBox.warning(self, "警告", "图中没有结点")
             return
@@ -563,7 +536,7 @@ class MainWindow(QMainWindow):
     @Slot()  # 关联矩阵
     def on_actionIncidence_Matrix_Undigraph_triggered(self):
         self.viewAndScene()
-        items = self.scene.singleItems(BezierNode)
+        items = self.__scene.singleItems(BezierNode)
         if len(items) == 0:
             QMessageBox.warning(self, "警告", "图中没有结点")
             return
@@ -586,13 +559,61 @@ class MainWindow(QMainWindow):
             MatrixTable = ShowMatrixWidget(self, self.__graph, "关联矩阵")
             MatrixTable.show()
 
-    # @Slot()
-    # def on_actionUndo_triggered(self):  # 撤销
-    #     self.command.undo()
-    #
-    # @Slot()
-    # def on_actionRedo_triggered(self):  # 重做
-    #     self.command.redo()
+    @Slot()  # 图的连通性
+    def on_actionConnectivity_triggered(self):
+        name = ''
+        if self.connectGraph():
+            num = self.__graph.connectivity()
+
+            if num is False:
+                name = '此图为非连通图'
+            elif num == 2:
+                name = "此图为单向连通图"
+            elif num == 3:
+                name = "此图为强连通图"
+            elif num == 1:
+                name = '此图为连通图'
+
+            QMessageBox.information(self, "图的连通性", name)
+
+            self.disconnectGraph()
+
+    @Slot()  # 完全图判定
+    def on_actionCompleteGraph_triggered(self):
+        if self.connectGraph():
+            edge = self.__graph.completeGraph()
+            if edge:
+                name = "此图为完全图"
+            else:
+                name = '此图不是完全图'
+
+            QMessageBox.information(self, "完全图判定", name)
+
+            self.disconnectGraph()
+
+    @Slot() # 简单图多重图判定
+    def on_actionMultipleOrSimple_triggered(self):
+        if self.connectGraph():
+            edges = self.__graph.multipleOrSimple()
+            if not edges:
+                QMessageBox.information(self, "简单图与多重图的判定", "此图为简单图")
+
+            else:
+                parallelSides = ShowDataWidget(self, edges, self.__graph, "简单图与多重图的判定")
+                parallelSides.multipleOrSimple()
+                parallelSides.show()
+
+    @Slot()
+    def on_actionUndo_triggered(self):  # 撤销
+        self.undoStack.undo()
+        self.__updateEdgeView()
+        self.__updateNodeView()
+
+    @Slot()
+    def on_actionRedo_triggered(self):  # 重做
+        self.undoStack.redo()
+        self.__updateEdgeView()
+        self.__updateNodeView()
 
     # @Slot()
     # def on_actionPen_Color_triggered(self):  # 画笔颜色
@@ -604,22 +625,22 @@ class MainWindow(QMainWindow):
     @Slot()
     def on_actionPen_Thickness_triggered(self):  # 画笔粗细
         self.viewAndScene()
-        iniThickness = self.view.getPenThickness()
-        intPenStyle = self.view.getPenStyle()
+        iniThickness = self.__view.getPenThickness()
+        intPenStyle = self.__view.getPenStyle()
         thicknessDialog = ThicknessDialog(None, "画笔粗细与样式", iniThickness, intPenStyle)
         ret = thicknessDialog.exec_()
         thickness = thicknessDialog.getThickness()
         penStyle = thicknessDialog.getPenStyle()
-        self.view.setPenStyle(penStyle)
-        self.view.setPenThickness(thickness)
+        self.__view.setPenStyle(penStyle)
+        self.__view.setPenThickness(thickness)
 
     @Slot()
     def on_actionBackground_Color_triggered(self):
         self.viewAndScene()
-        iniColor = self.view.getBackgroundColor()
+        iniColor = self.__view.getBackgroundColor()
         color = QColorDialog.getColor(iniColor, self, "选择颜色")
         if color.isValid():
-            self.view.setBackgroundBrush(color)
+            self.__view.setBackgroundBrush(color)
 
     # @Slot(bool)
     # def on_actionProperty_And_History_triggered(self, checked):
@@ -634,7 +655,7 @@ class MainWindow(QMainWindow):
         #     return
         filename = os.path.basename(savePath)
         if filename != "":
-            self.view.saveImage(savePath, fileType)
+            self.__view.saveImage(savePath, fileType)
 
     @Slot()
     def on_actionDelete_triggered(self):
@@ -645,7 +666,7 @@ class MainWindow(QMainWindow):
     def on_actionDigraph_Mode_toggled(self, checked: bool):
         self.__labModeInfo.setText("有向图模式")
         self.__graph.setMode(checked)
-        items = self.scene.uniqueItems()
+        items = self.__scene.uniqueItems()
         if len(items) != 0:
             dlgTitle = "警告！！"
             strInfo = "更换模式会清楚画板所有元素！是否要更换模式"
@@ -683,14 +704,14 @@ class MainWindow(QMainWindow):
                                     if item is edge:
                                         destNodeList.remove(destEdge)
 
-                    self.scene.removeItem(item)  # 删除绘图项
+                    self.__scene.removeItem(item)  # 删除绘图项
         # self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
 
     @Slot(bool)
     def on_actionRedigraph_Mode_toggled(self, checked: bool):
         self.__labModeInfo.setText("无向图模式")
         self.__graph.setMode(checked)
-        items = self.scene.uniqueItems()
+        items = self.__scene.uniqueItems()
         if len(items) != 0:
             dlgTitle = "警告！！"
             strInfo = "更换模式会清楚画板所有元素！是否要更换模式"
@@ -728,7 +749,7 @@ class MainWindow(QMainWindow):
                                     if item is edge:
                                         destNodeList.remove(destEdge)
 
-                    self.scene.removeItem(item)  # 删除绘图项
+                    self.__scene.removeItem(item)  # 删除绘图项
 
         self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
 
@@ -760,8 +781,8 @@ class MainWindow(QMainWindow):
         self.__labSceneCord.setText("Scene 坐标：%.0f,%.0f" % (pt.x(), pt.y()))
 
     def do_mouseClicked(self, point):  ##鼠标单击
-        pt = self.view.mapToScene(point)  # 转换到Scene坐标
-        item = self.scene.itemAt(pt, self.view.transform())  # 获取光标下的图形项
+        pt = self.__view.mapToScene(point)  # 转换到Scene坐标
+        item = self.__scene.itemAt(pt, self.__view.transform())  # 获取光标下的图形项
         if item is None:
             return
         pm = item.mapFromScene(pt)  # 转换为绘图项的局部坐标
@@ -774,8 +795,8 @@ class MainWindow(QMainWindow):
         self.__labItemInfo.setText(data)
 
     def do_mouseDoubleClick(self, point):  ##鼠标双击
-        pt = self.view.mapToScene(point)  # 转换到Scene坐标,QPointF
-        item = self.scene.itemAt(pt, self.view.transform())  # 获取光标下的绘图项
+        pt = self.__view.mapToScene(point)  # 转换到Scene坐标,QPointF
+        item = self.__scene.itemAt(pt, self.__view.transform())  # 获取光标下的绘图项
         if item is None:
             return
 
@@ -814,7 +835,7 @@ class MainWindow(QMainWindow):
                 pass
                 # self.operatorData.save_Csv(filename, ['point(1)', 'point(2)'], nodes)
             elif fileType == '*.graph':
-                self.operatorData.save_Graph(filename, self.view.getContentAsGraph())
+                self.operatorData.save_Graph(filename, self.__view.getContentAsGraph())
 
     def do_open_file(self):  # 打开文件
         dict_file = {}
@@ -830,7 +851,7 @@ class MainWindow(QMainWindow):
         return dict_file
 
     def do_addItem(self, item):
-        add = AddCommand(self.scene, item)
+        add = AddCommand(self, self.__scene, item)
         self.undoStack.push(add)
 
     def do_shapeMoved(self, item, pos):
@@ -838,7 +859,7 @@ class MainWindow(QMainWindow):
         self.undoStack.push(move)
 
     def do_deleteItem(self):
-        items = self.scene.selectedItems()
+        items = self.__scene.selectedItems()
         cnt = len(items)
         for i in range(cnt):
             item = items[i]
@@ -850,6 +871,7 @@ class MainWindow(QMainWindow):
                             node.setSourceNode(None)
                         elif itemType == ItemType.DestType:
                             node.setDestNode(None)
+                self.__nodeNum -= 1
             elif str(type(item)).find("BezierEdge") >= 0:
                 item: BezierEdge
                 sourceNode: BezierNode = item.sourceNode
@@ -866,13 +888,44 @@ class MainWindow(QMainWindow):
                         for edge in destEdge.keys():
                             if item is edge:
                                 destNodeList.remove(destEdge)
+                self.__edgeNum -= 1
 
-            self.scene.removeItem(item)  # 删除绘图项
+            self.__scene.removeItem(item)  # 删除绘图项
 
-    def do_curChanged(self, current, previous):
+    def do_curEdgeChanged(self, current, previous):
+        if current is not None:
+            text = f"当前单元格{current.row()},{current.column()}"
+            item = self.edgeModel.itemFromIndex(current)
+
+    def do_curNodeChanged(self, current, previous):
         if current is not None:
             text = f"当前单元格{current.row()},{current.column()}"
             item = self.nodeModel.itemFromIndex(current)
+
+    def do_updateEdgeWeight(self, topLeft, bottomRight):
+        if topLeft.column() == 4:
+            edges = self.__scene.singleItems(BezierEdge)
+            for edge in edges:
+                edge: BezierEdge
+                if edge.textCp.toPlainText() == self.edgeModel.index(topLeft.row(), 0, QModelIndex()).data():
+                    edge.weightCp.setPlainText(topLeft.data())
+                    self.__scene.update()
+
+    def do_updateNodeWeight(self, topLeft, bottomRight):
+        if topLeft.column() == 3:
+            nodes = self.__scene.singleItems(BezierNode)
+            for node in nodes:
+                node: BezierNode
+                if node.textCp.toPlainText() == self.nodeModel.index(topLeft.row(), 0, QModelIndex()).data():
+                    node.weightCp.setPlainText(topLeft.data())
+                    self.__scene.update()
+
+    def do_ShowSelectPath(self, pathList: list):
+        self.__scene.clearSelection()
+        items = self.__scene.uniqueItems()
+        for item in items:
+            if item.textCp.toPlainText() in pathList:
+                item.setSelected(True)
 
 
 ##  ============窗体测试程序 ================================

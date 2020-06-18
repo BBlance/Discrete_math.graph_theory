@@ -9,11 +9,12 @@ from PointItem import ItemType
 
 
 class AddCommand(QUndoCommand):
-    def __init__(self, scene: QGraphicsScene, item):
+    def __init__(self, parent, scene: QGraphicsScene, item):
         super(AddCommand, self).__init__()
 
         self.scene = scene
         self.item = item
+        self.parent = parent
         className = str(type(item))
         if className.find("BezierNode") >= 0:
             self.setText(f'添加顶点V{self.item.data(2)}')
@@ -39,6 +40,8 @@ class AddCommand(QUndoCommand):
                         node.setSourceNode(None)
                     elif itemType == ItemType.DestType:
                         node.setDestNode(None)
+            nodeNum = self.parent.nodeNum()
+            nodeNum -= 1
         elif str(type(self.item)).find("BezierEdge") >= 0:
             self.item: BezierEdge
             sourceNode: BezierNode = self.item.sourceNode
@@ -49,13 +52,15 @@ class AddCommand(QUndoCommand):
                     for edge in sourceEdge.keys():
                         if self.item is edge:
                             sourceNodeList.remove(sourceEdge)
+
             if destNode:
                 destNodeList = destNode.bezierEdges
                 for destEdge in destNodeList:
                     for edge in destEdge.keys():
                         if self.item is edge:
                             destNodeList.remove(destEdge)
-
+            edgeNum = self.parent.edgeNum()
+            edgeNum -= 1
         self.scene.removeItem(self.item)  # 删除绘图项
 
 
@@ -66,12 +71,12 @@ class MoveCommand(QUndoCommand):
 
         self.m_oldPos = oldPos
         self.m_newPos = self.item.pos()
-        self.data=''
+        self.data = ''
 
         className = str(type(item))
         if className.find("BezierNode") >= 0:
 
-            self.data=f"顶点V{self.item.data(2)}移动到"
+            self.data = f"顶点V{self.item.data(2)}移动到"
         elif className.find("BezierEdge") >= 0:
             self.data = f"边e{self.item.data(3)}移动到"
         elif className.find("BezierText") >= 0:
@@ -79,7 +84,7 @@ class MoveCommand(QUndoCommand):
 
     def redo(self):
         self.item.setPos(self.m_newPos)
-        self.data=f"{self.data}x:{self.item.pos().x()},y:{self.item.pos().y()}"
+        self.data = f"{self.data}x:{self.item.pos().x()},y:{self.item.pos().y()}"
         self.setText(self.data)
 
     def undo(self):

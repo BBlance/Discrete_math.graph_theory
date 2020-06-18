@@ -33,8 +33,9 @@ class BezierEdge(BezierGraphicsItem):
         self.endCp = BezierPointItem(self, self.__destPoint, PointType.Special, ItemType.DestType)
         self.textCp = BezierTextItem(self, self._m_textPos, PointType.Text, ItemType.PathType)
         self.weightCp = BezierTextItem(self, self.weightPos, PointType.Text, ItemType.PathType)
-        self.textCp.setPlainText("权重")
         self.weightCp.setPlainText("0")
+
+        self.weightCp.setVisible(False)
 
         if sourceNode:
             self.__source: BezierNode = sourceNode
@@ -219,14 +220,21 @@ class BezierEdge(BezierGraphicsItem):
             painter.drawPolygon(self.drawArrow())
             path.addPolygon(self.drawArrow())
         painter.setBrush(Qt.NoBrush)
+        if self.isSelected():
+            pen = painter.pen()
+            pen.setColor(self.get_isSelectedPenColor())
+        else:
+            pen = painter.pen()
+            pen.setColor(self.get_noSelectedPenColor())
+        painter.setPen(pen)
 
         painter.drawPath(path)
         self.__path = path
 
-        if self.isSelected():
-            painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
-            rect = self.boundingRect()
-            painter.drawRect(rect)
+        # if self.isSelected():
+        #     painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
+        #     rect = self.boundingRect()
+        #     painter.drawRect(rect)
 
     def shape(self) -> QPainterPath:
         stroker = QPainterPathStroker()
@@ -283,12 +291,16 @@ class BezierEdge(BezierGraphicsItem):
             newPos.setX(newPos.x() + intRandom)
             self.setSpecialControlPoint(newPos, ItemType.SourceType)
             node.removeBezierEdge(edge=self, itemType=ItemType.SourceType)
+            self.beginCp.setPoint(newPos)
+            self.beginCp.setVisible(True)
         else:
             self.__dest = None
             newPos: QPointF = self.specialControlPoints()[1]
             newPos.setX(newPos.x() + intRandom)
             self.setSpecialControlPoint(newPos, ItemType.DestType)
             node.removeBezierEdge(edge=self, itemType=ItemType.DestType)
+            self.endCp.setPoint(newPos)
+            self.endCp.setVisible(True)
 
     def do_changeDirection(self):
         node = self.__sourcePoint
