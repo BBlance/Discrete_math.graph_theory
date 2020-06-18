@@ -1,21 +1,23 @@
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget, QMessageBox
 
-from PySide2.QtCore import QItemSelectionModel, Qt
+from PySide2.QtCore import QItemSelectionModel, Qt, QEvent
 
-from PySide2.QtGui import QStandardItemModel, QStandardItem
+from PySide2.QtGui import QStandardItemModel, QStandardItem, QCloseEvent
 
 from ui_ShowMatrix import Ui_ShowMatrix, QAbstractItemView, QHeaderView, QLabel
 
 
 class ShowMatrixWidget(QWidget):
 
-    def __init__(self, parent=None, graph=None, name=None):
+    def __init__(self, parent=None, graph=None, name=None, id=None):
         super().__init__(parent)
         self.setWindowFlag(Qt.Window, True)
         self.setWindowOpacity(0.9)
+        self.parent = parent
         self.ui = Ui_ShowMatrix()
         self.ui.setupUi(self)
         self.__graph = graph
+        self.id=id
         data = None
         HorizontalHeaderList = []
         VerticalHeaderList = []
@@ -23,8 +25,14 @@ class ShowMatrixWidget(QWidget):
         dataDetailView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         if name == "邻接矩阵":
-            self.setWindowTitle(name)
-            data = self.__graph.adjacentMatrixWithEdges()
+            if id == 0:
+                self.setWindowTitle(name + '，元素为边数')
+                data = self.__graph.adjacentMatrixWithEdges()
+            else:
+                self.setWindowTitle(name + '，元素为权重')
+                data = self.__graph.adjacentMatrixWithWeight()
+                if not (str(type(data)).find('matrix') >= 0):
+                    return
             for node in self.__graph:
                 HorizontalHeaderList.append(f'V{node.id()}')
             VerticalHeaderList = HorizontalHeaderList
@@ -47,8 +55,7 @@ class ShowMatrixWidget(QWidget):
                 VerticalHeaderList.append(f'V{node.id()}')
 
             for edge in self.__graph.edges():
-                print(edge)
-                HorizontalHeaderList.append(f'e{edge}')
+                HorizontalHeaderList.append(f'e{edge.id()}')
 
             data = self.__graph.incidenceMatrix()
             HorizontalHeaderList.reverse()
@@ -82,3 +89,16 @@ class ShowMatrixWidget(QWidget):
         dataModel.setRowCount(rowCount)
 
         parent.disconnectGraph()
+
+    def closeEvent(self, event: QCloseEvent):
+        if self.__graph:
+            self.parent.disconnectGraph()
+        super().closeEvent(event)
+
+    def leaveEvent(self, event: QEvent):
+        self.parent.disconnectGraph()
+
+    def enterEvent(self, event: QEvent):
+        self.parent.disconnectGraph()
+        self.parent.connectGraph()
+        self.__graph = self.parent.graph()
