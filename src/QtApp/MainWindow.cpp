@@ -181,3 +181,8 @@ void MainWindow::on_actionMultipleOrSimple_triggered()
 {
 
 }
+
+void MainWindow::on_actionShortest_Path_triggered()
+{
+
+}

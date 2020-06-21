@@ -7,7 +7,7 @@ from PySide2.QtGui import QBrush, QStandardItemModel, QStandardItem
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QColorDialog, \
     QInputDialog, QLabel, QMessageBox, QFileDialog, QActionGroup, QUndoStack, QGraphicsItem, QGraphicsView, \
-    QHeaderView, QAbstractItemView, QFontDialog
+    QHeaderView, QFontDialog
 
 from BezierEdge import BezierEdge
 from BezierNode import BezierNode
@@ -408,7 +408,7 @@ class MainWindow(QMainWindow):
         self.__setItemProperties(item, "注释")
         self.do_addItem(item)
 
-    @Slot(bool)
+    @Slot(bool)  # 显示和隐藏结点权重
     def on_actionShowNodesWeight_toggled(self, check: bool):
         nodes = self.__scene.singleItems(BezierNode)
         for node in nodes:
@@ -420,7 +420,7 @@ class MainWindow(QMainWindow):
         else:
             self.ui.actionShowNodesWeight.setText("显示顶点权重")
 
-    @Slot(bool)
+    @Slot(bool)  # 显示和隐藏边权重
     def on_actionShowEdgesWeight_toggled(self, check: bool):
         edges = self.__scene.singleItems(BezierEdge)
         for edge in edges:
@@ -483,7 +483,6 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 初级回路
     def on_actionPrimary_Loop_triggered(self):
-        self.viewAndScene()
         items = self.__scene.nodeList
         if len(items) == 0:
             QMessageBox.warning(self, "警告", "对不起，你没有选择起始节点")
@@ -561,10 +560,10 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 图的连通性
     def on_actionConnectivity_triggered(self):
+        print(True)
         name = ''
         if self.connectGraph():
             num = self.__graph.connectivity()
-
             if num is False:
                 name = '此图为非连通图'
             elif num == 2:
@@ -591,8 +590,9 @@ class MainWindow(QMainWindow):
 
             self.disconnectGraph()
 
-    @Slot() # 简单图多重图判定
+    @Slot()  # 简单图多重图判定
     def on_actionMultipleOrSimple_triggered(self):
+        print(True)
         if self.connectGraph():
             edges = self.__graph.multipleOrSimple()
             if not edges:
@@ -602,6 +602,20 @@ class MainWindow(QMainWindow):
                 parallelSides = ShowDataWidget(self, edges, self.__graph, "简单图与多重图的判定")
                 parallelSides.multipleOrSimple()
                 parallelSides.show()
+
+    @Slot()
+    def on_actionShortestPath_triggered(self):
+
+        items = self.__scene.nodeList
+        if len(items) == 0:
+            QMessageBox.warning(self, "警告", "对不起，你没有选择结点")
+            return
+        if self.connectGraph():
+            ShortestPath = ShowDataWidget(self, items, self.__graph, name="最短路径")
+            ShortestPath.pathSignal.connect(self.do_ShowSelectPath)
+            if ShortestPath.shortestPath():
+                ShortestPath.updateToolWidget(mode=1, path=2)
+                ShortestPath.show()
 
     @Slot()
     def on_actionUndo_triggered(self):  # 撤销
@@ -750,8 +764,6 @@ class MainWindow(QMainWindow):
                                         destNodeList.remove(destEdge)
 
                     self.__scene.removeItem(item)  # 删除绘图项
-
-        self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
 
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化

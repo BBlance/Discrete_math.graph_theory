@@ -1,14 +1,13 @@
-from PySide2.QtWidgets import (QApplication, QWidget, QFileDialog,
-                               QToolBar, QVBoxLayout, QFontDialog)
+from PySide2.QtWidgets import QWidget
 
 from PySide2.QtCore import QItemSelectionModel, Qt, QRegExp, QEvent, QModelIndex, Signal
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem, QRegExpValidator, QCloseEvent
 
+from BezierNode import BezierNode
 from Graph import Graph
+from GraphicsScene import GraphicsScene
 from ui_DataDetails import Ui_DataDetails, QAbstractItemView, QHeaderView, QLabel, QLineEdit, QPushButton, QMessageBox
-
-from time import time
 
 
 class ShowDataWidget(QWidget):
@@ -21,7 +20,7 @@ class ShowDataWidget(QWidget):
         self.ui = Ui_DataDetails()
         self.ui.setupUi(self)
         self.parent = parent
-        self.scene = self.parent.scene()
+        self.scene: GraphicsScene = self.parent.scene()
         self.__graph: Graph = graph
         self.toolWidget = self.ui.toolWidget
         self.path = []
@@ -130,8 +129,10 @@ class ShowDataWidget(QWidget):
             self.startNodeEdit.setCursor(Qt.IBeamCursor)
             if path == 0:
                 self.searchBtn.clicked.connect(self.do_searchBtnEasyLoop)
-            else:
+            elif path == 1:
                 self.searchBtn.clicked.connect(self.do_searchBtnPrimaryLoop)
+            elif path == 2:
+                self.searchBtn.clicked.connect(self.do_searchBtnShortestPath)
         else:
 
             self.startNodeEdit.setValidator(validator1)
@@ -147,7 +148,7 @@ class ShowDataWidget(QWidget):
             self.endNodeEdit.setCursor(Qt.IBeamCursor)
             if path == 0:
                 self.searchBtn.clicked.connect(self.do_searchBtnEasyPath)
-            else:
+            elif path == 1:
                 self.searchBtn.clicked.connect(self.do_searchBtnPrimaryPath)
 
         self.toolWidget.setVisible(True)
@@ -303,7 +304,35 @@ class ShowDataWidget(QWidget):
                 item.setFlags(Qt.NoItemFlags)
 
     def shortestPath(self):
-        pass
+        if not self.startNodeEdit.text():
+            startNode = self.items[0][0].data(2)
+        else:
+            startNode = int(self.startNodeEdit.text().strip('V'))
+        paths = []
+        for node in self.scene.singleItems(BezierNode):
+            path = self.__graph.shortestPath(startNode, node.data(2))
+            if path is not None and len(path) > 2 and path not in paths:
+                paths.append(path)
+        if len(paths) == 0:
+            self.dataModel.clear()
+            QMessageBox.information(None, "Sorry", "没有符合条件的路径")
+            return False
+        self.rowCount = len(paths)
+        self.dataModel.setRowCount(self.rowCount)
+        self.dataModel.setColumnCount(self.columnCount)
+        self.dataModel.clear()
+        for i in range(self.rowCount):
+            for j in range(len(paths[i])):
+                if str(type(paths[i][j])).find("Edge") >= 0:
+                    item = QStandardItem(f'e{paths[i][j].id()}')
+                    item.setFlags(Qt.NoItemFlags)
+                    self.dataModel.setItem(i, j, item)
+                elif str(type(paths[i][j])).find("Vertex") >= 0:
+                    item = QStandardItem(f'V{paths[i][j].id()}')
+                    item.setFlags(Qt.NoItemFlags)
+                    self.dataModel.setItem(i, j, item)
+
+        return True
 
     def closeEvent(self, event: QCloseEvent):
         if self.__graph:
@@ -346,6 +375,13 @@ class ShowDataWidget(QWidget):
             QMessageBox.information(None, "Sorry", "超出上限")
             return
         self.easyLoop()
+
+    def do_searchBtnShortestPath(self):
+        start = int(self.startNodeEdit.text().strip('V'))
+        if start > self.__graph.nodeNumber() - 1:
+            QMessageBox.information(None, "Sorry", "超出上限")
+            return
+        self.shortestPath()
 
     def do_updateNode(self, nodeList):
         if len(nodeList) == 1:

@@ -102,6 +102,8 @@ private slots:
 
     void on_actionMultipleOrSimple_triggered();
 
+    void on_actionShortest_Path_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

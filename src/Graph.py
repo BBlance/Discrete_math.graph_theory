@@ -108,22 +108,6 @@ class Graph:
                 return vertices.__id()
         return False
 
-    #  判断坐标是否存在
-    def IsContainsPoint(self, point):
-        x, y = point.__x(), point.__y()
-        for vertices in self.__vertDict.values():
-            x2, y2 = vertices.coordinates()
-            if x2 == x and y2 == y:
-                return True
-        return False
-
-    #  根据ID获取坐标
-    def idToCoordinates(self, id):
-        for vertices in self.__vertDict.values():
-            if id == vertices.__id():
-                return vertices.coordinates()
-        return False
-
     def __iter__(self):
         return iter(self.__vertDict.values())
 
@@ -360,34 +344,6 @@ class Graph:
         martix = self.adjacentMatrixWithEdges()
         return pow(martix, step)
 
-    def findPath(self, start, end, pathway=[]):
-        pathway = pathway + [self.__vertDict[start]]
-        if start == end:
-            return pathway
-        for node in self.__vertDict[start].vertConnections():
-            if node not in pathway:
-                edges = self.edge(pathway[len(pathway) - 1].id(), node.id())
-                pathway.append(edges[0])
-                newPath = self.findPath(node.id(), end, pathway)
-                if newPath:
-                    return newPath
-        return None
-
-    def findPathWay(self, start, end, pathway=[]):
-        pathway = pathway + [self.__vertDict[start]]
-        if start == end:
-            return [pathway]
-        pathways = []
-        for edge in self.__vertDict[start].edgeConnections():
-
-            if edge not in pathway:
-                if edge.toVert() not in pathway:
-                    pathway = pathway + [edge]
-                    newPaths = self.findPathWay(edge.toVert().id(), end, pathway)
-                    for newPath in newPaths:
-                        pathways.append(newPath)
-        return pathways
-
     # 简单通路
     def findSimplePathway(self, start, end, pathway=[]):
         if type(start) is Edge:
@@ -462,7 +418,7 @@ class Graph:
             newPath = self.shortestPath(start, self.__vertDict[end].pred().id(), pathway)
             if newPath:
                 return newPath
-        return newPath
+        return None
 
     def dijkstra(self, start):
         if type(start) is not Vertex:
@@ -686,9 +642,10 @@ if __name__ == '__main__':
     g = Graph()
 
     g.addEdge(1, 0)
-    g.addEdge(1, 2)
+    g.addEdge(1, 2, 3)
     g.addEdge(1, 3)
     g.addEdge(3, 0)
     g.addEdge(3, 2)
 
-    print(g.connectivity())
+    for s in g.shortestPath(3, 2):
+        print(s)

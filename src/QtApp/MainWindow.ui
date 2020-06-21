@@ -615,36 +615,12 @@
     <string>关联矩阵</string>
    </property>
   </action>
-  <action name="actionShortest_Path">
-   <property name="text">
-    <string>最短路径</string>
-   </property>
-   <property name="toolTip">
-    <string>最短路径</string>
-   </property>
-  </action>
   <action name="actionCritical_Path">
    <property name="text">
     <string>关键路径</string>
    </property>
    <property name="toolTip">
     <string>关键路径</string>
-   </property>
-  </action>
-  <action name="actionFind_Euler_Loop">
-   <property name="text">
-    <string>欧拉回路</string>
-   </property>
-   <property name="toolTip">
-    <string>寻找欧拉回路</string>
-   </property>
-  </action>
-  <action name="actionFind_Hamiltonian_Loop">
-   <property name="text">
-    <string>寻找哈密顿回路</string>
-   </property>
-   <property name="toolTip">
-    <string>寻找哈密顿回路</string>
    </property>
   </action>
   <action name="actionGraph_Coloring_Problem">

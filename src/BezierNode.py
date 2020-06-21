@@ -2,10 +2,10 @@ from random import randint
 from typing import Optional
 
 import typing
-from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QStyle, QGraphicsSceneMouseEvent, QGraphicsItem, \
-    QGraphicsSceneContextMenuEvent, QMenu, QAction, QWidgetAction
-from PySide2.QtCore import QPointF, QRectF, Qt, qAbs, QPoint, Signal, QObject
-from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QColor, QPen, QRadialGradient, QCursor, QFocusEvent
+from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QGraphicsItem, \
+    QGraphicsSceneContextMenuEvent, QMenu, QAction
+from PySide2.QtCore import QPointF, QRectF, Qt
+from PySide2.QtGui import QPainterPath, QPainter, QColor, QPen, QRadialGradient, QCursor
 
 from BezierGraphicsItem import BezierGraphicsItem
 
@@ -120,12 +120,6 @@ class BezierNode(BezierGraphicsItem):
         painter.setPen(QPen(Qt.black, 0))
         painter.drawEllipse(-10, -10, 20, 20)
 
-        # if self.isSelected():
-        #     painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
-        #     rect = self.boundingRect()
-        #     painter.setBrush(Qt.NoBrush)
-        #     painter.drawRect(rect)
-
     def boundingRect(self) -> QRectF:
         adjust = 2
         return QRectF(-10 - adjust, -10 - adjust, 23 + adjust, 23 + adjust)
@@ -191,8 +185,6 @@ class BezierNode(BezierGraphicsItem):
                     edge.endCp.setVisible(True)
 
         self.scene().update()
-
-
 
         self.__bezierEdgeList.clear()
 

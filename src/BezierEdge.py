@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneM
     QGraphicsSceneContextMenuEvent, QMenu, QAction
 
 from PySide2.QtCore import QPointF, QRectF, Qt, QLineF
-from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF, QPen, \
+from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF,\
     QPainterPathStroker, QCursor
 
 from BezierGraphicsItem import BezierGraphicsItem
