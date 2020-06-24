@@ -120,7 +120,7 @@ class MainWindow(QMainWindow):
         self.__labModeInfo = QLabel("有向图模式")
         self.ui.statusbar.addPermanentWidget(self.__labModeInfo)
 
-    def iniGraphicsSystem(self):  ##初始化 Graphics View系统
+    def iniGraphicsSystem(self, name=None):  ##初始化 Graphics View系统
 
         self.__scene = GraphicsScene(self)  # 创建QGraphicsScene
         self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
@@ -134,8 +134,10 @@ class MainWindow(QMainWindow):
         self.__scene.itemMoveSignal.connect(self.do_shapeMoved)
         self.__scene.itemLock.connect(self.do_nodeLock)
         self.__scene.isHasItem.connect(self.do_checkIsHasItems)
-
-        title = f'Board_{self.ui.tabWidget.count()}'
+        if name:
+            title = name
+        else:
+            title = f'Board_{self.ui.tabWidget.count()}'
         curIndex = self.ui.tabWidget.addTab(self.__view, title)
         self.ui.tabWidget.setCurrentIndex(curIndex)
         self.ui.tabWidget.setVisible(True)
@@ -806,14 +808,17 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 保存文件
     def on_actionSave_triggered(self):
-        saveGraphData(self, self.standardGraphData())
-        pass
+        filename = saveGraphData(self, self.standardGraphData())
+        if filename:
+            index = self.ui.tabWidget.currentIndex()
+            self.ui.tabWidget.setTabText(index, filename)
 
     @Slot()
     def on_actionOpen_triggered(self):
         graph = openGraphData(self)
         if graph:
             graph = self.reverseStandardData(graph)
+            self.iniGraphicsSystem(graph[0])
             for item in graph[1]:
                 self.__scene.addItem(item)
             self.__updateNodeView()

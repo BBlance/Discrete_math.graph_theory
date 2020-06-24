@@ -3,9 +3,7 @@ from PySide2.QtWidgets import QFileDialog, QMessageBox
 from pandas import DataFrame, ExcelWriter, read_excel
 from pandas.io.excel import ExcelFile
 from numpy import isnan
-
 Dir = QDir()
-
 
 def saveGraphData(parent=None, graphData=None):
     curPath = Dir.currentPath()
@@ -15,8 +13,7 @@ def saveGraphData(parent=None, graphData=None):
     if fileName == "":
         return
     if flt.find('xlsx') >= 0:
-        if not saveExcel(fileName, graphData):
-            return
+        fileName=saveExcel(fileName, graphData)
     elif flt.find('graph') >= 0:
         saveGraph()
     return fileName
@@ -80,7 +77,7 @@ def saveExcel(fileName, graph: list):
 
     elif result == QMessageBox.Cancel:
         return
-    return True
+    return file_full.baseName()
 
 
 def saveGraph(parent=None):
