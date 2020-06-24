@@ -1,118 +1,131 @@
-import json
-import os
-import csv
+from PySide2.QtCore import QDataStream, Qt, QIODevice, QDir, QFile, QFileInfo
+from PySide2.QtWidgets import QFileDialog, QMessageBox
+from pandas import DataFrame, ExcelWriter, read_excel
+from pandas.io.excel import ExcelFile
+from numpy import isnan
 
-class OperatorData(object):
+Dir = QDir()
 
-    def save_Graph(self, filename, data):
-        print(data)
+
+def saveGraphData(parent=None, graphData=None):
+    curPath = Dir.currentPath()
+    title = "选择文件"
+    filt = "Excel文件(*.xlsx);;图数据文件(*.graph)"
+    fileName, flt = QFileDialog.getSaveFileName(parent, title, curPath, filt)
+    if fileName == "":
+        return
+    if flt.find('xlsx') >= 0:
+        if not saveExcel(fileName, graphData):
+            return
+    elif flt.find('graph') >= 0:
+        saveGraph()
+    return fileName
+
+
+def openGraphData(parent=None):
+    curPath = Dir.currentPath()
+    title = "选择文件"
+    filt = "Excel文件(*.xlsx);;图数据文件(*.graph)"
+    fileName, flt = QFileDialog.getOpenFileName(parent, title, curPath, filt)
+    if fileName == "":
+        return
+    if flt.find('xlsx') >= 0:
+        return openExcel(fileName)
+    elif flt.find('graph') >= 0:
+        saveGraph()
+
+    return False
+
+
+def saveExcel(fileName, graph: list):
+    nodeColumns = ['图形ID', '顶点ID', '权重', 'x坐标', 'y坐标']
+
+    edgeColumns = ['图形ID', '边ID', '始点', '终点', '权重', '1点x坐标', '1点y坐标', '2点x坐标', '2点y坐标', '3点x坐标', '3点y坐标', '4点x坐标',
+                   '4点y坐标', '中心点x坐标', '中心点y坐标']
+    textColumns = ['图形ID', '文本ID', '文本内容', 'x坐标', 'y坐标']
+    if len(graph[1]) > 0:
+        maxLength = max([len(node) for node in graph[1]]) - len(nodeColumns)
+        for i in range(maxLength):
+            nodeColumns = nodeColumns + ['连接顶点ID']
+
+    file_full = QFileInfo(fileName)
+    if file_full.exists():
+        result = QMessageBox.question(None, "警告", '文件即将被覆盖！', QMessageBox.Yes | QMessageBox.Cancel)
+    else:
+        result = QMessageBox.Yes
+
+    if result == QMessageBox.Yes:
+        graphName = file_full.baseName()
+        nodeName = "V" + f'({graphName})'
+        edgeName = "E" + f'({graphName})'
+        textName = "T" + f'({graphName})'
+        dataDict = ["图名称", "顶点集", "边集", "文本集", "图类型"]
+        graphList = [graphName, nodeName, edgeName, textName, graph[0]]
+        graphFrame = DataFrame(graphList, index=dataDict)
+        graphFrame = graphFrame.T
+        nodeFrame = DataFrame(graph[1], columns=nodeColumns)
+        edgeFrame = DataFrame(graph[2], columns=edgeColumns)
+        textFrame = DataFrame(graph[3], columns=textColumns)
+
         try:
-            if not os.path.exists(filename):
-                with open(filename, 'w', encoding='utf-8') as f:
-                    for vertices, dicts in data.items():
-                        f.write(str(vertices) + '\t')
-                        for coordinates, vert in dicts.items():
-                            f.write(str(coordinates) + '\t' + str(vert) + '\n')
-                    print('写入成功')
-            else:
-                with open(filename, 'a', encoding='utf-8') as f:
-                    for vertices, dicts in data.items():
-                        f.write(str(vertices) + '\t')
-                        for coordinates, vert in dicts.items():
-                            f.write(str(coordinates) + '\t' + str(vert) + '\n')
-                    print('写入成功')
+            with ExcelWriter(fileName) as writer:
+                graphFrame.to_excel(writer, sheet_name=graphName, index=None)
+                nodeFrame.to_excel(writer, sheet_name=nodeName, index=None)
+                edgeFrame.to_excel(writer, sheet_name=edgeName, index=None)
+                textFrame.to_excel(writer, sheet_name=textName, index=None)
+            writer.save()
+            writer.close()
         except Exception as e:
-            print('写入错误 ==>', e)
+            QMessageBox.warning(None, "Permission denied", str(e))
 
-        return filename
-
-    def save_Json(self, filename, item):  # 将字典对象保存为Json
-
-        # 将字典对象转化为可写入文本的字符串
-        item = json.dumps(item)
-
-        try:
-            if not os.path.exists(filename):
-
-                with open(filename, 'w', encoding='utf-8') as f:
-                    f.write(item + ',\n')
-                    print("写入成功")
-            else:
-                with open(filename, 'a', encoding='utf-8') as f:
-                    f.write(item + ',\n')
-                    print('写入成功')
-        except Exception as e:
-            print('写入错误 ==>', e)
-
-        return filename
-
-    def save_Csv(self, keyword_list, filename, item):  # 将字典对象保存为csv
-        ''':arg
-        保存csv的方法
-        :param keyword_list:保存文件的字段(表头)
-        :param filename:: 保存文件的路径
-        :param item: 要保存的字典对象
-        :return:
-        '''
-
-        try:
-
-            #  首次打开文件时，首行写入表头
-            if not os.path.exists(filename):
-                #  newline='' 去处空白行
-                with open(filename, 'w', newline='', encoding='utf-8') as csv_file:
-                    #  写字典的方法
-                    writer = csv.DictWriter(csv_file, fieldnames=keyword_list)
-                    #  写表头方法
-                    writer.writeheader()
-            # 追加内容
-            #  newline='' 去处空白行，不加会出现空白行
-            with open(filename, 'a', newline='', encoding='utf-8') as csv_file:
-                writer = csv.DictWriter(csv_file, fieldnames=keyword_list)
-                #  按行写入数据
-                writer.writerow(item)
-                print("写入成功")
-        except Exception as e:
-            print('写入错误 ==>', e)
-            #  记录错误数据
-            with open('error.txt', 'w') as f:
-                f.write(json.dumps(item) + ',\n')
-
-        return filename
-
-    def open_Graph(self, filename):
-        data = {}
-        with open(filename, 'r', encoding='utf-8') as f:
-            for line in f.readlines():
-                line = line.strip()
-                vertices = int(line.split('\t')[0])
-                coordinates = tuple(int(x) for x in line.split('\t')[1].strip(')').strip('(').split(','))
-                connectionTo = line.split('\t')[2].strip('[').strip(']').split(',')
-                for i in range(len(connectionTo)):
-                    connectionTo[i] = connectionTo[i].replace(" ", '')
-                connectionTo=[int(x) for x in connectionTo if x != '']
+    elif result == QMessageBox.Cancel:
+        return
+    return True
 
 
-                data[vertices] = {coordinates: connectionTo}
-
-        return data
-
-    def open_Json(self, filename):
-
-        with open(filename, 'r', encoding='UTF-8') as f:
-            load_dict = json.load(f)
-            print('加载文件完成')
-        return load_dict
-
-    def open_Csv(self, filename):
-        load_dict = {}
-        with open(filename, 'r', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            fieldnames = next(reader)
-            csv_reader = csv.DictReader(f, fieldnames=fieldnames)
-            for row in csv_reader:
-                for key, value in row.items():
-                    load_dict[key] = value
-        return load_dict
+def saveGraph(parent=None):
+    return True
 
 
+def openExcel(fileName):
+    graphData = ExcelFile(fileName)
+    sheetNames = graphData.sheet_names
+    graphFrame = read_excel(fileName, sheetNames[0])
+    nodeFrame = read_excel(fileName, sheetNames[1])
+    edgeFrame = read_excel(fileName, sheetNames[2])
+    textFrame = read_excel(fileName, sheetNames[3])
+
+    mode = int(graphFrame.iloc[0, 4])
+    graphName = str(graphFrame.iloc[0, 0])
+    nodeDataList = []
+    edgeDataList = []
+    textDataList = []
+
+    for i in range(nodeFrame.shape[0]):
+        data = []
+        for j in range(nodeFrame.shape[1]):
+            if not isnan(nodeFrame.iloc[i, j]):
+                data.append(int(nodeFrame.iloc[i, j]))
+        if len(data) >= 2:
+            nodeDataList.append(data)
+
+    for i in range(edgeFrame.shape[0]):
+        data = []
+        for j in range(edgeFrame.shape[1]):
+            if not isnan(edgeFrame.iloc[i, j]):
+                data.append(int(edgeFrame.iloc[i, j]))
+        if len(data) >= 2:
+            edgeDataList.append(data)
+    for i in range(textFrame.shape[0]):
+        data = []
+        for j in range(textFrame.shape[1]):
+            if not isnan(textFrame.iloc[i, j]):
+                data.append(int(textFrame.iloc[i, j]))
+        if len(data) >= 2:
+            textDataList.append(data)
+
+    return [graphName, mode, nodeDataList, edgeDataList, textDataList]
+
+
+def openGraph(parent=None):
+    return True

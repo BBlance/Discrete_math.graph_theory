@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import sys, random
-from PySide2.QtCore import Slot, Qt, QRectF, QItemSelectionModel, QModelIndex
+from PySide2.QtCore import Slot, Qt, QRectF, QItemSelectionModel, QModelIndex, QDataStream, QIODevice, QDir, QFile, \
+    QPointF, QLineF
 
-from PySide2.QtGui import QBrush, QStandardItemModel, QStandardItem
+from PySide2.QtGui import QBrush, QStandardItemModel, QStandardItem, QMouseEvent
 
 from PySide2.QtWidgets import QApplication, QMainWindow, QColorDialog, \
     QInputDialog, QLabel, QMessageBox, QFileDialog, QActionGroup, QUndoStack, QGraphicsItem, QGraphicsView, \
@@ -21,7 +22,7 @@ from ShowMatrixWidget import ShowMatrixWidget
 from UndoCommand import AddCommand, MoveCommand
 from ui_MainWindow import Ui_MainWindow
 from ThicknessDialog import ThicknessDialog
-from OperatorFile import OperatorData
+from OperatorFile import saveGraphData, openGraphData
 
 
 class MainWindow(QMainWindow):
@@ -31,11 +32,15 @@ class MainWindow(QMainWindow):
         self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
         self.ui = Ui_MainWindow()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
+        self.dir = QDir()
+
+        self.__curFileName = ''
 
         self.setWindowTitle("离散数学可视化认知系统")
 
         self.ui.nodeDetails.setEnabled(False)
         self.ui.edgeDetails.setEnabled(False)
+        self.ui.actionSave.setEnabled(False)
 
         self.edgeModel = QStandardItemModel(5, 5, self)
         self.edgeSelectionModel = QItemSelectionModel(self.edgeModel)
@@ -128,6 +133,7 @@ class MainWindow(QMainWindow):
         self.__view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
         self.__scene.itemMoveSignal.connect(self.do_shapeMoved)
         self.__scene.itemLock.connect(self.do_nodeLock)
+        self.__scene.isHasItem.connect(self.do_checkIsHasItems)
 
         title = f'Board_{self.ui.tabWidget.count()}'
         curIndex = self.ui.tabWidget.addTab(self.__view, title)
@@ -277,10 +283,10 @@ class MainWindow(QMainWindow):
             strList = [f"V{node.data(self.__NodeId)}", str(len(node.bezierEdges)),
                        f"x:{node.pos().x()},y:{node.pos().y()}", str(node.weight())]
             if self.ui.actionDigraph_Mode.isChecked():
-                strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())[1]}')
-                strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())[0]}')
+                strList.append(f'{node.degrees(self.ui.actionDigraph_Mode.isChecked())[1]}')
+                strList.append(f'{node.degrees(self.ui.actionDigraph_Mode.isChecked())[0]}')
             else:
-                strList.append(f'{node.digraphDegrees(self.ui.actionDigraph_Mode.isChecked())}')
+                strList.append(f'{node.degrees(self.ui.actionDigraph_Mode.isChecked())}')
             for j in range(nodeColCount):
                 item = QStandardItem(strList[j])
                 if j != 3:
@@ -318,6 +324,7 @@ class MainWindow(QMainWindow):
                         badEdgeList.append(edge)
 
         if len(badEdgeList) != 0:
+            self.disconnectGraph()
             string = ""
             for x in range(len(badEdgeList)):
                 demo = "、"
@@ -336,6 +343,151 @@ class MainWindow(QMainWindow):
         if self.ui.tabWidget.count():
             self.__view: GraphicsView = self.ui.tabWidget.currentWidget()
             self.__scene = self.__view.scene()
+
+    def saveGraphData(self):
+        curPath = self.dir.currentPath()
+        title = "选择文件"
+        filt = "图数据文件(*.graph);;Excel文件(*.xlsx)"
+        fileName, flt = QFileDialog.getSaveFileName(self, title, curPath, filt)
+        if fileName == "":
+            return
+        self.__curFileName = fileName
+        return fileName
+
+    def readGraphData(self):
+        curPath = self.dir.currentPath()
+        title = "选择文件"
+        filt = "图数据文件(*.graph)"
+        fileName, flt = QFileDialog.getOpenFileName(self, title, curPath, filt)
+        if fileName == "":
+            return
+        self.__curFileName = fileName
+        return fileName
+
+    def standardGraphData(self):
+        mode = int(self.ui.actionDigraph_Mode.isChecked())
+        nodes = self.__scene.singleItems(BezierNode)
+        edges = self.__scene.singleItems(BezierEdge)
+        texts = self.__scene.singleItems(BezierText)
+        nodeDataList = []
+        edgeDataList = []
+        textDataList = []
+        for node in nodes:
+            node: BezierNode
+            data = [node.data(self.__ItemId), node.data(self.__NodeId), node.weight(), node.pos().x(), node.pos().y()]
+
+            for edge in node.bezierEdges:
+                for key, value in edge.items():
+                    if value == ItemType.DestType:
+                        if key.destNode:
+                            data.append(key.destNode.data(self.__NodeId))
+            nodeDataList.append(data)
+
+        for edge in edges:
+            edge: BezierEdge
+            data = [edge.data(self.__ItemId), edge.data(self.__EdgeId)]
+            if edge.sourceNode:
+                data.append(edge.sourceNode.data(self.__NodeId))
+            else:
+                data.append(-1)
+            if edge.destNode:
+                data.append(edge.destNode.data(self.__NodeId))
+            else:
+                data.append(-1)
+
+            data = data + [edge.weight(), edge.beginCp.point().x(), edge.beginCp.point().y(),
+                           edge.edge1Cp.point().x(), edge.edge1Cp.point().y(), edge.edge2Cp.point().x(),
+                           edge.edge2Cp.point().y(), edge.endCp.point().x(), edge.endCp.point().y(),
+                           edge.scenePos().x(), edge.scenePos().y()]
+            edgeDataList.append(data)
+
+        for text in texts:
+            text: BezierText
+            data = [text.data(self.__ItemId), text.data(self.__TextId), text.toPlainText(), text.scenePos().x(),
+                    text.scenePos().y()]
+            textDataList.append(data)
+
+        nodeDataList.reverse()
+        edgeDataList.reverse()
+        textDataList.reverse()
+
+        return [mode, nodeDataList, edgeDataList, textDataList]
+
+    def reverseStandardData(self, excelData):
+        graphName = excelData[0]
+        mode = excelData[1]
+        nodes = []
+        edges = []
+        texts = []
+        self.ui.actionDigraph_Mode.setChecked(bool(mode))
+        for nodeDetail in excelData[2]:
+            node = BezierNode()
+            node.textCp.setPlainText(f"V{nodeDetail[1]}")
+            node.setData(self.__ItemId, nodeDetail[0])
+            node.setData(self.__NodeId, nodeDetail[1])
+            node.setData(self.__ItemDesc, "顶点")
+            node.weightCp.setPlainText(str(nodeDetail[2]))
+            node.setPos(nodeDetail[3], nodeDetail[4])
+
+            nodes.append(node)
+
+        for edgeDetail in excelData[3]:
+            edge = BezierEdge()
+            edge.setData(self.__ItemId, edgeDetail[0])
+            edge.setData(self.__EdgeId, edgeDetail[1])
+            edge.setData(self.__ItemDesc, "边")
+            edge.setSpecialControlPoint(QPointF(edgeDetail[5], edgeDetail[6]), ItemType.SourceType)
+            edge.setEdgeControlPoint(QPointF(edgeDetail[7], edgeDetail[8]), ItemType.SourceType)
+            edge.setEdgeControlPoint(QPointF(edgeDetail[9], edgeDetail[10]), ItemType.DestType)
+            edge.setSpecialControlPoint(QPointF(edgeDetail[11], edgeDetail[12]), ItemType.DestType)
+            edge.setPos(QPointF(edgeDetail[13], edgeDetail[14]))
+
+            edge.textCp.setPlainText(f"e{edgeDetail[1]}")
+            edge.weightCp.setPlainText(str(edgeDetail[4]))
+            edge.centerCp.setPoint(edge.updateCenterPos())
+            edge.beginCp.setPoint(QPointF(edgeDetail[5], edgeDetail[6]))
+            edge.edge1Cp.setPoint(QPointF(edgeDetail[7], edgeDetail[8]))
+            edge.edge2Cp.setPoint(QPointF(edgeDetail[9], edgeDetail[10]))
+            edge.endCp.setPoint(QPointF(edgeDetail[11], edgeDetail[12]))
+
+            if edgeDetail[2] != -1:
+                for node in nodes:
+                    node: BezierNode
+                    if node.data(self.__NodeId) == edgeDetail[2]:
+                        edge.setSourceNode(node)
+                        node.addBezierEdge(edge, ItemType.SourceType)
+                        line = QLineF(edge.mapFromScene(node.pos()), edge.edge1Cp.point())
+                        length = line.length()
+                        edgeOffset = QPointF(line.dx() * 10 / length, line.dy() * 10 / length)
+                        source = edge.mapFromScene(node.pos()) + edgeOffset
+                        edge.setSpecialControlPoint(source, ItemType.SourceType)
+                        edge.beginCp.setVisible(False)
+            if edgeDetail[3] != -1:
+                for node in nodes:
+                    node: BezierNode
+                    if node.data(self.__NodeId) == edgeDetail[3]:
+                        edge.setDestNode(node)
+                        node.addBezierEdge(edge, ItemType.DestType)
+                        line = QLineF(edge.mapFromScene(node.pos()), edge.edge2Cp.point())
+                        length = line.length()
+                        edgeOffset = QPointF(line.dx() * 10 / length, line.dy() * 10 / length)
+                        if mode:
+                            dest = edge.mapFromScene(node.pos()) + edgeOffset * 2.3
+                        else:
+                            dest = edge.mapFromScene(node.pos()) + edgeOffset
+                        edge.setSpecialControlPoint(dest, ItemType.DestType)
+                        edge.endCp.setVisible(False)
+            edges.append(edge)
+
+        for textDetail in excelData[4]:
+            text = BezierText(str(textDetail[2]))
+            text.setData(self.__ItemId, textDetail[0])
+            text.setData(self.__TextId, textDetail[1])
+            text.setData(self.__ItemDesc, "文本")
+            text.setPos(textDetail[3], textDetail[4])
+            texts.append(text)
+
+        return [graphName, nodes + edges + texts]
 
     # ==============event处理函数==========================
 
@@ -374,7 +526,6 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 添加边
     def on_actionArc_triggered(self):  # 添加曲线
-        # self.viewAndScene()
         item = BezierEdge()
         item.setGraphMode(self.ui.actionDigraph_Mode.isChecked())
         self.__setItemProperties(item, "边")
@@ -390,13 +541,6 @@ class MainWindow(QMainWindow):
         self.do_addItem(item)
         self.__updateNodeView()
         self.__updateEdgeView()
-
-    @Slot()  # 添加矩形框
-    def on_actionRectangle_triggered(self):  # 添加矩形
-
-        for item in self.singleItems(BezierNode):
-            print(item.data(2), item.bezierEdges)
-        pass
 
     @Slot()  # 添加注释
     def on_actionAdd_Annotation_triggered(self):
@@ -560,7 +704,6 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 图的连通性
     def on_actionConnectivity_triggered(self):
-        print(True)
         name = ''
         if self.connectGraph():
             num = self.__graph.connectivity()
@@ -592,7 +735,6 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 简单图多重图判定
     def on_actionMultipleOrSimple_triggered(self):
-        print(True)
         if self.connectGraph():
             edges = self.__graph.multipleOrSimple()
             if not edges:
@@ -651,22 +793,37 @@ class MainWindow(QMainWindow):
     @Slot()
     def on_actionBackground_Color_triggered(self):
         self.viewAndScene()
-        iniColor = self.__view.getBackgroundColor()
-        color = QColorDialog.getColor(iniColor, self, "选择颜色")
-        if color.isValid():
-            self.__view.setBackgroundBrush(color)
+        # iniColor = self.__view.getBackgroundColor()
+        # color = QColorDialog.getColor(iniColor, self, "选择颜色")
+        # if color.isValid():
+        #     self.__view.setBackgroundBrush(color)
+        for item in self.standardGraphData():
+            print(item)
 
     # @Slot(bool)
     # def on_actionProperty_And_History_triggered(self, checked):
     #     self.ui.dockWidget.setVisible(checked)
 
+    @Slot()  # 保存文件
+    def on_actionSave_triggered(self):
+        saveGraphData(self, self.standardGraphData())
+        pass
+
+    @Slot()
+    def on_actionOpen_triggered(self):
+        graph = openGraphData(self)
+        if graph:
+            graph = self.reverseStandardData(graph)
+            for item in graph[1]:
+                self.__scene.addItem(item)
+            self.__updateNodeView()
+            self.__updateEdgeView()
+            self.__scene.update()
+
     @Slot()
     def on_actionSave_Image_triggered(self):
         self.viewAndScene()
         savePath, fileType = QFileDialog.getSaveFileName(self, '保存图片', '.\\', '*bmp;;*.png')
-        # if savePath[0] == "":
-        #     print("Save cancel")
-        #     return
         filename = os.path.basename(savePath)
         if filename != "":
             self.__view.saveImage(savePath, fileType)
@@ -813,7 +970,6 @@ class MainWindow(QMainWindow):
             return
 
         className = str(type(item))  # 将类名称转换为字符串
-        ##      print(className)
 
         if className.find("QGraphicsRectItem") >= 0:  # 矩形框
             self.__setBrushColor(item)
@@ -847,7 +1003,7 @@ class MainWindow(QMainWindow):
                 pass
                 # self.operatorData.save_Csv(filename, ['point(1)', 'point(2)'], nodes)
             elif fileType == '*.graph':
-                self.operatorData.save_Graph(filename, self.__view.getContentAsGraph())
+                self.operatorData.__saveGraph(filename, self.__view.getContentAsGraph())
 
     def do_open_file(self):  # 打开文件
         dict_file = {}
@@ -858,7 +1014,7 @@ class MainWindow(QMainWindow):
         elif fileType == '*.csv':
             dict_file = self.operatorData.open_Csv(openPath)
         elif fileType == '*.graph':
-            dict_file = self.operatorData.open_Graph(openPath)
+            dict_file = self.operatorData.openGraph(openPath)
 
         return dict_file
 
@@ -938,6 +1094,12 @@ class MainWindow(QMainWindow):
         for item in items:
             if item.textCp.toPlainText() in pathList:
                 item.setSelected(True)
+
+    def do_checkIsHasItems(self, num):
+        if num:
+            self.ui.actionSave.setEnabled(True)
+        else:
+            self.ui.actionSave.setEnabled(False)
 
 
 ##  ============窗体测试程序 ================================
