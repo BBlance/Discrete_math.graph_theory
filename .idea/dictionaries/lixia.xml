@@ -4,6 +4,7 @@
       <w>dest</w>
       <w>detalis</w>
       <w>dtime</w>
+      <w>filt</w>
       <w>ftime</w>
       <w>pixmap</w>
       <w>pred</w>
@@ -13,6 +14,7 @@
       <w>undigraph</w>
       <w>vert</w>
       <w>verts</w>
+      <w>xlsx</w>
       <w>xvel</w>
       <w>yvel</w>
     </words>

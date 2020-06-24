@@ -7,6 +7,7 @@ from time import time
 
 class GraphicsScene(QGraphicsScene):
     itemMoveSignal = Signal(BezierGraphicsItem, QPointF)
+    isHasItem=Signal(int)
     itemLock = Signal(BezierGraphicsItem)
     itemNode = Signal(list)
 
@@ -54,6 +55,7 @@ class GraphicsScene(QGraphicsScene):
         if not self.another:
             if len(self.nodeList)>1:
                 self.nodeList = self.nodeList[1:]
+        self.isHasItem.emit(len(self.items()))
 
         if len(self.nodeList) > 2:
             self.nodeList.clear()

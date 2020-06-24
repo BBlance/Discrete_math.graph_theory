@@ -186,3 +186,13 @@ void MainWindow::on_actionShortest_Path_triggered()
 {
 
 }
+
+void MainWindow::on_actionSave_triggered()
+{
+
+}
+
+void MainWindow::on_actionOpen_triggered()
+{
+
+}

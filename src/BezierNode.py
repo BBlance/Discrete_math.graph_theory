@@ -3,7 +3,7 @@ from typing import Optional
 
 import typing
 from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QGraphicsItem, \
-    QGraphicsSceneContextMenuEvent, QMenu, QAction
+    QGraphicsSceneContextMenuEvent, QMenu, QAction, QMessageBox
 from PySide2.QtCore import QPointF, QRectF, Qt
 from PySide2.QtGui import QPainterPath, QPainter, QColor, QPen, QRadialGradient, QCursor
 
@@ -65,7 +65,7 @@ class BezierNode(BezierGraphicsItem):
             pass
         return False
 
-    def digraphDegrees(self, mode: bool):  # 结点的度
+    def degrees(self, mode: bool):  # 结点的度
         if mode:
             outDegree = 0
             inDegree = 0
