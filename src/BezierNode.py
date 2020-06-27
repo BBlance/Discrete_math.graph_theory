@@ -52,8 +52,8 @@ class BezierNode(BezierGraphicsItem):
         elif self.is_Float():
             return int(float(weight))
 
-        title = "权重设置错误"
-        strInfo = "您的权重有误，请更正为数字！"
+        title = self._tr("BezierNode","BezierNode","权重设置错误")
+        strInfo = self._tr("BezierNode","BezierNode","您的权重有误，请更正为数字！")
         QMessageBox.warning(None, title, strInfo)
 
     def is_Float(self):
@@ -156,7 +156,8 @@ class BezierNode(BezierGraphicsItem):
     def contextMenuEvent(self, event: QGraphicsSceneContextMenuEvent):
         menu = QMenu()
         if len(self.bezierEdges):
-            lockOnNodeAction = QAction("解除组合")
+            text = self._tr("BezierNode","BezierNode","解除组合")
+            lockOnNodeAction = QAction(text)
             lockOnNodeAction.triggered.connect(self.do_lockOnNodes)
             menu.addAction(lockOnNodeAction)
             menu.exec_(QCursor.pos())

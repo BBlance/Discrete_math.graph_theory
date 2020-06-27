@@ -3,11 +3,12 @@ from typing import Optional
 from PySide2.QtWidgets import QStyleOptionGraphicsItem, QWidget, QGraphicsSceneMouseEvent, QMessageBox, \
     QGraphicsSceneContextMenuEvent, QMenu, QAction
 
-from PySide2.QtCore import QPointF, QRectF, Qt, QLineF
-from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF,\
+from PySide2.QtCore import QPointF, QRectF, Qt, QLineF, QCoreApplication, QTranslator
+from PySide2.QtGui import QPainterPath, QPainter, QKeyEvent, QPolygonF, \
     QPainterPathStroker, QCursor
-
 from BezierGraphicsItem import BezierGraphicsItem
+
+_tr = QCoreApplication.translate
 
 
 class BezierEdge(BezierGraphicsItem):
@@ -21,11 +22,11 @@ class BezierEdge(BezierGraphicsItem):
     __path = QPainterPath()
     _isDigraph = True
     _m_weightPos = QPointF(0, 0)
+    _tr = QCoreApplication.translate
 
     def __init__(self, sourceNode=None, destNode=None):
 
         super(BezierEdge, self).__init__(QPointF(0, 0))
-
         self.centerCp = BezierPointItem(self, self._m_centerPos, PointType.Center, ItemType.NoneType)
         self.edge1Cp = BezierPointItem(self, self._edge1, PointType.Edge, ItemType.SourceType)
         self.edge2Cp = BezierPointItem(self, self._edge2, PointType.Edge, ItemType.DestType)
@@ -39,13 +40,11 @@ class BezierEdge(BezierGraphicsItem):
 
         if sourceNode:
             self.__source: BezierNode = sourceNode
-            self.__source.textCp.setText("source")
             self.__source.addBezierEdge(self, self.beginCp.itemType())
             self.__source.setPos(self.specialControlPoints()[0])
 
         if destNode:
             self.__dest: BezierNode = destNode
-            self.__dest.textCp.setText("dest")
             self.__dest.addBezierEdge(self, self.endCp.itemType())
             self.__dest.setPos(self.specialControlPoints()[1])
 
@@ -58,12 +57,8 @@ class BezierEdge(BezierGraphicsItem):
         self._m_pointList.setRandColor()
         self._m_pointList.setParentItem(self)
 
-        # self._startAngle = float(0)
-        # self._endAngle = float(0)
-        # self._sweepLength = float(0)
-        # self._startPoint = QPointF()
-
     ##  ==============自定义功能函数========================
+
     @property
     def sourceNode(self):
         return self.__source
@@ -71,6 +66,10 @@ class BezierEdge(BezierGraphicsItem):
     @property
     def destNode(self):
         return self.__dest
+
+    @property
+    def pointList(self):
+        return self._m_pointList
 
     @property
     def weightPos(self):
@@ -120,8 +119,11 @@ class BezierEdge(BezierGraphicsItem):
     def setSpecialControlPoint(self, p: QPointF, itemType):
         if itemType == ItemType.SourceType:
             self.__sourcePoint = p
+            self.beginCp.setPoint(p)
         elif itemType == ItemType.DestType:
             self.__destPoint = p
+            self.endCp.setPoint(p)
+        self.update()
 
     def edgeControlPoints(self):
         return self._edge1, self._edge2
@@ -129,8 +131,11 @@ class BezierEdge(BezierGraphicsItem):
     def setEdgeControlPoint(self, p: QPointF, itemType):
         if itemType == ItemType.SourceType:
             self._edge1 = p
+            self.edge1Cp.setPoint(p)
         elif itemType == ItemType.DestType:
             self._edge2 = p
+            self.edge2Cp.setPoint(p)
+        self.update()
 
     def updateCenterPos(self):
         specialTuple = self.edgeControlPoints() + self.specialControlPoints()
@@ -144,6 +149,7 @@ class BezierEdge(BezierGraphicsItem):
         y = y / len(specialTuple)
 
         self._m_centerPos = QPointF(x, y)
+        self.update()
         return self._m_centerPos
 
     def isDigraph(self):
@@ -159,8 +165,8 @@ class BezierEdge(BezierGraphicsItem):
         elif self.is_Float():
             return int(float(weight))
 
-        title = "权重设置错误"
-        strInfo = "您的权重有误，请更正为数字！"
+        title = QCoreApplication.translate("BezierEdge", "权重设置错误")
+        strInfo = QCoreApplication.translate("BezierEdge", "您的权重有误，请更正为数字！")
         QMessageBox.warning(None, title, strInfo)
 
     def is_Float(self):
@@ -231,11 +237,6 @@ class BezierEdge(BezierGraphicsItem):
         painter.drawPath(path)
         self.__path = path
 
-        # if self.isSelected():
-        #     painter.setPen(QPen(Qt.black, 1, Qt.DotLine, Qt.SquareCap, Qt.MiterJoin))
-        #     rect = self.boundingRect()
-        #     painter.drawRect(rect)
-
     def shape(self) -> QPainterPath:
         stroker = QPainterPathStroker()
         stroker.setWidth(10)
@@ -265,16 +266,19 @@ class BezierEdge(BezierGraphicsItem):
     def contextMenuEvent(self, event: QGraphicsSceneContextMenuEvent):
         menu = QMenu()
         if self._isDigraph:
-            changeDirection = QAction("更换方向")
+            text = self._tr("BezierEdge", "更换方向")
+            changeDirection = QAction(text)
             changeDirection.triggered.connect(self.do_changeDirection)
             menu.addAction(changeDirection)
 
         if self.__source:
-            lockOnSourceAction = QAction("解除始点连接")
+            text = self._tr("BezierEdge", "解除始点连接")
+            lockOnSourceAction = QAction(text)
             lockOnSourceAction.triggered.connect(lambda: self.do_lockOnNodes(self.__source))
             menu.addAction(lockOnSourceAction)
         if self.__dest:
-            lockOnDestAction = QAction("解除终点连接")
+            text = self._tr("BezierEdge", "解除终点连接")
+            lockOnDestAction = QAction(text)
             lockOnDestAction.triggered.connect(lambda: self.do_lockOnNodes(self.__dest))
             menu.addAction(lockOnDestAction)
 

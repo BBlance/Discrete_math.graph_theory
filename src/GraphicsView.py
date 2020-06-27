@@ -55,22 +55,6 @@ class GraphicsView(QGraphicsView):
             self.zoomIn()
         elif event.key() == Qt.Key_Minus:
             self.zoomOut()
-
-
         super().keyPressEvent(event)
 
-    # def drawBackground(self, painter: QPainter, rect: QRectF):
-    #     sceneRect = self.sceneRect()
-    #     rightShadow = QRectF(sceneRect.right(), sceneRect.top() + 5, 5, sceneRect.height())
-    #     bottomShadow = QRectF(sceneRect.left() + 5, sceneRect.bottom(), sceneRect.width(), 5)
-    #     if rightShadow.intersects(rect) and rightShadow.contains(rect):
-    #         painter.fillRect(rightShadow, Qt.darkGray)
-    #     if bottomShadow.intersects(rect) and bottomShadow.contains(rect):
-    #         painter.fillRect(bottomShadow, Qt.darkGray)
-    #
-    #     gradient = QLinearGradient(sceneRect.topLeft(), sceneRect.bottomRight())
-    #     gradient.setColorAt(0, Qt.white)
-    #     gradient.setColorAt(1, Qt.lightGray)
-    #     painter.fillRect(rect.intersected(sceneRect), gradient)
-    #     painter.setBrush(Qt.NoBrush)
-    #     painter.drawRect(sceneRect)
+

@@ -79,10 +79,8 @@ class BezierPointItem(QAbstractGraphicsShapeItem):
             painter.drawRect(-4, -4, 8, 8)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
-        item = self.parentItem()
-
         if event.buttons() and Qt.LeftButton:
-
+            item = self.parentItem()
             dx = event.scenePos().x() - event.lastScenePos().x()
             dy = event.scenePos().y() - event.lastScenePos().y()
             if item.sourceNode or item.destNode:
@@ -97,12 +95,12 @@ class BezierPointItem(QAbstractGraphicsShapeItem):
                 self.scene().update()
             elif self.__m_type == PointType.Edge:
                 self.__m_point = self.mapToParent(event.pos())
-                self.setPos(self.__m_point)
+                #self.setPos(self.__m_point)
                 item.setEdgeControlPoint(self.__m_point, self.__m_item_type)
                 self.scene().update()
             elif self.__m_type == PointType.Special:
                 self.__m_point = self.mapToParent(event.pos())
-                self.setPos(self.__m_point)
+                #self.setPos(self.__m_point)
                 item.setSpecialControlPoint(self.__m_point, self.__m_item_type)
                 if self.collidingItem(item):
                     if self.itemType() == ItemType.DestType:
@@ -145,13 +143,11 @@ class BezierTextItem(QGraphicsTextItem):
     def __init__(self, parent: QAbstractGraphicsShapeItem, p: QPointF, pointType: PointType,
                  itemType=ItemType.NoneType):
         super().__init__(parent)
-        self._m_text = "数据"
+
         self.__m_point = p
         self.__m_type = pointType
         self.__m_item_type = itemType
-
         self.setPos(self.__m_point)
-        self.setPlainText(self._m_text)
 
         self._m_noSelectedFont = self.font()
         self._m_noSelectedFont.setPointSize(10)

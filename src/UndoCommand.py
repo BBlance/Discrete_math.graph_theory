@@ -1,6 +1,6 @@
 from random import random
 
-from PySide2.QtCore import QPointF
+from PySide2.QtCore import QPointF, QCoreApplication
 from PySide2.QtWidgets import QUndoCommand, QGraphicsScene
 
 from BezierEdge import BezierEdge
@@ -9,6 +9,8 @@ from PointItem import ItemType
 
 
 class AddCommand(QUndoCommand):
+    _tr = QCoreApplication.translate
+
     def __init__(self, parent, scene: QGraphicsScene, item):
         super(AddCommand, self).__init__()
 
@@ -17,11 +19,14 @@ class AddCommand(QUndoCommand):
         self.parent = parent
         className = str(type(item))
         if className.find("BezierNode") >= 0:
-            self.setText(f'添加顶点V{self.item.data(2)}')
+            text = self._tr("AddCommand", '添加顶点V')
+            self.setText(f'{text}{self.item.data(2)}')
         elif className.find("BezierEdge") >= 0:
-            self.setText(f'添加边e{self.item.data(3)}')
+            text = self._tr("AddCommand", '添加边e')
+            self.setText(f'{text}{self.item.data(3)}')
         elif className.find("BezierText") >= 0:
-            self.setText(f'添加注释{self.item.data(4)}')
+            text = self._tr("AddCommand", '添加注释')
+            self.setText(f'{text}{self.item.data(4)}')
 
     def undo(self):
         self.do_deleteItem()
@@ -65,6 +70,8 @@ class AddCommand(QUndoCommand):
 
 
 class MoveCommand(QUndoCommand):
+    _tr = QCoreApplication.translate
+
     def __init__(self, item, oldPos: QPointF):
         super(MoveCommand, self).__init__()
         self.item = item
@@ -72,15 +79,17 @@ class MoveCommand(QUndoCommand):
         self.m_oldPos = oldPos
         self.m_newPos = self.item.pos()
         self.data = ''
-
+        move = self._tr("MoveCommand", '移动到')
         className = str(type(item))
         if className.find("BezierNode") >= 0:
-
-            self.data = f"顶点V{self.item.data(2)}移动到"
+            text = self._tr("MoveCommand", '顶点V')
+            self.data = f"{text}{self.item.data(2)}{move}"
         elif className.find("BezierEdge") >= 0:
-            self.data = f"边e{self.item.data(3)}移动到"
+            text = self._tr("MoveCommand", '边e')
+            self.data = f"{text}{self.item.data(3)}{move}"
         elif className.find("BezierText") >= 0:
-            self.data = f"注释{self.item.data(4)}移动到"
+            text = self._tr("MoveCommand", '注释')
+            self.data = f"{text}{self.item.data(4)}{move}"
 
     def redo(self):
         self.item.setPos(self.m_newPos)

@@ -1,0 +1,16 @@
+CODECFORTR      = UTF-8
+CODECFORSRC     = UTF-8
+
+TRANSLATIONS = appLang_CN.ts\
+                appLang_EN.ts
+
+SOURCES = BezierEdge.py \
+          BezierNode.py \
+          GraphicsView.py \
+          OperatorFile.py \
+          ShowDataWidget.py \
+          ShowMatrixWidget.py \
+          UndoCommand.py \
+          Windows.py \
+          ui_MainWindow.py
+FORMS += MainWindow.ui

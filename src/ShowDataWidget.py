@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QWidget
 
-from PySide2.QtCore import QItemSelectionModel, Qt, QRegExp, QEvent, QModelIndex, Signal
+from PySide2.QtCore import QItemSelectionModel, Qt, QRegExp, QEvent, QModelIndex, Signal, QCoreApplication
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem, QRegExpValidator, QCloseEvent
 
@@ -12,6 +12,7 @@ from ui_DataDetails import Ui_DataDetails, QAbstractItemView, QHeaderView, QLabe
 
 class ShowDataWidget(QWidget):
     pathSignal = Signal(list)
+    _tr = QCoreApplication.translate
 
     def __init__(self, parent=None, items=None, graph=None, name=None):
         super().__init__(parent)
@@ -32,12 +33,15 @@ class ShowDataWidget(QWidget):
         self.horizontalHeaderList = []
         self.verticalHeaderList = []
 
-        self.startLabel = QLabel("始点")
-        self.endLabel = QLabel("终点")
+        source = self._tr("BezierShowDataWidget", '始点')
+        dest = self._tr("BezierShowDataWidget", '终点')
+        self.startLabel = QLabel(source)
+        self.endLabel = QLabel(dest)
 
         self.startNodeEdit = QLineEdit(self)
         self.endNodeEdit = QLineEdit(self)
-        self.searchBtn = QPushButton("search", self)
+        btnStr = self._tr("BezierShowDataWidget", '搜索')
+        self.searchBtn = QPushButton(btnStr, self)
         self.searchBtn.setVisible(False)
         self.startNodeEdit.setVisible(False)
         self.endNodeEdit.setVisible(False)
@@ -62,56 +66,6 @@ class ShowDataWidget(QWidget):
         self.dataDetailView.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.dataDetailView.setAlternatingRowColors(True)
         self.setWindowTitle(name)
-
-    # def edgeDetails(self):
-    #     self.horizontalHeaderList = ['ID', '权重']
-    #     self.rowCount = len(self.items)
-    #     self.columnCount = len(self.horizontalHeaderList)
-    #     self.dataModel.setRowCount(self.rowCount)
-    #     self.dataModel.setColumnCount(self.columnCount)
-    #     self.dataModel.clear()
-    #     self.dataModel.setHorizontalHeaderLabels(self.horizontalHeaderList)
-    #     self.horizontalHeaderList.reverse()
-    #     for i in range(self.rowCount):
-    #         strList = [f'e{self.items[i].data(3)}', f'{self.items[i].weight()}']
-    #         for j in range(self.columnCount):
-    #             item = QStandardItem(strList[j])
-    #             self.dataModel.setItem(i, j, item)
-    #
-    # def nodeDetails(self, mode='度'):
-    #     self.horizontalHeaderList = ['ID']
-    #     if self.parent.ui.actionDigraph_Mode.isChecked():
-    #         if mode == "出度":
-    #             self.horizontalHeaderList.append('出度')
-    #         elif mode == "入度":
-    #             self.horizontalHeaderList.append('入度')
-    #         elif mode == "度":
-    #             self.horizontalHeaderList.append("度")
-    #         self.columnCount += 1
-    #     else:
-    #         self.horizontalHeaderList.append("度")
-    #         self.columnCount += 1
-    #     self.rowCount = len(self.items)
-    #     self.columnCount = len(self.horizontalHeaderList)
-    #     self.dataModel.setRowCount(self.rowCount)
-    #     self.dataModel.setColumnCount(self.columnCount)
-    #     self.dataModel.clear()
-    #     self.dataModel.setHorizontalHeaderLabels(self.horizontalHeaderList)
-    #     self.items.reverse()
-    #     for i in range(self.rowCount):
-    #         strList = [f'V{self.items[i].data(2)}']
-    #         if self.parent.ui.actionDigraph_Mode.isChecked():
-    #             if mode == "出度":
-    #                 strList.append(f'{self.items[i].digraphDegrees(True)[1]}')
-    #             elif mode == "入度":
-    #                 strList.append(f'{self.items[i].digraphDegrees(True)[0]}')
-    #             elif mode == '度':
-    #                 strList.append(f'{self.items[i].digraphDegrees(False)}')
-    #         else:
-    #             strList.append(f'{self.items[i].digraphDegrees(False)}')
-    #         for j in range(self.columnCount):
-    #             item = QStandardItem(strList[j])
-    #             self.dataModel.setItem(i, j, item)
 
     def updateToolWidget(self, mode=0, path=0):
         self.searchBtn.setVisible(True)
@@ -187,7 +141,7 @@ class ShowDataWidget(QWidget):
         paths = self.__graph.findSimplePathway(startNode, endNode)
         if len(paths) == 0:
             self.dataModel.clear()
-            QMessageBox.information(None, "Sorry", "没有符合条件的通路")
+            QMessageBox.information(None, "Sorry", self._tr("BezierShowDataWidget", "没有符合条件的通路"))
             return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
@@ -218,7 +172,8 @@ class ShowDataWidget(QWidget):
         paths = self.__graph.findPrimaryPathway(startNode, endNode)
         if len(paths) == 0:
             self.dataModel.clear()
-            QMessageBox.information(None, "Sorry", "没有符合条件的通路")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "没有符合条件的通路"))
             return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
@@ -245,7 +200,8 @@ class ShowDataWidget(QWidget):
         paths = self.__graph.findSimpleLoop(startNode)
         if len(paths) == 0:
             self.dataModel.clear()
-            QMessageBox.information(None, "Sorry", "没有符合条件的回路")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "没有符合条件的回路"))
             return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
@@ -272,7 +228,8 @@ class ShowDataWidget(QWidget):
         paths = self.__graph.findPrimaryLoop(startNode)
         if len(paths) == 0:
             self.dataModel.clear()
-            QMessageBox.information(None, "Sorry", "没有符合条件的回路")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "没有符合条件的回路"))
             return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
@@ -315,7 +272,8 @@ class ShowDataWidget(QWidget):
                 paths.append(path)
         if len(paths) == 0:
             self.dataModel.clear()
-            QMessageBox.information(None, "Sorry", "没有符合条件的路径")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "没有符合条件的路径"))
             return False
         self.rowCount = len(paths)
         self.dataModel.setRowCount(self.rowCount)
@@ -351,35 +309,40 @@ class ShowDataWidget(QWidget):
         start = int(self.startNodeEdit.text().strip('V'))
         end = int(self.endNodeEdit.text().strip('V'))
         if start > self.__graph.nodeNumber() or end > self.__graph.nodeNumber():
-            QMessageBox.information(None, "Sorry", "超出上限")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "超出上限"))
             return
         self.easyPath()
 
     def do_searchBtnPrimaryPath(self):
         start = int(self.startNodeEdit.text().strip('V'))
         if start > self.__graph.nodeNumber() - 1:
-            QMessageBox.information(None, "Sorry", "超出上限")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "超出上限"))
             return
         self.primaryPath()
 
     def do_searchBtnEasyLoop(self):
         start = int(self.startNodeEdit.text().strip('V'))
         if start > self.__graph.nodeNumber() - 1:
-            QMessageBox.information(None, "Sorry", "超出上限")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "超出上限"))
             return
         self.easyLoop()
 
     def do_searchBtnPrimaryLoop(self):
         start = int(self.startNodeEdit.text().strip('V'))
         if start > self.__graph.nodeNumber() - 1:
-            QMessageBox.information(None, "Sorry", "超出上限")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "超出上限"))
             return
         self.easyLoop()
 
     def do_searchBtnShortestPath(self):
         start = int(self.startNodeEdit.text().strip('V'))
         if start > self.__graph.nodeNumber() - 1:
-            QMessageBox.information(None, "Sorry", "超出上限")
+            QMessageBox.information(None, self._tr("BezierShowDataWidget", "对不起"),
+                                    self._tr("BezierShowDataWidget", "超出上限"))
             return
         self.shortestPath()
 

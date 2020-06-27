@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QGraphicsSceneMouseEvent, QGraphicsTextItem
+from PySide2.QtWidgets import QGraphicsSceneMouseEvent, QGraphicsTextItem, QGraphicsItem
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QColor, QFocusEvent
 from BezierGraphicsItem import GraphicsType
@@ -9,6 +9,9 @@ class BezierText(QGraphicsTextItem):
         super().__init__()
         self._m_graphicsType = GraphicsType.TextType
         self.setPlainText(string)
+
+        self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsSelectable | QGraphicsItem.ItemIsFocusable)
+        self.setFlag(QGraphicsItem.ItemSendsGeometryChanges)
 
         self._m_noSelectedFont = self.font()
         self._m_noSelectedFont.setPointSize(20)
@@ -41,7 +44,6 @@ class BezierText(QGraphicsTextItem):
         self.setTextCursor(cursor)
 
     def mouseDoubleClickEvent(self, event: QGraphicsSceneMouseEvent):
-        print(event.button())
         if event.button() == Qt.LeftButton:
             self.setTextInteractionFlags(Qt.TextEditorInteraction)
 

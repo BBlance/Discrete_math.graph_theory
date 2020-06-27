@@ -196,3 +196,28 @@ void MainWindow::on_actionOpen_triggered()
 {
 
 }
+
+void MainWindow::on_actionHideControlPoint_triggered()
+{
+
+}
+
+void MainWindow::on_actionHideControlPoint_toggled(bool arg1)
+{
+
+}
+
+void MainWindow::on_actionHelp_Document_triggered()
+{
+
+}
+
+void MainWindow::on_actionOutputData_triggered()
+{
+
+}
+
+void MainWindow::on_actionImportData_triggered()
+{
+
+}

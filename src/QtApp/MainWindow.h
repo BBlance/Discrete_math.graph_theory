@@ -108,6 +108,16 @@ private slots:
 
     void on_actionOpen_triggered();
 
+    void on_actionHideControlPoint_triggered();
+
+    void on_actionHideControlPoint_toggled(bool arg1);
+
+    void on_actionHelp_Document_triggered();
+
+    void on_actionOutputData_triggered();
+
+    void on_actionImportData_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

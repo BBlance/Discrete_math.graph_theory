@@ -1,6 +1,6 @@
-from PySide2.QtWidgets import QWidget, QMessageBox
+from PySide2.QtWidgets import QWidget
 
-from PySide2.QtCore import QItemSelectionModel, Qt, QEvent
+from PySide2.QtCore import QItemSelectionModel, Qt, QEvent, QCoreApplication
 
 from PySide2.QtGui import QStandardItemModel, QStandardItem, QCloseEvent
 
@@ -8,6 +8,7 @@ from ui_ShowMatrix import Ui_ShowMatrix, QAbstractItemView, QHeaderView, QLabel
 
 
 class ShowMatrixWidget(QWidget):
+    _tr=QCoreApplication.translate
 
     def __init__(self, parent=None, graph=None, name=None, id=None):
         super().__init__(parent)
@@ -17,7 +18,7 @@ class ShowMatrixWidget(QWidget):
         self.ui = Ui_ShowMatrix()
         self.ui.setupUi(self)
         self.__graph = graph
-        self.id=id
+        self.id = id
         data = None
         HorizontalHeaderList = []
         VerticalHeaderList = []
@@ -26,10 +27,10 @@ class ShowMatrixWidget(QWidget):
 
         if name == "邻接矩阵":
             if id == 0:
-                self.setWindowTitle(name + '，元素为边数')
+                self.setWindowTitle(name + self._tr("BezierMatrixWidget",'，元素为边数'))
                 data = self.__graph.adjacentMatrixWithEdges()
             else:
-                self.setWindowTitle(name + '，元素为权重')
+                self.setWindowTitle(name + self._tr("BezierMatrixWidget",'，元素为权重'))
                 data = self.__graph.adjacentMatrixWithWeight()
                 if not (str(type(data)).find('matrix') >= 0):
                     return

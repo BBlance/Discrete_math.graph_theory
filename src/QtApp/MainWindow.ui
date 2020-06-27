@@ -19,7 +19,7 @@
      <widget class="QTabWidget" name="tabWidget">
       <widget class="QWidget" name="Page">
        <attribute name="title">
-        <string>Board 1</string>
+        <string>画板1</string>
        </attribute>
       </widget>
      </widget>
@@ -40,11 +40,14 @@
      <string>文件操作</string>
     </property>
     <property name="title">
-     <string> 文件</string>
+     <string>文件</string>
     </property>
     <widget class="QMenu" name="menuRecent_File">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="title">
-      <string> 最近打开的文件</string>
+      <string>最近打开的文件</string>
      </property>
      <addaction name="actionFlie_List"/>
     </widget>
@@ -57,8 +60,8 @@
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_All"/>
     <addaction name="separator"/>
-    <addaction name="actionImport_Data"/>
-    <addaction name="actionOutput_Data"/>
+    <addaction name="actionImportData"/>
+    <addaction name="actionOutputData"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
     <addaction name="separator"/>
@@ -71,20 +74,9 @@
     <property name="title">
      <string>编辑</string>
     </property>
-    <widget class="QMenu" name="menuFind_or_Replace">
-     <property name="statusTip">
-      <string>查找和替换图元</string>
-     </property>
-     <property name="title">
-      <string>查找/替换</string>
-     </property>
-     <addaction name="actionFind"/>
-     <addaction name="actionReplace"/>
-    </widget>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="actionDelete"/>
-    <addaction name="menuFind_or_Replace"/>
    </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="statusTip">
@@ -111,6 +103,8 @@
     <addaction name="actionBackground_Color"/>
     <addaction name="actionAccent_Color"/>
     <addaction name="actionProperty_And_History"/>
+    <addaction name="actionHide_ToolBar"/>
+    <addaction name="actionHideControlPoint"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -179,11 +173,11 @@
    </widget>
    <widget class="QMenu" name="menuWinodws">
     <property name="title">
-     <string> 窗口</string>
+     <string>窗口</string>
     </property>
     <widget class="QMenu" name="menuLanguage">
      <property name="title">
-      <string> 语言</string>
+      <string>语言</string>
      </property>
      <addaction name="actionSetEnglish"/>
      <addaction name="actionSetChinese"/>
@@ -191,12 +185,11 @@
     <addaction name="actionMinimise"/>
     <addaction name="actionMaximize"/>
     <addaction name="actionMini_Mode"/>
-    <addaction name="actionHide_ToolBar"/>
     <addaction name="menuLanguage"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string> 帮助</string>
+     <string>帮助</string>
     </property>
     <addaction name="actionConnect_Author"/>
     <addaction name="actionWelcome"/>
@@ -212,8 +205,11 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="general_utility_toolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
-    <string>  常规功能</string>
+    <string>常规功能</string>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -235,7 +231,7 @@
   </widget>
   <widget class="QToolBar" name="graphical_toolBar">
    <property name="windowTitle">
-    <string> 绘图工具</string>
+    <string>绘图工具</string>
    </property>
    <attribute name="toolBarArea">
     <enum>LeftToolBarArea</enum>
@@ -288,6 +284,12 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QTabWidget" name="propertyTab">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>16777215</width>
@@ -299,6 +301,9 @@
        </property>
        <property name="currentIndex">
         <number>0</number>
+       </property>
+       <property name="tabBarAutoHide">
+        <bool>true</bool>
        </property>
        <widget class="QWidget" name="DetailsTab">
         <attribute name="title">
@@ -427,6 +432,9 @@
    </property>
   </action>
   <action name="actionSave_All">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>保存全部</string>
    </property>
@@ -437,7 +445,10 @@
     <string>保存所有</string>
    </property>
   </action>
-  <action name="actionImport_Data">
+  <action name="actionImportData">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>导入数据</string>
    </property>
@@ -445,13 +456,16 @@
     <string>导入数据</string>
    </property>
    <property name="statusTip">
-    <string> 导出图数据</string>
+    <string>导出图数据</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+I</string>
    </property>
   </action>
-  <action name="actionOutput_Data">
+  <action name="actionOutputData">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>导出数据</string>
    </property>
@@ -459,13 +473,16 @@
     <string>导出数据</string>
    </property>
    <property name="statusTip">
-    <string>导入图数据</string>
+    <string>导出图数据</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+O</string>
    </property>
   </action>
   <action name="actionSave_Image">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>保存为图片</string>
    </property>
@@ -477,6 +494,9 @@
    </property>
   </action>
   <action name="actionClose">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/108.bmp</normaloff>:/icons/images/108.bmp</iconset>
@@ -596,7 +616,7 @@
     <string>简单通路</string>
    </property>
    <property name="statusTip">
-    <string>通路中的边互不相同，  则称其为£的简单通路</string>
+    <string>通路中的边互不相同，则称其为£的简单通路</string>
    </property>
   </action>
   <action name="actionEasy_Loop">
@@ -690,11 +710,14 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>隐藏工具栏</string>
+    <string>显示工具栏</string>
    </property>
    <property name="toolTip">
-    <string>隐藏工具栏</string>
+    <string>显示与隐藏工具栏</string>
    </property>
   </action>
   <action name="actionConnect_Author">
@@ -733,6 +756,9 @@
    </property>
   </action>
   <action name="actionPen_Thickness">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/penStyle.png</normaloff>:/icons/images/penStyle.png</iconset>
@@ -748,6 +774,9 @@
    </property>
   </action>
   <action name="actionPen_Color">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/penColor.png</normaloff>:/icons/images/penColor.png</iconset>
@@ -763,6 +792,9 @@
    </property>
   </action>
   <action name="actionBackground_Color">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/backgroundColor.png</normaloff>:/icons/images/backgroundColor.png</iconset>
@@ -847,19 +879,22 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
-    <string>属性与历史记录</string>
+    <string>显示属性与历史记录</string>
    </property>
    <property name="toolTip">
-    <string>属性与历史记录</string>
+    <string>显示与隐藏属性与历史记录</string>
    </property>
    <property name="statusTip">
     <string>隐藏或者显示属性栏</string>
    </property>
   </action>
   <action name="actionAccent_Color">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="icon">
     <iconset resource="res.qrc">
      <normaloff>:/icons/images/rt_penColor.png</normaloff>:/icons/images/rt_penColor.png</iconset>
@@ -868,7 +903,7 @@
     <string>选中色</string>
    </property>
    <property name="toolTip">
-    <string>强调色</string>
+    <string>图元选中色</string>
    </property>
    <property name="statusTip">
     <string>选中图原时的颜色</string>
@@ -933,6 +968,17 @@
    </property>
    <property name="text">
     <string>显示边权重</string>
+   </property>
+  </action>
+  <action name="actionHideControlPoint">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>显示控制点</string>
    </property>
   </action>
  </widget>
