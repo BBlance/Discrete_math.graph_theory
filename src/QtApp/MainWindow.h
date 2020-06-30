@@ -118,6 +118,8 @@ private slots:
 
     void on_actionImportData_triggered();
 
+    void on_actionSave_As_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
         self.__curFileName = ''
         self.__translator = None
-        title = self.tr("离散数学可视化认知系统")
+        title = self.tr("基于Python的图的绘制及相关概念的可视化展示")
         self.setWindowTitle(title)
 
         self.ui.nodeDetails.setEnabled(False)
@@ -596,6 +596,8 @@ class MainWindow(QMainWindow):
                 PathWay.updateToolWidget()
                 PathWay.show()
 
+        self.disconnectGraph()
+
     @Slot()  # 简单回路
     def on_actionEasy_Loop_triggered(self):
         self.viewAndScene()
@@ -610,6 +612,7 @@ class MainWindow(QMainWindow):
             if LoopWay.easyLoop():
                 LoopWay.updateToolWidget(mode=1)
                 LoopWay.show()
+        self.disconnectGraph()
 
     @Slot()  # 初级通路
     def on_actionPrimary_Pathway_triggered(self):
@@ -622,11 +625,13 @@ class MainWindow(QMainWindow):
             return
 
         if self.connectGraph():
-            PathWay = ShowDataWidget(self, items, self.__graph, name="简单通路")
+            PathWay = ShowDataWidget(self, items, self.__graph, name="初级通路")
             PathWay.pathSignal.connect(self.do_ShowSelectPath)
             if PathWay.primaryPath():
                 PathWay.updateToolWidget(path=1)
                 PathWay.show()
+
+        self.disconnectGraph()
 
     @Slot()  # 初级回路
     def on_actionPrimary_Loop_triggered(self):
@@ -641,6 +646,8 @@ class MainWindow(QMainWindow):
             if LoopWay.primaryLoop():
                 LoopWay.updateToolWidget(mode=1, path=1)
                 LoopWay.show()
+
+        self.disconnectGraph()
 
     @Slot()  # 邻接矩阵 边数
     def on_action_EdgeNum_triggered(self):
@@ -764,19 +771,19 @@ class MainWindow(QMainWindow):
                 ShortestPath.updateToolWidget(mode=1, path=2)
                 ShortestPath.show()
 
-    @Slot()
+    @Slot()  # 撤销
     def on_actionUndo_triggered(self):  # 撤销
         self.undoStack.undo()
         self.__updateEdgeView()
         self.__updateNodeView()
 
-    @Slot()
+    @Slot()  # 重做
     def on_actionRedo_triggered(self):  # 重做
         self.undoStack.redo()
         self.__updateEdgeView()
         self.__updateNodeView()
 
-    @Slot()
+    @Slot()  # 帮助
     def on_actionHelp_Document_triggered(self):
         open("https://github.com/BBlance/Discrete_math.graph_theory")
 
@@ -815,7 +822,8 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 保存文件
     def on_actionSave_triggered(self):
-        filename = self.operatorFile.saveGraphData(self.standardGraphData())
+        tableName = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        filename = self.operatorFile.saveGraphData(self.standardGraphData(), tableName)
         if filename:
             index = self.ui.tabWidget.currentIndex()
             self.ui.tabWidget.setTabText(index, filename.baseName())
@@ -831,6 +839,13 @@ class MainWindow(QMainWindow):
             self.__updateNodeView()
             self.__updateEdgeView()
             self.__scene.update()
+
+    @Slot()  # 另存为
+    def on_actionSave_As_triggered(self):
+        filename = self.operatorFile.saveExcelAs(self.standardGraphData())
+        if filename:
+            index = self.ui.tabWidget.currentIndex()
+            self.ui.tabWidget.setTabText(index, filename.baseName())
 
     @Slot()  # 导出数据
     def on_actionOutputData_triggered(self):
@@ -966,19 +981,28 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
-        self.viewAndScene()
+        # self.viewAndScene()
         self.__updateEdgeView()
         self.__updateNodeView()
+
         hasTabs = self.ui.tabWidget.count() > 0  # 再无页面时
+
         self.ui.tabWidget.setVisible(hasTabs)
+        self.ui.dockWidget.setVisible(hasTabs)
+        self.ui.actionProperty_And_History.setChecked(hasTabs)
 
     @Slot(int)
     def on_tabWidget_tabCloseRequested(self, index):  # 分页关闭时关闭窗体
+
+        self.__view: GraphicsView = self.ui.tabWidget.widget(index)
+        self.__scene = self.__view.scene()
+        print(index)
         if index < 0:
             return
         aForm = self.ui.tabWidget.widget(index)
         aForm.close()
         self.ui.tabWidget.tabBar().removeTab(index)
+
 
     #  =============自定义槽函数===============================
     def do_nodeLock(self, item):

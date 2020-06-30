@@ -332,7 +332,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionSave_Image)
         self.menuFile.addAction(self.actionSave_As)
-        self.menuFile.addAction(self.actionSave_All)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionImportData)
         self.menuFile.addAction(self.actionOutputData)
@@ -407,6 +406,7 @@ class Ui_MainWindow(object):
         self.actionMinimise.triggered.connect(MainWindow.showMinimized)
         self.actionMaximize.triggered.connect(MainWindow.showMaximized)
         self.actionProperty_And_History.toggled.connect(self.dockWidget.setVisible)
+        self.actionQuit.triggered.connect(MainWindow.close)
 
         self.propertyTab.setCurrentIndex(0)
 

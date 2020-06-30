@@ -12,11 +12,16 @@ class OperatorFile(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def saveGraphData(self, graphData=None):
+    def saveGraphData(self, graphData=None, filename=None):
         curPath = self.dir.currentPath()
         title = self._tr("OperatorFile", "保存文件")
         filt = self._tr("OperatorFile", "*.xlsx;;*.graph")
-        fileName, flt = QFileDialog.getSaveFileName(self, title, curPath, filt)
+        file_full=QFileInfo(filename+'.xlsx')
+        if not file_full.exists():
+            fileName, flt = QFileDialog.getSaveFileName(self, title, curPath, filt)
+        else:
+            fileName=file_full.fileName()
+            flt=file_full.suffix()
         if fileName == "":
             return
         if flt.find('xlsx') >= 0:
@@ -100,7 +105,6 @@ class OperatorFile(QWidget):
         nodeDataList = []
         edgeDataList = []
 
-
         for i in range(nodeFrame.shape[0]):
             data = []
             for j in range(nodeFrame.shape[1]):
@@ -136,41 +140,80 @@ class OperatorFile(QWidget):
         textColumns = ['文本ID', '文本内容', 'x坐标', 'y坐标']
 
         file_full = QFileInfo(fileName)
-        if file_full.exists():
-            title = self._tr("OperatorFile", '警告')
-            info = self._tr("OperatorFile", '文件即将被覆盖')
-            result = QMessageBox.question(self, title, info, QMessageBox.Yes | QMessageBox.Cancel)
-        else:
-            result = QMessageBox.Yes
 
-        if result == QMessageBox.Yes:
-            graphName = file_full.baseName()
-            nodeName = "V" + f'({graphName})'
-            edgeName = "E" + f'({graphName})'
-            textName = "T" + f'({graphName})'
-            dataDict = ["图名称", "顶点集", "边集", "文本集", "图类型"]
-            graphList = [graphName, nodeName, edgeName, textName, graph[0]]
-            graphFrame = DataFrame(graphList, index=dataDict)
-            graphFrame = graphFrame.T
-            nodeFrame = DataFrame(graph[1], columns=nodeColumns)
-            edgeFrame = DataFrame(graph[2], columns=edgeColumns)
-            textFrame = DataFrame(graph[3], columns=textColumns)
+        graphName = file_full.baseName()
+        nodeName = "V" + f'({graphName})'
+        edgeName = "E" + f'({graphName})'
+        textName = "T" + f'({graphName})'
+        dataDict = ["图名称", "顶点集", "边集", "文本集", "图类型"]
+        graphList = [graphName, nodeName, edgeName, textName, graph[0]]
+        graphFrame = DataFrame(graphList, index=dataDict)
+        graphFrame = graphFrame.T
+        nodeFrame = DataFrame(graph[1], columns=nodeColumns)
+        edgeFrame = DataFrame(graph[2], columns=edgeColumns)
+        textFrame = DataFrame(graph[3], columns=textColumns)
 
-            try:
-                with ExcelWriter(fileName) as writer:
-                    graphFrame.to_excel(writer, sheet_name=graphName, index=None)
-                    nodeFrame.to_excel(writer, sheet_name=nodeName, index=None)
-                    edgeFrame.to_excel(writer, sheet_name=edgeName, index=None)
-                    textFrame.to_excel(writer, sheet_name=textName, index=None)
-                writer.save()
-                writer.close()
-            except Exception as e:
-                text = self._tr("OperatorFile", '权限不足')
-                QMessageBox.warning(self, text, str(e))
-                return
-
-        elif result == QMessageBox.Cancel:
+        try:
+            with ExcelWriter(fileName) as writer:
+                graphFrame.to_excel(writer, sheet_name=graphName, index=None)
+                nodeFrame.to_excel(writer, sheet_name=nodeName, index=None)
+                edgeFrame.to_excel(writer, sheet_name=edgeName, index=None)
+                textFrame.to_excel(writer, sheet_name=textName, index=None)
+            writer.save()
+            writer.close()
+        except Exception as e:
+            text = self._tr("OperatorFile", '权限不足')
+            QMessageBox.warning(self, text, str(e))
             return
+
+        return file_full
+
+    def saveExcelAs(self, graph: list):
+        curPath = self.dir.currentPath()
+        title = self._tr("OperatorFile", "保存文件")
+        filt = self._tr("OperatorFile", "*.xlsx;;*.graph")
+        fileName, flt = QFileDialog.getSaveFileName(self, title, curPath, filt,
+                                                    options=QFileDialog.DontConfirmOverwrite)
+        if fileName == "":
+            return
+
+        file_full = QFileInfo(fileName)
+
+        while file_full.exists():
+            fileName = f'{file_full.baseName()}_副本.xlsx'
+            file_full = QFileInfo(fileName)
+
+        nodeColumns = ['顶点ID', '权重', 'x坐标', 'y坐标']
+
+        edgeColumns = ['边ID', '始点', '终点', '权重', '1点x坐标', '1点y坐标', '2点x坐标', '2点y坐标', '3点x坐标', '3点y坐标', '4点x坐标',
+                       '4点y坐标', '中心点x坐标', '中心点y坐标']
+        textColumns = ['文本ID', '文本内容', 'x坐标', 'y坐标']
+
+        graphName = file_full.baseName()
+        nodeName = "V" + f'({graphName})'
+        edgeName = "E" + f'({graphName})'
+        textName = "T" + f'({graphName})'
+        dataDict = ["图名称", "顶点集", "边集", "文本集", "图类型"]
+        graphList = [graphName, nodeName, edgeName, textName, graph[0]]
+        graphFrame = DataFrame(graphList, index=dataDict)
+        graphFrame = graphFrame.T
+        nodeFrame = DataFrame(graph[1], columns=nodeColumns)
+        edgeFrame = DataFrame(graph[2], columns=edgeColumns)
+        textFrame = DataFrame(graph[3], columns=textColumns)
+
+        try:
+            with ExcelWriter(fileName) as writer:
+                graphFrame.to_excel(writer, sheet_name=graphName, index=None)
+                nodeFrame.to_excel(writer, sheet_name=nodeName, index=None)
+                edgeFrame.to_excel(writer, sheet_name=edgeName, index=None)
+                textFrame.to_excel(writer, sheet_name=textName, index=None)
+            writer.save()
+            writer.close()
+        except Exception as e:
+            text = self._tr("OperatorFile", '权限不足')
+            QMessageBox.warning(self, text, str(e))
+            return
+
         return file_full
 
     # def saveGraph(self):
