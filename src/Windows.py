@@ -32,12 +32,14 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)  # 调用父类构造函数，创建窗体
-        self.__scene = GraphicsScene(self)  # 创建QGraphicsScene
-        self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
+        self.__scene = None  # 创建QGraphicsScene
+        self.__view = None  # 创建图形视图组件
         self.ui = Ui_MainWindow()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
         self.dir = QDir()
         self.operatorFile = OperatorFile(self)
+
+        self.ui.menubar.raise_()
 
         self.__curFileName = ''
         self.__translator = None
@@ -127,24 +129,24 @@ class MainWindow(QMainWindow):
 
     def iniGraphicsSystem(self, name=None):  ##初始化 Graphics View系统
 
-        self.__scene = GraphicsScene(self)  # 创建QGraphicsScene
-        self.__view = GraphicsView(self, self.__scene)  # 创建图形视图组件
-        self.__scene.setSceneRect(QRectF(-300, -200, 600, 200))
-        self.__view.setCursor(Qt.CrossCursor)  # 设置鼠标
-        self.__view.setMouseTracking(True)
-        self.__view.setDragMode(QGraphicsView.RubberBandDrag)
+        scene = GraphicsScene(self)  # 创建QGraphicsScene
+        view = GraphicsView(self, scene)  # 创建图形视图组件
+        scene.setSceneRect(QRectF(-300, -200, 600, 200))
+        view.setCursor(Qt.CrossCursor)  # 设置鼠标
+        view.setMouseTracking(True)
+        view.setDragMode(QGraphicsView.RubberBandDrag)
 
-        self.__view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
-        self.__view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
-        self.__scene.itemMoveSignal.connect(self.do_shapeMoved)
-        self.__scene.itemLock.connect(self.do_nodeLock)
-        self.__scene.isHasItem.connect(self.do_checkIsHasItems)
+        view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
+        view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+        scene.itemMoveSignal.connect(self.do_shapeMoved)
+        scene.itemLock.connect(self.do_nodeLock)
+        scene.isHasItem.connect(self.do_checkIsHasItems)
         if name:
             title = name
         else:
             text = self.tr('画板')
             title = f'{text}{self.ui.tabWidget.count()}'
-        curIndex = self.ui.tabWidget.addTab(self.__view, title)
+        curIndex = self.ui.tabWidget.addTab(view, title)
         self.ui.tabWidget.setCurrentIndex(curIndex)
         self.ui.tabWidget.setVisible(True)
         self.ui.tabWidget.update()
@@ -156,12 +158,8 @@ class MainWindow(QMainWindow):
 
     def __buildUndoCommand(self):
         self.undoStack = QUndoStack()
-        self.ui.actionUndo = self.undoStack.createUndoAction(self, self._tr("MainWindow", "撤销"))
-        self.ui.actionRedo = self.undoStack.createRedoAction(self, self._tr("MainWindow", "重做"))
-
         self.addAction(self.ui.actionUndo)
         self.addAction(self.ui.actionRedo)
-
         self.ui.undoView.setStack(self.undoStack)
 
     def __setItemProperties(self, item, desc):  ##item是具体类型的QGraphicsItem
@@ -209,7 +207,6 @@ class MainWindow(QMainWindow):
         modeMenuGroup = QActionGroup(self)
         modeMenuGroup.addAction(self.ui.actionDigraph_Mode)
         modeMenuGroup.addAction(self.ui.actionRedigraph_Mode)
-        # self.ui.actionRedigraph_s_Degrees.setEnabled(not self.ui.actionDigraph_Mode.isChecked())
 
     def __updateEdgeView(self):
         edges = self.singleItems(BezierEdge)
@@ -794,17 +791,17 @@ class MainWindow(QMainWindow):
     #     if color.isValid():
     #         self.view.setPenColor(color)
 
-    @Slot()
-    def on_actionPen_Thickness_triggered(self):  # 画笔粗细
-        self.viewAndScene()
-        iniThickness = self.__view.getPenThickness()
-        intPenStyle = self.__view.getPenStyle()
-        thicknessDialog = ThicknessDialog(None, self._tr("MainWindow", "画笔粗细与样式"), iniThickness, intPenStyle)
-        ret = thicknessDialog.exec_()
-        thickness = thicknessDialog.getThickness()
-        penStyle = thicknessDialog.getPenStyle()
-        self.__view.setPenStyle(penStyle)
-        self.__view.setPenThickness(thickness)
+    # @Slot()
+    # def on_actionPen_Thickness_triggered(self):  # 画笔粗细
+    #     self.viewAndScene()
+    #     iniThickness = self.__view.getPenThickness()
+    #     intPenStyle = self.__view.getPenStyle()
+    #     thicknessDialog = ThicknessDialog(None, self._tr("MainWindow", "画笔粗细与样式"), iniThickness, intPenStyle)
+    #     ret = thicknessDialog.exec_()
+    #     thickness = thicknessDialog.getThickness()
+    #     penStyle = thicknessDialog.getPenStyle()
+    #     self.__view.setPenStyle(penStyle)
+    #     self.__view.setPenThickness(thickness)
 
     @Slot()
     def on_actionBackground_Color_triggered(self):
@@ -981,9 +978,10 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
-        # self.viewAndScene()
-        self.__updateEdgeView()
-        self.__updateNodeView()
+        self.viewAndScene()
+        if self.__view and self.__scene:
+            self.__updateEdgeView()
+            self.__updateNodeView()
 
         hasTabs = self.ui.tabWidget.count() > 0  # 再无页面时
 
@@ -996,13 +994,13 @@ class MainWindow(QMainWindow):
 
         self.__view: GraphicsView = self.ui.tabWidget.widget(index)
         self.__scene = self.__view.scene()
-        print(index)
         if index < 0:
             return
+        self.__view = None
+        self.__scene = None
         aForm = self.ui.tabWidget.widget(index)
         aForm.close()
         self.ui.tabWidget.tabBar().removeTab(index)
-
 
     #  =============自定义槽函数===============================
     def do_nodeLock(self, item):
