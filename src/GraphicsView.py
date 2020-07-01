@@ -23,8 +23,14 @@ class GraphicsView(QGraphicsView):
         gradient.setColorAt(0, Qt.white)
         gradient.setColorAt(1, Qt.lightGray)
 
+        self.setCursor(Qt.CrossCursor)  # 设置鼠标
+        self.setMouseTracking(True)
+        self.setDragMode(QGraphicsView.RubberBandDrag)
+
         self.setBackgroundBrush(gradient)
         self.setScene(scene)
+        self.setAttribute(Qt.WA_DeleteOnClose)
+
 
     def zoomIn(self):  # 放大场景
         self.scaleView(1.2)
@@ -55,3 +61,5 @@ class GraphicsView(QGraphicsView):
         elif event.key() == Qt.Key_Minus:
             self.zoomOut()
         super().keyPressEvent(event)
+
+

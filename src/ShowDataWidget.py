@@ -120,12 +120,12 @@ class ShowDataWidget(QWidget):
     @classmethod
     def iniStartEnd(cls, nodeList):
         if nodeList[0][1] < nodeList[1][1]:
-            start = nodeList[0][0].data(2)
-            end = nodeList[1][0].data(2)
+            start = nodeList[0][0].data(0)
+            end = nodeList[1][0].data(0)
             return start, end
         else:
-            start = nodeList[1][0].data(2)
-            end = nodeList[0][0].data(2)
+            start = nodeList[1][0].data(0)
+            end = nodeList[0][0].data(0)
             return start, end
 
     def easyPath(self):
@@ -194,7 +194,7 @@ class ShowDataWidget(QWidget):
 
     def easyLoop(self):
         if not self.startNodeEdit.text():
-            startNode = self.items[0][0].data(2)
+            startNode = self.items[0][0].data(0)
         else:
             startNode = int(self.startNodeEdit.text().strip('V'))
         paths = self.__graph.findSimpleLoop(startNode)
@@ -222,7 +222,7 @@ class ShowDataWidget(QWidget):
 
     def primaryLoop(self):
         if not self.startNodeEdit.text():
-            startNode = self.items[0][0].data(2)
+            startNode = self.items[0][0].data(0)
         else:
             startNode = int(self.startNodeEdit.text().strip('V'))
         paths = self.__graph.findPrimaryLoop(startNode)
@@ -262,12 +262,12 @@ class ShowDataWidget(QWidget):
 
     def shortestPath(self):
         if not self.startNodeEdit.text():
-            startNode = self.items[0][0].data(2)
+            startNode = self.items[0][0].data(0)
         else:
             startNode = int(self.startNodeEdit.text().strip('V'))
         paths = []
         for node in self.scene.singleItems(BezierNode):
-            path = self.__graph.shortestPath(startNode, node.data(2))
+            path = self.__graph.shortestPath(startNode, node.data(0))
             if path is not None and len(path) > 2 and path not in paths:
                 paths.append(path)
         if len(paths) == 0:
@@ -348,12 +348,12 @@ class ShowDataWidget(QWidget):
 
     def do_updateNode(self, nodeList):
         if len(nodeList) == 1:
-            start = nodeList[0][0].data(2)
+            start = nodeList[0][0].data(0)
             self.startNodeEdit.setText(f'V{start}')
         elif len(nodeList) == 2:
             if nodeList[0][1] < nodeList[1][1]:
-                start = nodeList[0][0].data(2)
-                end = nodeList[1][0].data(2)
+                start = nodeList[0][0].data(0)
+                end = nodeList[1][0].data(0)
                 self.startNodeEdit.setText(f'V{start}')
                 self.endNodeEdit.setText(f'V{end}')
                 self.startNodeEdit.setText(f'V{start}')
@@ -361,8 +361,8 @@ class ShowDataWidget(QWidget):
 
 
             else:
-                start = nodeList[1][0].data(2)
-                end = nodeList[0][0].data(2)
+                start = nodeList[1][0].data(0)
+                end = nodeList[0][0].data(0)
                 self.startNodeEdit.setText(f'{start}')
                 self.endNodeEdit.setText(f'{end}')
                 self.startNodeEdit.setText(f'{start}')

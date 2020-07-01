@@ -1,4 +1,4 @@
-from PySide2.QtCore import Signal, QPointF, Qt
+from PySide2.QtCore import Signal, QPointF, Qt, QRectF
 from PySide2.QtGui import QKeyEvent
 from PySide2.QtWidgets import QGraphicsScene, QGraphicsSceneMouseEvent
 from BezierGraphicsItem import BezierGraphicsItem
@@ -7,7 +7,7 @@ from time import time
 
 class GraphicsScene(QGraphicsScene):
     itemMoveSignal = Signal(BezierGraphicsItem, QPointF)
-    isHasItem=Signal(int)
+    isHasItem = Signal(int)
     itemLock = Signal(BezierGraphicsItem)
     itemNode = Signal(list)
 
@@ -18,6 +18,7 @@ class GraphicsScene(QGraphicsScene):
         self.m_oldPos = QPointF()
         self.nodeList = []
         self.another = False
+        self.setSceneRect(QRectF(-300, -200, 600, 200))
 
     def singleItems(self, className, order=0) -> list:
         items = []
@@ -29,6 +30,13 @@ class GraphicsScene(QGraphicsScene):
             for item in self.selectedItems():
                 if type(item) is className:
                     items.append(item)
+        return items
+
+    def uniqueIdList(self, className):
+        items = []
+        for item in self.items():
+            if type(item) is className:
+                items.append(item.data(0))
         return items
 
     #  获取需要的结点和边
@@ -53,7 +61,7 @@ class GraphicsScene(QGraphicsScene):
         if len(self.nodeList) > 0:
             self.itemNode.emit(self.nodeList)
         if not self.another:
-            if len(self.nodeList)>1:
+            if len(self.nodeList) > 1:
                 self.nodeList = self.nodeList[1:]
         self.isHasItem.emit(len(self.items()))
 

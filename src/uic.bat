@@ -11,6 +11,8 @@ pyside2-uic -o ui_DataDetails.py  DataDetails.ui
 
 pyside2-rcc .\QtApp\res.qrc -o res_rc.py
 
+del ThicknessDialog.ui ShowMatrix.ui DataDetails.ui
+
 
 
 

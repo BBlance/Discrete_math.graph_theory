@@ -75,16 +75,9 @@ class MainWindow(QMainWindow):
         self.__ItemId = 0  # 绘图项自定义数据的key
         self.__ItemDesc = 1  # 绘图项自定义数据的key
 
-        self.__NodeId = 2
-        self.__EdgeId = 3
-        self.__TextId = 4
-
-        self.__seqNum = 0  # 每个图形项设置一个序号
         self.__nodeNum = 0  # 结点的序号
         self.__edgeNum = 0  # 边的序号
         self.__textNum = 0
-        self.__backZ = 0  # 后置序号
-        self.__frontZ = 0  # 前置序号
 
         self.lastColumnFlags = (Qt.ItemIsSelectable | Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
 
@@ -127,37 +120,6 @@ class MainWindow(QMainWindow):
         self.__labModeInfo = QLabel(self._tr("MainWindow", "有向图模式"))
         self.ui.statusbar.addPermanentWidget(self.__labModeInfo)
 
-    def iniGraphicsSystem(self, name=None):  ##初始化 Graphics View系统
-
-        scene = GraphicsScene()  # 创建QGraphicsScene
-        view = GraphicsView(self, scene)  # 创建图形视图组件
-        view.setAttribute(Qt.WA_DeleteOnClose)
-        scene.setSceneRect(QRectF(-300, -200, 600, 200))
-        view.setCursor(Qt.CrossCursor)  # 设置鼠标
-        view.setMouseTracking(True)
-        view.setDragMode(QGraphicsView.RubberBandDrag)
-
-        view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
-        view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
-        scene.itemMoveSignal.connect(self.do_shapeMoved)
-        scene.itemLock.connect(self.do_nodeLock)
-        scene.isHasItem.connect(self.do_checkIsHasItems)
-
-        if name:
-            title = name
-        else:
-            text = self.tr('画板')
-            title = f'{text}{self.ui.tabWidget.count()}'
-        curIndex = self.ui.tabWidget.addTab(view, title)
-        self.ui.tabWidget.setCurrentIndex(curIndex)
-        self.ui.tabWidget.setVisible(True)
-        self.ui.tabWidget.update()
-
-        ##  4个信号与槽函数的关联
-
-        # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)  # 鼠标双击
-        # self.view.keyPress.connect(self.do_keyPress)  # 左键按下
-
     def __buildUndoCommand(self):
         self.undoStack = QUndoStack()
         self.addAction(self.ui.actionUndo)
@@ -165,7 +127,6 @@ class MainWindow(QMainWindow):
         self.ui.undoView.setStack(self.undoStack)
 
     def __setItemProperties(self, item, desc):  ##item是具体类型的QGraphicsItem
-
         self.__nodeNum = len(self.singleItems(BezierNode))
         self.__edgeNum = len(self.singleItems(BezierEdge))
         self.__textNum = len(self.singleItems(BezierText))
@@ -175,23 +136,36 @@ class MainWindow(QMainWindow):
         item.setPos(-150 + randint(1, 200), -200 + randint(1, 200))
 
         if type(item) is BezierNode:
-            item.setData(self.__NodeId, self.__nodeNum)
-            item.textCp.setPlainText("V" + str(self.__nodeNum))
+            newNum = self.checkSort(self.__scene.uniqueIdList(BezierNode))
+            if newNum is not None:
+                item.setData(self.__ItemId, newNum)
+                item.textCp.setPlainText("V" + str(newNum))
+            else:
+                item.setData(self.__ItemId, self.__nodeNum)
+                item.textCp.setPlainText("V" + str(self.__nodeNum))
             self.__nodeNum = 1 + self.__nodeNum
         elif type(item) is BezierEdge:
-            item.setData(self.__EdgeId, self.__edgeNum)
-            item.textCp.setPlainText("e" + str(self.__edgeNum))
+            newNum = self.checkSort(self.__scene.uniqueIdList(BezierEdge))
+            if newNum is not None:
+                item.setData(self.__ItemId, newNum)
+                item.textCp.setPlainText("e" + str(newNum))
+            else:
+                item.setData(self.__ItemId, self.__edgeNum)
+                item.textCp.setPlainText("e" + str(self.__edgeNum))
             self.__edgeNum = 1 + self.__edgeNum
         elif type(item) is BezierText:
-            item.setData(self.__TextId, self.__textNum)
+            newNum = self.checkSort(self.__scene.uniqueIdList(BezierText))
+            if newNum is not None:
+                item.setData(self.__ItemId, newNum)
+            else:
+                item.setData(self.__ItemId, self.__textNum)
             self.__textNum = 1 + self.__textNum
 
-        self.__seqNum = 1 + self.__seqNum
-        item.setData(self.__ItemId, self.__seqNum)  # 图件编号
         item.setData(self.__ItemDesc, desc)  # 图件描述
 
         self.__scene.addItem(item)
         self.__scene.clearSelection()
+
         item.setSelected(True)
 
     def __setBrushColor(self, item):  ##设置填充颜色
@@ -234,10 +208,10 @@ class MainWindow(QMainWindow):
         edges.reverse()
         for i in range(len(edges)):
             edge: BezierEdge = edges[i]
-            sourceNode = f'V{edge.sourceNode.data(self.__NodeId)}' if edge.sourceNode else None
-            destNode = f'V{edge.destNode.data(self.__NodeId)}' if edge.destNode else None
+            sourceNode = f'V{edge.sourceNode.data(self.__ItemId)}' if edge.sourceNode else None
+            destNode = f'V{edge.destNode.data(self.__ItemId)}' if edge.destNode else None
 
-            strList = [f"e{edge.data(self.__EdgeId)}", sourceNode,
+            strList = [f"e{edge.data(self.__ItemId)}", sourceNode,
                        destNode, f"x:{edge.pos().x()},y:{edge.pos().y()}",
                        f"{edge.weight()}"]
 
@@ -275,7 +249,7 @@ class MainWindow(QMainWindow):
         nodes.reverse()
         for i in range(len(nodes)):
             node: BezierNode = nodes[i]
-            strList = [f"V{node.data(self.__NodeId)}", str(len(node.bezierEdges)),
+            strList = [f"V{node.data(self.__ItemId)}", str(len(node.bezierEdges)),
                        f"x:{node.pos().x()},y:{node.pos().y()}", str(node.weight())]
             if self.ui.actionDigraph_Mode.isChecked():
                 strList.append(f'{node.degrees(self.ui.actionDigraph_Mode.isChecked())[1]}')
@@ -287,6 +261,28 @@ class MainWindow(QMainWindow):
                 if j != 3:
                     item.setFlags(self.__lastColumnFlag)
                 self.nodeModel.setItem(i, j, item)
+
+    def iniGraphicsSystem(self, name=None):  ##初始化 Graphics View系统
+        scene = GraphicsScene()  # 创建QGraphicsScene
+        view = GraphicsView(self, scene)  # 创建图形视图组件
+        view.mouseMove.connect(self.do_mouseMove)  # 鼠标移动
+        view.mouseClicked.connect(self.do_mouseClicked)  # 左键按下
+        scene.itemMoveSignal.connect(self.do_shapeMoved)
+        scene.itemLock.connect(self.do_nodeLock)
+        scene.isHasItem.connect(self.do_checkIsHasItems)
+        if name:
+            title = name
+        else:
+            text = self.tr('未命名')
+            title = f'{text}{self.ui.tabWidget.count()}'
+        curIndex = self.ui.tabWidget.addTab(view, title)
+        self.ui.tabWidget.setCurrentIndex(curIndex)
+        self.ui.tabWidget.setVisible(True)
+
+        ##  4个信号与槽函数的关联
+
+        # self.view.mouseDoubleClick.connect(self.do_mouseDoubleClick)  # 鼠标双击
+        # self.view.keyPress.connect(self.do_keyPress)  # 左键按下
 
     def singleItems(self, className) -> list:
         self.viewAndScene()
@@ -305,15 +301,15 @@ class MainWindow(QMainWindow):
             elif type(item) is BezierEdge:
                 edgeList.append(item)
         for node in nodeList:
-            self.__graph.addVertex(node.data(self.__NodeId))
+            self.__graph.addVertex(node.data(self.__ItemId))
 
         badEdgeList = []
         for i in range(len(edgeList)):
             for edge in edgeList:
                 edge: BezierEdge
-                if edge.data(self.__EdgeId) == i:
+                if edge.data(self.__ItemId) == i:
                     if edge.sourceNode and edge.destNode:
-                        self.__graph.addEdge(edge.sourceNode.data(self.__NodeId), edge.destNode.data(self.__NodeId),
+                        self.__graph.addEdge(edge.sourceNode.data(self.__ItemId), edge.destNode.data(self.__ItemId),
                                              edge.weight())
                     else:
                         badEdgeList.append(edge)
@@ -325,7 +321,7 @@ class MainWindow(QMainWindow):
                 demo = "、"
                 if x == len(badEdgeList) - 1:
                     demo = ""
-                string = f'{string}e{badEdgeList[x].data(self.__EdgeId)}{demo}'
+                string = f'{string}e{badEdgeList[x].data(self.__ItemId)}{demo}'
             QMessageBox.warning(self, self._tr("MainWindow", "连接故障！"),
                                 self._tr("MainWindow", "警告，") + string + self._tr("MainWindow", "的连接不完整"))
             return False
@@ -350,18 +346,18 @@ class MainWindow(QMainWindow):
         textDataList = []
         for node in nodes:
             node: BezierNode
-            data = [node.data(self.__NodeId), node.weight(), node.pos().x(), node.pos().y()]
+            data = [node.data(self.__ItemId), node.weight(), node.pos().x(), node.pos().y()]
             nodeDataList.append(data)
 
         for edge in edges:
             edge: BezierEdge
-            data = [edge.data(self.__EdgeId)]
+            data = [edge.data(self.__ItemId)]
             if edge.sourceNode:
-                data.append(edge.sourceNode.data(self.__NodeId))
+                data.append(edge.sourceNode.data(self.__ItemId))
             else:
                 data.append(-1)
             if edge.destNode:
-                data.append(edge.destNode.data(self.__NodeId))
+                data.append(edge.destNode.data(self.__ItemId))
             else:
                 data.append(-1)
 
@@ -373,7 +369,7 @@ class MainWindow(QMainWindow):
 
         for text in texts:
             text: BezierText
-            data = [text.data(self.__TextId), text.toPlainText(), text.scenePos().x(),
+            data = [text.data(self.__ItemId), text.toPlainText(), text.scenePos().x(),
                     text.scenePos().y()]
             textDataList.append(data)
 
@@ -394,7 +390,7 @@ class MainWindow(QMainWindow):
         for nodeDetail in excelData[2]:
             node = BezierNode()
             node.textCp.setPlainText(f"V{nodeDetail[0]}")
-            node.setData(self.__NodeId, nodeDetail[0])
+            node.setData(self.__ItemId, nodeDetail[0])
             nodeText = self._tr("MainWindow", "顶点")
             node.setData(self.__ItemDesc, nodeText)
             if len(nodeDetail) < 3:
@@ -409,7 +405,7 @@ class MainWindow(QMainWindow):
 
         for edgeDetail in excelData[3]:
             edge = BezierEdge()
-            edge.setData(self.__EdgeId, edgeDetail[0])
+            edge.setData(self.__ItemId, edgeDetail[0])
             edge.setData(self.__ItemDesc, "边")
             edge.textCp.setPlainText(f"e{edgeDetail[0]}")
             edge.weightCp.setPlainText(str(edgeDetail[3]))
@@ -424,7 +420,7 @@ class MainWindow(QMainWindow):
             if edgeDetail[1] >= 0:
                 for node in nodes:
                     node: BezierNode
-                    if node.data(self.__NodeId) == edgeDetail[1]:
+                    if node.data(self.__ItemId) == edgeDetail[1]:
                         edge.setSourceNode(node)
                         node.addBezierEdge(edge, ItemType.SourceType)
                         line = QLineF(edge.mapFromScene(node.pos()), edge.edge1Cp.point())
@@ -439,7 +435,7 @@ class MainWindow(QMainWindow):
             if edgeDetail[2] >= 0:
                 for node in nodes:
                     node: BezierNode
-                    if node.data(self.__NodeId) == edgeDetail[2]:
+                    if node.data(self.__ItemId) == edgeDetail[2]:
                         edge.setDestNode(node)
                         node.addBezierEdge(edge, ItemType.DestType)
                         line = QLineF(edge.mapFromScene(node.pos()), edge.edge2Cp.point())
@@ -465,7 +461,7 @@ class MainWindow(QMainWindow):
 
         for textDetail in excelData[4]:
             text = BezierText(str(textDetail[1]))
-            text.setData(self.__TextId, textDetail[0])
+            text.setData(self.__ItemId, textDetail[0])
             text.setData(self.__ItemDesc, "文本")
             text.setPos(textDetail[2], textDetail[3])
             texts.append(text)
@@ -478,6 +474,13 @@ class MainWindow(QMainWindow):
             self.ui.actionSetEnglish.setChecked(True)
         else:
             self.ui.actionSetChinese.setChecked(True)
+
+    @classmethod
+    def checkSort(cls, index: list):
+        index.sort()
+        for i in range(len(index)):
+            if i != index[i]:
+                return i
 
     # ==============event处理函数==========================
 
@@ -513,7 +516,6 @@ class MainWindow(QMainWindow):
     @Slot()  # 新建画板
     def on_actionNew_triggered(self):
         self.iniGraphicsSystem()
-
 
     @Slot()  # 添加边
     def on_actionArc_triggered(self):  # 添加曲线
@@ -704,7 +706,7 @@ class MainWindow(QMainWindow):
                         demo = "、"
                         if x == len(items) - 1:
                             demo = ""
-                        badNodes = f"{badNodes}V{items[x].sourceNode.data(self.__NodeId)}{demo}"
+                        badNodes = f"{badNodes}V{items[x].sourceNode.data(self.__ItemId)}{demo}"
             if len(badNodeList):
                 text = self._tr("MainWindow", '有向图的关联矩阵需要有向图无环,而')
                 text1 = self._tr("MainWindow", '存在环！')
@@ -896,90 +898,22 @@ class MainWindow(QMainWindow):
     def on_actionDigraph_Mode_toggled(self, checked: bool):
         self.__labModeInfo.setText(self._tr("MainWindow", "有向图模式"))
         self.__graph.setMode(checked)
-        items = self.__scene.uniqueItems()
-        if len(items) != 0:
-            dlgTitle = self._tr("MainWindow", "警告！！")
-            strInfo = self._tr("MainWindow", "更换模式会清楚画板所有元素！是否要更换模式")
-            result = QMessageBox.question(self, dlgTitle, strInfo, QMessageBox.Yes | QMessageBox.No,
-                                          QMessageBox.NoButton)
-            if result == QMessageBox.Yes:
-                self.__edgeNum = 0
-                self.__nodeNum = 0
-                self.__seqNum = 0
-                cnt = len(items)
-                for i in range(cnt):
-                    item = items[i]
-                    if str(type(item)).find("BezierNode") >= 0:
-                        item: BezierNode
-                        for edge in item.bezierEdges:
-                            for node, itemType in edge.items():
-                                if itemType == ItemType.SourceType:
-                                    node.setSourceNode(None)
-                                elif itemType == ItemType.DestType:
-                                    node.setDestNode(None)
-                    elif str(type(item)).find("BezierEdge") >= 0:
-                        item: BezierEdge
-                        sourceNode: BezierNode = item.sourceNode
-                        destNode: BezierNode = item.destNode
-                        if sourceNode:
-                            sourceNodeList = sourceNode.bezierEdges
-                            for sourceEdge in sourceNodeList:
-                                for edge in sourceEdge.keys():
-                                    if item is edge:
-                                        sourceNodeList.remove(sourceEdge)
-                        if destNode:
-                            destNodeList = destNode.bezierEdges
-                            for destEdge in destNodeList:
-                                for edge in destEdge.keys():
-                                    if item is edge:
-                                        destNodeList.remove(destEdge)
-
-                    self.__scene.removeItem(item)  # 删除绘图项
-        # self.ui.actionRedigraph_s_Degrees.setEnabled(self.ui.actionRedigraph_Mode.isChecked())
+        items = self.__scene.singleItems(BezierEdge)
+        for item in items:
+            item: BezierEdge
+            item.setGraphMode(True)
+            item.update()
 
     @Slot(bool)
     def on_actionRedigraph_Mode_toggled(self, checked: bool):
         self.__labModeInfo.setText(self._tr("MainWindow", "无向图模式"))
         self.__graph.setMode(checked)
-        items = self.__scene.uniqueItems()
-        if len(items) != 0:
-            dlgTitle = self._tr("MainWindow", "警告！！")
-            strInfo = self._tr("MainWindow", "更换模式会清楚画板所有元素！是否要更换模式")
-            result = QMessageBox.question(self, dlgTitle, strInfo, QMessageBox.Yes | QMessageBox.No,
-                                          QMessageBox.NoButton)
-            if result == QMessageBox.Yes:
-                self.__edgeNum = 0
-                self.__nodeNum = 0
-                self.__seqNum = 0
-                cnt = len(items)
-                for i in range(cnt):
-                    item = items[i]
-                    if str(type(item)).find("BezierNode") >= 0:
-                        item: BezierNode
-                        for edge in item.bezierEdges:
-                            for node, itemType in edge.items():
-                                if itemType == ItemType.SourceType:
-                                    node.setSourceNode(None)
-                                elif itemType == ItemType.DestType:
-                                    node.setDestNode(None)
-                    elif str(type(item)).find("BezierEdge") >= 0:
-                        item: BezierEdge
-                        sourceNode: BezierNode = item.sourceNode
-                        destNode: BezierNode = item.destNode
-                        if sourceNode:
-                            sourceNodeList = sourceNode.bezierEdges
-                            for sourceEdge in sourceNodeList:
-                                for edge in sourceEdge.keys():
-                                    if item is edge:
-                                        sourceNodeList.remove(sourceEdge)
-                        if destNode:
-                            destNodeList = destNode.bezierEdges
-                            for destEdge in destNodeList:
-                                for edge in destEdge.keys():
-                                    if item is edge:
-                                        destNodeList.remove(destEdge)
+        items = self.__scene.singleItems(BezierEdge)
+        for item in items:
+            item: BezierEdge
+            item.setGraphMode(False)
+            item.update()
 
-                    self.__scene.removeItem(item)  # 删除绘图项
 
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
@@ -996,16 +930,12 @@ class MainWindow(QMainWindow):
 
     @Slot(int)
     def on_tabWidget_tabCloseRequested(self, index):  # 分页关闭时关闭窗体
-
-        self.__view: GraphicsView = self.ui.tabWidget.widget(index)
-        self.__scene = self.__view.scene()
         if index < 0:
             return
-        self.__view = None
-        self.__scene = None
-        aForm = self.ui.tabWidget.widget(index)
-        aForm.close()
-        self.ui.tabWidget.tabBar().removeTab(index)
+        view = self.ui.tabWidget.widget(index)
+        view.close()
+        # self.__view = None
+        # self.__scene = None
 
     #  =============自定义槽函数===============================
     def do_nodeLock(self, item):
@@ -1030,9 +960,9 @@ class MainWindow(QMainWindow):
         self.__labItemCord.setText("%s%.0f,%.0f" % (itemInfo, pm.x(), pm.y()))
         data = f"{item.data(self.__ItemDesc)}, ItemId={item.data(self.__ItemId)}"
         if type(item) is BezierEdge:
-            data = f"{data},EdgeId=e{item.data(self.__EdgeId)}"
+            data = f"{data},EdgeId=e{item.data(self.__ItemId)}"
         elif type(item) is BezierNode:
-            data = f"{data}, NodeId=V{item.data(self.__NodeId)}"
+            data = f"{data}, NodeId=V{item.data(self.__ItemId)}"
         self.__labItemInfo.setText(data)
 
     def do_mouseDoubleClick(self, point):  ##鼠标双击
