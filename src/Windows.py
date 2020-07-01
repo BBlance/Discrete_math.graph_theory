@@ -129,8 +129,9 @@ class MainWindow(QMainWindow):
 
     def iniGraphicsSystem(self, name=None):  ##初始化 Graphics View系统
 
-        scene = GraphicsScene(self)  # 创建QGraphicsScene
+        scene = GraphicsScene()  # 创建QGraphicsScene
         view = GraphicsView(self, scene)  # 创建图形视图组件
+        view.setAttribute(Qt.WA_DeleteOnClose)
         scene.setSceneRect(QRectF(-300, -200, 600, 200))
         view.setCursor(Qt.CrossCursor)  # 设置鼠标
         view.setMouseTracking(True)
@@ -141,6 +142,7 @@ class MainWindow(QMainWindow):
         scene.itemMoveSignal.connect(self.do_shapeMoved)
         scene.itemLock.connect(self.do_nodeLock)
         scene.isHasItem.connect(self.do_checkIsHasItems)
+
         if name:
             title = name
         else:
@@ -512,6 +514,7 @@ class MainWindow(QMainWindow):
     def on_actionNew_triggered(self):
         self.iniGraphicsSystem()
 
+
     @Slot()  # 添加边
     def on_actionArc_triggered(self):  # 添加曲线
         item = BezierEdge()
@@ -776,6 +779,7 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 重做
     def on_actionRedo_triggered(self):  # 重做
+        self.viewAndScene()
         self.undoStack.redo()
         self.__updateEdgeView()
         self.__updateNodeView()
@@ -819,6 +823,7 @@ class MainWindow(QMainWindow):
 
     @Slot()  # 保存文件
     def on_actionSave_triggered(self):
+        self.viewAndScene()
         tableName = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
         filename = self.operatorFile.saveGraphData(self.standardGraphData(), tableName)
         if filename:

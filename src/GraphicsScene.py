@@ -11,8 +11,8 @@ class GraphicsScene(QGraphicsScene):
     itemLock = Signal(BezierGraphicsItem)
     itemNode = Signal(list)
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super(GraphicsScene, self).__init__()
 
         self.m_Item = None
         self.m_oldPos = QPointF()
