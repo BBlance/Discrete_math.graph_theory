@@ -1,6 +1,6 @@
 import sys
 from PySide2.QtCore import QPoint
-from numpy import zeros, identity, mat, array
+from numpy import identity, mat, array, zeros
 from pandas import value_counts
 
 from pythonds.graphs import PriorityQueue

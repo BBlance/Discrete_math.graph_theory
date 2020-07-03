@@ -47,14 +47,8 @@ class BezierNode(BezierGraphicsItem):
 
     def weight(self):
         weight = self.weightCp.toPlainText()
-        if weight.isdigit():
-            return int(weight)
-        elif self.is_Float():
-            return int(float(weight))
-
-        title = self._tr("BezierNode","BezierNode","权重设置错误")
-        strInfo = self._tr("BezierNode","BezierNode","您的权重有误，请更正为数字！")
-        QMessageBox.warning(None, title, strInfo)
+        if self.is_Float():
+            return float(weight)
 
     def is_Float(self):
         weight = self.weightCp.toPlainText()

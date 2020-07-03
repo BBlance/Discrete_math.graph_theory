@@ -160,14 +160,8 @@ class BezierEdge(BezierGraphicsItem):
 
     def weight(self):
         weight = self.weightCp.toPlainText()
-        if weight.isdigit():
-            return int(weight)
-        elif self.is_Float():
-            return int(float(weight))
-
-        title = QCoreApplication.translate("BezierEdge", "权重设置错误")
-        strInfo = QCoreApplication.translate("BezierEdge", "您的权重有误，请更正为数字！")
-        QMessageBox.warning(None, title, strInfo)
+        if self.is_Float():
+            return float(weight)
 
     def is_Float(self):
         weight = self.weightCp.toPlainText()

@@ -1,4 +1,0 @@
-indexs=[7,6,4,3,2,1]
-print(indexs)
-indexs.sort()
-print(indexs)

@@ -21,6 +21,7 @@ from PointItem import ItemType
 from ShowDataWidget import ShowDataWidget
 from ShowMatrixWidget import ShowMatrixWidget
 from UndoCommand import AddCommand, MoveCommand
+from WeightSpinDelegate import WeightSpinDelegate
 from ui_MainWindow import Ui_MainWindow
 from ThicknessDialog import ThicknessDialog
 from OperatorFile import OperatorFile
@@ -36,12 +37,8 @@ class MainWindow(QMainWindow):
         self.__view = None  # 创建图形视图组件
         self.ui = Ui_MainWindow()  # 创建UI对象
         self.ui.setupUi(self)  # 构造UI界面
-        self.dir = QDir()
         self.operatorFile = OperatorFile(self)
 
-        self.ui.menubar.raise_()
-
-        self.__curFileName = ''
         self.__translator = None
         title = self.tr("基于Python的图的绘制及相关概念的可视化展示")
         self.setWindowTitle(title)
@@ -57,6 +54,8 @@ class MainWindow(QMainWindow):
         self.nodeModel = QStandardItemModel(5, 4, self)
         self.nodeSelectionModel = QItemSelectionModel(self.nodeModel)
         self.nodeModel.dataChanged.connect(self.do_updateNodeWeight)
+
+        self.spinWeight = WeightSpinDelegate(0, 200, 1, self)
 
         self.ui.tabWidget.setVisible(False)
         self.ui.tabWidget.clear()
@@ -205,6 +204,7 @@ class MainWindow(QMainWindow):
         self.ui.edgeDetails.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.edgeDetails.setAlternatingRowColors(True)
         self.edgeModel.setRowCount(len(edges))
+        self.ui.edgeDetails.setItemDelegateForColumn(4,self.spinWeight)
         edges.reverse()
         for i in range(len(edges)):
             edge: BezierEdge = edges[i]
@@ -246,6 +246,7 @@ class MainWindow(QMainWindow):
         self.ui.nodeDetails.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
         self.ui.nodeDetails.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.ui.nodeDetails.setAlternatingRowColors(True)
+        self.ui.nodeDetails.setItemDelegateForColumn(3, self.spinWeight)
         nodes.reverse()
         for i in range(len(nodes)):
             node: BezierNode = nodes[i]
@@ -914,7 +915,6 @@ class MainWindow(QMainWindow):
             item.setGraphMode(False)
             item.update()
 
-
     @Slot(int)
     def on_tabWidget_currentChanged(self, index):  # ui.tabWidget当前页面变化
         self.viewAndScene()
@@ -1050,7 +1050,7 @@ class MainWindow(QMainWindow):
             for edge in edges:
                 edge: BezierEdge
                 if edge.textCp.toPlainText() == self.edgeModel.index(topLeft.row(), 0, QModelIndex()).data():
-                    edge.weightCp.setPlainText(topLeft.data())
+                    edge.weightCp.setPlainText(str(topLeft.data()))
                     self.__scene.update()
 
     def do_updateNodeWeight(self, topLeft, bottomRight):
@@ -1059,7 +1059,7 @@ class MainWindow(QMainWindow):
             for node in nodes:
                 node: BezierNode
                 if node.textCp.toPlainText() == self.nodeModel.index(topLeft.row(), 0, QModelIndex()).data():
-                    node.weightCp.setPlainText(topLeft.data())
+                    node.weightCp.setPlainText(str(topLeft.data()))
                     self.__scene.update()
 
     def do_ShowSelectPath(self, pathList: list):
