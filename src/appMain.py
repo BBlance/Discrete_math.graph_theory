@@ -5,15 +5,15 @@
 import sys
 
 from PySide2.QtWidgets import QApplication
+from SplashScreen import SplashScreen
 
 from Windows import MainWindow
 
 app = QApplication(sys.argv)  # 创建GUI应用程序
-##icon = QIcon(":/icons/images/app.ico")
-##app.setWindowIcon(icon)
+splash=SplashScreen()
 
-mainform = MainWindow()  # 创建主窗体
+mainWindow = MainWindow()  # 创建主窗体
 
-mainform.show()  # 显示主窗体
+mainWindow.show()  # 显示主窗体
 
 sys.exit(app.exec_())
